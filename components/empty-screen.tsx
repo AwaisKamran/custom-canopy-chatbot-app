@@ -9,10 +9,10 @@ export function EmptyScreen() {
     <div className="mx-auto max-w-2xl px-4">
       <div className="flex flex-col gap-2 rounded-lg border bg-background p-8">
         <h1 className="text-lg font-semibold">
-          Welcome to Uptime Institute AI Chatbot!
+          Welcome to the Custom Canopy Chatbot!
         </h1>
         <p className="leading-normal text-muted-foreground">
-          The Uptime Institute is a globally recognized organization that focuses on improving data center performance, reliability, and efficiency. It is best known for its “Tier Standard,” which provides a set of criteria for data center infrastructure design, construction, and operations. These standards range from Tier I (basic capacity) to Tier IV (fault-tolerant systems), ensuring different levels of operational sustainability and redundancy. 
+          Custom Canopy specializes in creating high-quality, custom-made canopies tailored to your exact specifications. Simply answer a few questions and receive mockups for your custom canopies that adhere to your requirements.
         </p>
       </div>
     </div>
