@@ -4,7 +4,7 @@ import * as React from 'react'
 import Textarea from 'react-textarea-autosize'
 
 import { Button } from '@/components/ui/button'
-import { IconArrowElbow, IconPlus } from '@/components/ui/icons'
+import { IconArrowElbow } from '@/components/ui/icons'
 import {
   Tooltip,
   TooltipContent,
@@ -17,7 +17,9 @@ import { Chat } from '@/lib/types'
 import { saveChat } from '@/app/actions'
 import { addMessage } from '@/lib/redux/slice/chat.slice'
 import { useDispatch, useSelector } from 'react-redux'
-import OpenAI from "openai";
+import FileUploadPopover from './file-upload-popover'
+import OpenAI from 'openai'
+import FilePreview from './file-preview'
 
 const openAIApiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY
 const openAIAssistantId = process.env.NEXT_PUBLIC_ASSISTANT_ID
@@ -30,14 +32,17 @@ export function PromptForm({
   setInput: (value: string) => void
 }) {
   const router = useRouter()
-  const openai = new OpenAI({ 
+  const openai = new OpenAI({
     apiKey: openAIApiKey,
-    dangerouslyAllowBrowser: true 
+    dangerouslyAllowBrowser: true
   })
   const { formRef, onKeyDown } = useEnterSubmit()
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
   const dispatch = useDispatch()
-  const messages = useSelector((state:any) => state.chat.messages)
+  const messages = useSelector((state: any) => state.chat.messages)
+  const [selectedFiles, setSelectedFiles] = React.useState<
+    { file: File; previewUrl: string; textSnippet: string }[]
+  >([])
 
   async function submitUserMessage(chatId: string, value: string) {
     const createdAt = new Date()
@@ -57,19 +62,17 @@ export function PromptForm({
     // console.log(emptyThread.id);
 
     const emptyThread = {
-      id: "thread_sN57ma9sJMTs2iaJqGZO2vdY"
+      id: 'thread_sN57ma9sJMTs2iaJqGZO2vdY'
     }
 
     const threadMessages = await openai.beta.threads.messages.create(
       emptyThread.id,
-      { role: "user", content: value }
-    );
+      { role: 'user', content: value }
+    )
 
-    let run = await openai.beta.threads.runs.createAndPoll(
-      emptyThread.id,
-      { 
-        assistant_id: openAIAssistantId || "",
-        instructions: `
+    let run = await openai.beta.threads.runs.createAndPoll(emptyThread.id, {
+      assistant_id: openAIAssistantId || '',
+      instructions: `
         You are a course catalogue assistant for Uptime Institute. You are provided multiple files that holds details about the objectives of the CDCDP course, you are supposed to answer all your questions according to the details within the file. 
 
         ----------------------------------
@@ -94,29 +97,44 @@ export function PromptForm({
 
         If you cant find any match within the files then excuse yourself from any other conversation that is not about uptime institute and CDCDP course. Respond as follows: "I apologize but as Uptime bot I can only guide you regarding the CDCDP course outline and objectives."
         `
-      }
-    );
-    
+    })
+
     if (run.status === 'completed') {
-      const messages = await openai.beta.threads.messages.list(
-        run.thread_id
-      );
+      const messages = await openai.beta.threads.messages.list(run.thread_id)
 
       const newAssistantChatId = nanoid()
-      const reversedMessages = messages.data.reverse();
+      const reversedMessages = messages.data.reverse()
       // @ts-ignore
-      const assistantResponse = reversedMessages[reversedMessages.length-1].content[0].text.value;
+      const assistantResponse = reversedMessages[reversedMessages.length - 1].content[0].text.value
 
-      dispatch(addMessage({ id: newAssistantChatId, message: assistantResponse, role: 'assistant' })) 
+      dispatch(
+        addMessage({
+          id: newAssistantChatId,
+          message: assistantResponse,
+          role: 'assistant'
+        })
+      )
     } else {
-      console.error(run.status);
+      console.error(run.status)
     }
-    
+
     return {
       id: chatId,
-      message: value, 
+      message: value,
       role: 'user'
     }
+  }
+
+  const handleFileSelect = (
+    files: { file: File; previewUrl: string | null }[]
+  ) => {
+    setSelectedFiles((prevFiles: any) => [...prevFiles, ...files])
+  }
+
+  const handleRemoveFile = (index: number) => {
+    setSelectedFiles((prevFiles: any[]) =>
+      prevFiles.filter((_, i) => i !== index)
+    )
   }
 
   React.useEffect(() => {
@@ -141,54 +159,54 @@ export function PromptForm({
         setInput('')
         if (!value) return
 
-        dispatch(addMessage({ id:chatId, message: value, role: 'user' }))    
+        dispatch(addMessage({ id: chatId, message: value, role: 'user' }))
 
         // Submit and get response message
         const responseMessage = await submitUserMessage(chatId, value)
       }}
     >
-      <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:border sm:px-12">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="absolute left-0 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4"
-              onClick={() => {
-                router.push('/new')
-              }}
-            >
-              <IconPlus />
-              <span className="sr-only">New Chat</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>New Chat</TooltipContent>
-        </Tooltip>
-        <Textarea
-          ref={inputRef}
-          tabIndex={0}
-          onKeyDown={onKeyDown}
-          placeholder="Send a message."
-          className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
-          autoFocus
-          spellCheck={false}
-          autoComplete="off"
-          autoCorrect="off"
-          name="message"
-          rows={1}
-          value={input}
-          onChange={e => setInput(e.target.value)}
-        />
-        <div className="absolute right-0 top-[13px] sm:right-4">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button type="submit" size="icon" disabled={input === ''}>
-                <IconArrowElbow />
-                <span className="sr-only">Send message</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Send message</TooltipContent>
-          </Tooltip>
+      <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:px-4">
+        <div className="flex flex-wrap gap-4 mb-2">
+          {selectedFiles.map((fileData, index) => (
+            <FilePreview
+              key={index}
+              file={fileData.file}
+              previewUrl={fileData.previewUrl}
+              onRemove={() => handleRemoveFile(index)}
+            />
+          ))}
+        </div>
+
+        <div className="flex space-between items-center mt-auto">
+          <div className="left-0 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4">
+            <FileUploadPopover onFileSelect={handleFileSelect} />
+          </div>
+          <Textarea
+            ref={inputRef}
+            tabIndex={0}
+            onKeyDown={onKeyDown}
+            placeholder="Send a message."
+            className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
+            autoFocus
+            spellCheck={false}
+            autoComplete="off"
+            autoCorrect="off"
+            name="message"
+            rows={1}
+            value={input}
+            onChange={e => setInput(e.target.value)}
+          />
+          <div className="right-0 top-[13px] sm:right-4">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button type="submit" size="icon" disabled={input === ''}>
+                  <IconArrowElbow />
+                  <span className="sr-only">Send message</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Send message</TooltipContent>
+            </Tooltip>
+          </div>
         </div>
       </div>
     </form>
