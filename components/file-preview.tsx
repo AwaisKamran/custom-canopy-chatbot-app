@@ -29,7 +29,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
             variant="ghost"
             size="icon"
             onClick={onRemove}
-            className="absolute top-0 right-0 sm:rounded-full sm:border bg-white text-black w-5 h-5 z-10 transform -translate-y-1/2 translate-x-1/2"
+            className="absolute top-0 right-0 sm:rounded-full sm:border bg-foreground text-background w-5 h-5 z-10 transform -translate-y-1/2 translate-x-1/2"
           >
             <IconClose className="w-2 h-2" />
             <span className="sr-only">Remove file</span>
@@ -46,7 +46,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
             className="w-full h-full object-cover"
           />
         ) : (
-          <span className="text-gray-300">{file.name}</span>
+          <span className="text-foreground">{file.name}</span>
         )}
       </div>
     </div>
