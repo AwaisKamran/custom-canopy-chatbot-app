@@ -1,0 +1,85 @@
+import React, { useRef, useState } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { IconAttachment, IconAddFile } from '@/components/ui/icons'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@/components/ui/popover'
+
+function FileUploadPopover({
+  onFileSelect,
+  ...props
+}: {
+  onFileSelect: (files: { file: File; previewUrl: string }[]) => void
+}) {
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false)
+
+  const handleFileUpload = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    const files = event.target.files
+    if (files) {
+      const fileDataArray: { file: File; previewUrl: string }[] = []
+      let filesRead = 0
+
+      Array.from(files).forEach(file => {
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          fileDataArray.push({ file, previewUrl: reader.result as string })
+          filesRead++
+          if (filesRead === files.length) {
+            onFileSelect(fileDataArray)
+            setIsPopoverOpen(false)
+          }
+        }
+        reader.readAsDataURL(file)
+      })
+    }
+  }
+
+  return (
+    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          size="icon"
+          className="size-8 sm:rounded-full bg-background p-0 sm:left-4"
+          onClick={() => setIsPopoverOpen(false)}
+        >
+          <IconAttachment />
+          <span className="sr-only">Attach File</span>
+        </Button>
+      </PopoverTrigger>
+
+      <PopoverContent align="start" side="top" sideOffset={8} className="p-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="flex items-center gap-2 w-full p-2"
+          onClick={handleFileUpload}
+        >
+          <IconAddFile />
+          <span>Upload from computer</span>
+        </Button>
+
+        <input
+          type="file"
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+          onChange={handleFileChange}
+          accept="image/*"
+          multiple
+        />
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+export default FileUploadPopover
