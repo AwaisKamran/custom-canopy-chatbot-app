@@ -23,6 +23,7 @@ import ColorPicker from './color-picker'
 
 const openAIApiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY
 const openAIAssistantId = process.env.NEXT_PUBLIC_ASSISTANT_ID
+const backendUrl = process.env.CUSTOM_CANOPY_SERVER_URL
 
 export function PromptForm({
   input,
@@ -111,8 +112,6 @@ export function PromptForm({
         })
       )
     } else if (run.status === 'requires_action') {
-      console.log('current run object is ', run)
-
       dispatch(
         addMessage({
           id: nanoid(),
@@ -151,7 +150,7 @@ export function PromptForm({
     formRequestBody.append('text_color', '[255, 255, 255]')
 
     try {
-      const response = await fetch(`http://localhost:8000/create-mockups`, {
+      const response = await fetch(`${backendUrl}/create-mockups`, {
         method: 'POST',
         body: formRequestBody
       })
