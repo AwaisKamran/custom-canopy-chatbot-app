@@ -23,7 +23,7 @@ import ColorPicker from './color-picker'
 
 const openAIApiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY
 const openAIAssistantId = process.env.NEXT_PUBLIC_ASSISTANT_ID
-const backendUrl = process.env.CUSTOM_CANOPY_SERVER_URL
+const backendUrl = `${process.env.NEXT_PUBLIC_CUSTOM_CANOPY_SERVER_URL}`
 
 export function PromptForm({
   input,
@@ -34,6 +34,7 @@ export function PromptForm({
   setInput: (value: string) => void
   session: Session
 }) {
+  console.log('backend url is', backendUrl)
   const openai = new OpenAI({
     apiKey: openAIApiKey,
     dangerouslyAllowBrowser: true

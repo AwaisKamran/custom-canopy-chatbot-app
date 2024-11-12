@@ -140,7 +140,7 @@ export async function refreshHistory(path: string) {
 }
 
 export async function getMissingKeys() {
-  const keysRequired = ['OPENAI_API_KEY', 'NEXT_PUBLIC_ASSISTANT_ID', 'CUSTOM_CANOPY_SERVER_URL']
+  const keysRequired = ['OPENAI_API_KEY', 'NEXT_PUBLIC_ASSISTANT_ID', 'NEXT_PUBLIC_CUSTOM_CANOPY_SERVER_URL']
   return keysRequired
     .map(key => (process.env[key] ? '' : key))
     .filter(key => key !== '')
