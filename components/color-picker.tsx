@@ -43,14 +43,14 @@ export default function ColorPickerPopover({
         <Button
           variant="outline"
           size="icon"
-          className="size-8 sm:rounded-full bg-background p-0 sm:left-4"
+          className="flex items-center gap-2 w-full p-2"
           onClick={() => setPickerOpen(false)}
         >
           <IconColorPicker />
-          <span className="sr-only">Pick Color</span>
+          <span>Pick a Color</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" side="top">
+      <PopoverContent align="center" side="top">
         <div className="flex flex-col items-center gap-4 mt-2">
           <HexColorPicker color={color} onChange={handleColorChange} />
           <div className="flex gap-4">
