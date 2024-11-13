@@ -227,6 +227,7 @@ export function PromptForm({
     await submitUserMessage(currentChatId, colorName)
     setBgrColor(color)
     setAwaitingColorPick(false)
+    setIsAssistantRunning(false)
   }
 
   const handleFileSelect = (
