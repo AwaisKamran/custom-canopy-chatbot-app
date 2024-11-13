@@ -212,6 +212,7 @@ export function PromptForm({
   }
 
   async function handleColorPick(color: string, colorName: string) {
+    setIsAssistantRunning(true)
     let currentChatId
     if (!chatId) {
       const newChatId = nanoid()
@@ -326,7 +327,10 @@ export function PromptForm({
         </div>
       ) : awaitingColorPick ? (
         <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:px-4">
-          <ColorPicker onColorSelect={handleColorPick} />
+          <ColorPicker
+            onColorSelect={handleColorPick}
+            disabled={isAssistantRunning}
+          />
         </div>
       ) : (
         <form ref={formRef} onSubmit={handleSubmit}>
@@ -344,7 +348,10 @@ export function PromptForm({
 
             <div className="flex space-between items-center mt-auto">
               <div className="left-0 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4">
-                <FileUploadPopover onFileSelect={handleFileSelect} />
+                <FileUploadPopover
+                  onFileSelect={handleFileSelect}
+                  disabled={isAssistantRunning || messages.length === 1}
+                />
               </div>
               <Textarea
                 ref={inputRef}
