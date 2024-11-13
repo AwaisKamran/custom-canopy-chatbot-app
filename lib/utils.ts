@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from 'clsx'
 import { customAlphabet } from 'nanoid'
 import { twMerge } from 'tailwind-merge'
+import namer from 'color-namer'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -131,4 +132,9 @@ export function subMonths(date: Date, amount: number) {
   const newDate: Date = new Date(date)
   newDate.setMonth(newDate.getMonth() - amount)
   return newDate
+}
+
+export function getColorName(hexColor: string): string | null {
+  const namedColor = namer(hexColor).basic[0]
+  return namedColor ? namedColor.name : null
 }

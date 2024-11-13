@@ -21,11 +21,17 @@ export interface ChatProps extends React.ComponentProps<'div'> {
   missingKeys: string[]
 }
 
-export function Chat({ id, initialMessages, className, session, missingKeys }: ChatProps) {
+export function Chat({
+  id,
+  initialMessages,
+  className,
+  session,
+  missingKeys
+}: ChatProps) {
   const router = useRouter()
   const path = usePathname()
   const [input, setInput] = useState('')
-  const messages = useSelector((state:any) => state.chat.messages)
+  const messages = useSelector((state: any) => state.chat.messages)
 
   const [_, setNewChatId] = useLocalStorage('newChatId', id)
 
@@ -67,7 +73,11 @@ export function Chat({ id, initialMessages, className, session, missingKeys }: C
         ref={messagesRef}
       >
         {messages?.length ? (
-          <ChatList initialMessages={initialMessages} isShared={false} session={session} />
+          <ChatList
+            initialMessages={initialMessages}
+            isShared={false}
+            session={session}
+          />
         ) : (
           <EmptyScreen />
         )}
@@ -79,6 +89,7 @@ export function Chat({ id, initialMessages, className, session, missingKeys }: C
         setInput={setInput}
         isAtBottom={isAtBottom}
         scrollToBottom={scrollToBottom}
+        session={session}
       />
     </div>
   )
