@@ -698,6 +698,11 @@
     lodash.merge "^4.6.2"
     postcss-selector-parser "6.0.10"
 
+"@types/color-namer@^1.3.3":
+  version "1.3.3"
+  resolved "https://registry.yarnpkg.com/@types/color-namer/-/color-namer-1.3.3.tgz#516579f13c556fcc112514ccdd71f6cea2085dbd"
+  integrity sha512-DJ0MHHqazwb94dUBRhahK49nXhRGk2DIRNrVNVR3U3uQjYWY4uNhEjHXO+TbFQGpZcwli1pCj6xm3S3KsB/+3A==
+
 "@types/debug@^4.0.0":
   version "4.1.12"
   resolved "https://registry.npmjs.org/@types/debug/-/debug-4.1.12.tgz"
