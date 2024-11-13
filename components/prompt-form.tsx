@@ -61,6 +61,8 @@ export function PromptForm({
   const [awaitingColorPick, setAwaitingColorPick] =
     React.useState<boolean>(false)
   const [bgrColor, setBgrColor] = React.useState<string>('')
+  const [isAssistantRunning, setIsAssistantRunning] =
+    React.useState<boolean>(false)
 
   async function submitUserMessage(currentChatId: string, value: string) {
     let chat = await getChat(currentChatId, session?.user.id as string)
@@ -239,6 +241,7 @@ export function PromptForm({
 
   const handleSubmit = async (e: any) => {
     e.preventDefault()
+    setIsAssistantRunning(true)
 
     const currentChatId = chatId || nanoid()
     if (!chatId) dispatch(setChatId(currentChatId))
@@ -257,6 +260,7 @@ export function PromptForm({
       dispatch(addMessage({ id: currentChatId, message: value, role: 'user' }))
       setSelectedFiles([])
       await submitUserMessage(currentChatId, value)
+      setIsAssistantRunning(false)
     } else {
       if (selectedFiles.length === 0) {
         dispatch(
@@ -270,6 +274,7 @@ export function PromptForm({
             role: 'assistant'
           })
         )
+        setIsAssistantRunning(false)
         return
       }
       const logoFile = selectedFiles[0].file
@@ -289,6 +294,7 @@ export function PromptForm({
       setSelectedFiles([])
       const generatedMockups = await generateCustomCanopy(logoFile)
       await submitToolOutput(generatedMockups.images)
+      setIsAssistantRunning(false)
     }
   }
 
@@ -353,7 +359,7 @@ export function PromptForm({
                 rows={1}
                 value={input}
                 onChange={e => setInput(e.target.value)}
-                disabled={awaitingColorPick}
+                disabled={isAssistantRunning}
               />
               <div className="right-0 top-[13px] sm:right-4">
                 <Tooltip>
