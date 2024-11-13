@@ -3,6 +3,7 @@
 import * as React from 'react'
 import Textarea from 'react-textarea-autosize'
 import LZString from 'lz-string'
+import JSZip from 'jszip'
 
 import { Button } from '@/components/ui/button'
 import { IconArrowElbow, IconPicture } from '@/components/ui/icons'
@@ -166,19 +167,28 @@ export function PromptForm({
         throw new Error('Failed to generate custom canopy')
       }
 
-      const mockups = await response.json()
+      const blob = await response.blob()
+      const zip = await JSZip.loadAsync(blob)
+
+      const generatedMockups: { filename: any; data: string }[] = []
+      zip.forEach(async (relativePath: any, file: any) => {
+        const fileData = await file.async('base64')
+        const imageSrc = `data:image/jpeg;base64,${fileData}`
+        generatedMockups.push({ filename: relativePath, data: imageSrc })
+      })
+
       setAwaitingFileUpload(false)
-      return mockups
+      return { generatedMockups, blob }
     } catch (error) {
       console.error(error)
+      return { generatedMockups: null, blob: null }
     }
   }
 
-  async function submitToolOutput(result?: any) {
-    const outputString = LZString.compress(JSON.stringify({ mockups: mockups }))
+  async function submitToolOutput(result: any, generatedMockups: any) {
     const tool_outputs = [
       {
-        output: outputString,
+        output: JSON.stringify(result),
         tool_call_id: toolCallId
       }
     ]
@@ -202,7 +212,7 @@ export function PromptForm({
           role: 'assistant'
         })
       )
-      setMockups(result)
+      setMockups(generatedMockups)
     } else {
       console.error('Unable to submit tool outputs: ', run.status)
     }
@@ -287,8 +297,8 @@ export function PromptForm({
         })
       )
       setSelectedFiles([])
-      const generatedMockups = await generateCustomCanopy(logoFile)
-      await submitToolOutput(generatedMockups.images)
+      const { generatedMockups, blob } = await generateCustomCanopy(logoFile)
+      await submitToolOutput(blob, generatedMockups)
     }
   }
 
