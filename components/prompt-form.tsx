@@ -162,7 +162,8 @@ export function PromptForm({
     try {
       const response = await fetch(`${backendUrl}/create-mockups`, {
         method: 'POST',
-        body: formRequestBody
+        body: formRequestBody,
+        credentials: 'include'
       })
 
       if (!response.ok) {
