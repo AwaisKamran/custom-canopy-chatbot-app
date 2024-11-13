@@ -54,6 +54,7 @@ export function PromptForm({
   const chatId = useSelector((state: any) => state.chat.chatId)
   const [awaitingFileUpload, setAwaitingFileUpload] =
     React.useState<boolean>(false)
+  const messages = useSelector((state: any) => state.chat.messages)
   const [formData, setFormData] = React.useState({ color: '', text: '' })
   const [finalRun, setFinalRun] = React.useState<string>('')
   const [toolCallId, setToolCallId] = React.useState<string>('')
@@ -359,7 +360,7 @@ export function PromptForm({
                 rows={1}
                 value={input}
                 onChange={e => setInput(e.target.value)}
-                disabled={isAssistantRunning}
+                disabled={isAssistantRunning || messages.length === 1}
               />
               <div className="right-0 top-[13px] sm:right-4">
                 <Tooltip>
