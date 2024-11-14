@@ -65,6 +65,7 @@ export function PromptForm({
   const [bgrColor, setBgrColor] = React.useState<string>('')
   const [isAssistantRunning, setIsAssistantRunning] =
     React.useState<boolean>(false)
+  const [fontColor, setFontColor] = React.useState<string>('')
 
   async function submitUserMessage(currentChatId: string, value: string) {
     let chat = await getChat(currentChatId, session?.user.id as string)
@@ -158,7 +159,7 @@ export function PromptForm({
     formRequestBody.append('color', formData.color)
     formRequestBody.append('text', formData.text)
     formRequestBody.append('logo', logoFile)
-    formRequestBody.append('text_color', '[255, 255, 255]')
+    formRequestBody.append('text_color', fontColor || '[0, 0, 0]')
 
     try {
       const response = await fetch(`${backendUrl}/create-mockups`, {
@@ -224,8 +225,13 @@ export function PromptForm({
     }
   }
 
-  async function handleColorPick(color: string, colorName: string) {
+  async function handleColorPick(
+    color: string,
+    colorName: string,
+    fontColor: string
+  ) {
     setIsAssistantRunning(true)
+    setFontColor(fontColor)
     let currentChatId
     if (!chatId) {
       const newChatId = nanoid()

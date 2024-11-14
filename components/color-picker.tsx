@@ -6,7 +6,7 @@ import { getColorName } from '@/lib/utils'
 import { IconColorPicker } from './ui/icons'
 
 interface ColorPickerPopoverProps {
-  onColorSelect: (color: string, colorName: string) => void
+  onColorSelect: (color: string, colorName: string, fontColor: string) => void
   disabled: boolean
 }
 
@@ -17,25 +17,35 @@ export default function ColorPickerPopover({
   const [color, setColor] = useState('#000000')
   const [isPickerOpen, setPickerOpen] = useState(false)
 
-  function hexToBGR(hex: string): string {
-    // Convert hex to RGB
+  const hexToBGR = (hex: string): any => {
     const bigint = parseInt(hex.slice(1), 16)
     const r = (bigint >> 16) & 255
     const g = (bigint >> 8) & 255
     const b = bigint & 255
 
-    // Return as BGR string
-    return `[${b}, ${g}, ${r}]`
+    return { b, g, r }
   }
 
   const handleColorChange = (newColor: string) => {
     setColor(newColor)
   }
 
+  const getContrastColor = (b: number, g: number, r: number): string => {
+    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+    if (luminance > 128) {
+      return `[0, 0, 0]`
+    } else {
+      return `[255, 255, 255]`
+    }
+  }
+
   const handleConfirm = () => {
-    const bgrColor = hexToBGR(color)
+    const { b, g, r } = hexToBGR(color)
+    const contrastFontColor = getContrastColor(b, g, r)
     const colorName = getColorName(color) || color
-    onColorSelect(bgrColor, colorName)
+    const bgrColor = `[${b}, ${g}, ${r}]`
+    onColorSelect(bgrColor, colorName, contrastFontColor)
     setPickerOpen(false)
   }
 
