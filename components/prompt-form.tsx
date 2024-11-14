@@ -159,7 +159,7 @@ export function PromptForm({
     formRequestBody.append('color', formData.color)
     formRequestBody.append('text', formData.text)
     formRequestBody.append('logo', logoFile)
-    formRequestBody.append('text_color', fontColor)
+    formRequestBody.append('text_color', fontColor || '[0, 0, 0]')
 
     try {
       const response = await fetch(`${backendUrl}/create-mockups`, {
