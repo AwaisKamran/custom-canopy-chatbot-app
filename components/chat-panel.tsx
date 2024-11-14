@@ -18,6 +18,9 @@ export interface ChatPanelProps {
   isAtBottom: boolean
   scrollToBottom: () => void
   session?: Session
+  mockups: any
+  setIsCarouselOpen: (value: boolean) => void
+  setMockups: (value: any) => void
 }
 
 export function ChatPanel({
@@ -27,7 +30,10 @@ export function ChatPanel({
   setInput,
   isAtBottom,
   scrollToBottom,
-  session
+  session,
+  mockups,
+  setIsCarouselOpen,
+  setMockups
 }: ChatPanelProps) {
   const [shareDialogOpen, setShareDialogOpen] = React.useState(false)
 
@@ -116,7 +122,14 @@ export function ChatPanel({
         ) : null} */}
 
         <div className="space-y-4 border-t bg-background px-4 py-2 shadow-lg sm:rounded-t-xl sm:border md:py-4">
-          <PromptForm input={input} setInput={setInput} session={session} />
+          <PromptForm
+            input={input}
+            setInput={setInput}
+            session={session}
+            mockups={mockups}
+            setIsCarouselOpen={setIsCarouselOpen}
+            setMockups={setMockups}
+          />
           <FooterText className="hidden sm:block" />
         </div>
       </div>

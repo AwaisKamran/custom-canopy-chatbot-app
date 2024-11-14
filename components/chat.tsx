@@ -13,6 +13,7 @@ import { useScrollAnchor } from '@/lib/hooks/use-scroll-anchor'
 import { toast } from 'sonner'
 import { useSelector } from 'react-redux'
 import { ChatMessage } from '@/lib/redux/slice/chat.slice'
+import PreviewCarousel from './preview-carousel'
 
 export interface ChatProps extends React.ComponentProps<'div'> {
   initialMessages: ChatMessage[]
@@ -32,6 +33,8 @@ export function Chat({
   const path = usePathname()
   const [input, setInput] = useState('')
   const messages = useSelector((state: any) => state.chat.messages)
+  const [mockups, setMockups] = useState(null)
+  const [isCarouselOpen, setIsCarouselOpen] = useState(false)
 
   const [_, setNewChatId] = useLocalStorage('newChatId', id)
 
@@ -72,7 +75,13 @@ export function Chat({
         className={cn('pb-[200px] pt-4 md:pt-10', className)}
         ref={messagesRef}
       >
-        {messages?.length ? (
+        {isCarouselOpen ? (
+          <PreviewCarousel
+            mockups={mockups}
+            isOpen={isCarouselOpen}
+            onClose={() => setIsCarouselOpen(false)}
+          />
+        ) : messages?.length ? (
           <ChatList
             initialMessages={initialMessages}
             isShared={false}
@@ -90,6 +99,9 @@ export function Chat({
         isAtBottom={isAtBottom}
         scrollToBottom={scrollToBottom}
         session={session}
+        mockups={mockups}
+        setIsCarouselOpen={setIsCarouselOpen}
+        setMockups={setMockups}
       />
     </div>
   )

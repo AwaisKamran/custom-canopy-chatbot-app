@@ -2,9 +2,11 @@
 
 import * as React from 'react'
 import Textarea from 'react-textarea-autosize'
+import LZString from 'lz-string'
+import JSZip from 'jszip'
 
 import { Button } from '@/components/ui/button'
-import { IconArrowElbow } from '@/components/ui/icons'
+import { IconArrowElbow, IconPicture } from '@/components/ui/icons'
 import {
   Tooltip,
   TooltipContent,
@@ -28,13 +30,18 @@ const backendUrl = `${process.env.NEXT_PUBLIC_CUSTOM_CANOPY_SERVER_URL}`
 export function PromptForm({
   input,
   setInput,
-  session
+  session,
+  mockups,
+  setIsCarouselOpen,
+  setMockups
 }: {
   input: string
   setInput: (value: string) => void
-  session: Session
+  session?: Session
+  mockups: any
+  setIsCarouselOpen: (value: boolean) => void
+  setMockups: (value: any) => void
 }) {
-  console.log('backend url is', backendUrl)
   const openai = new OpenAI({
     apiKey: openAIApiKey,
     dangerouslyAllowBrowser: true
@@ -57,7 +64,7 @@ export function PromptForm({
   const [bgrColor, setBgrColor] = React.useState<string>('')
 
   async function submitUserMessage(currentChatId: string, value: string) {
-    let chat = await getChat(currentChatId, session.user.id as string)
+    let chat = await getChat(currentChatId, session?.user.id as string)
     if (!chat) {
       const createdAt = new Date()
       const path = `/chat/${currentChatId}`
@@ -161,28 +168,27 @@ export function PromptForm({
       }
 
       const blob = await response.blob()
-      return blob
+      const zip = await JSZip.loadAsync(blob)
+
+      const generatedMockups: { filename: any; data: string }[] = []
+      zip.forEach(async (relativePath: any, file: any) => {
+        const fileData = await file.async('base64')
+        const imageSrc = `data:image/jpeg;base64,${fileData}`
+        generatedMockups.push({ filename: relativePath, data: imageSrc })
+      })
+
+      setAwaitingFileUpload(false)
+      return { generatedMockups, blob }
     } catch (error) {
       console.error(error)
+      return { generatedMockups: null, blob: null }
     }
   }
 
-  async function submitToolOutput(result?: Blob | MediaSource) {
-    if (!result) return
-
-    const url = URL.createObjectURL(result)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = 'custom_canopy.zip'
-    link.click()
-    URL.revokeObjectURL(url)
-
-    setAwaitingFileUpload(false)
+  async function submitToolOutput(result: any, generatedMockups: any) {
     const tool_outputs = [
       {
-        output: JSON.stringify({
-          canopyZipFile: result
-        }),
+        output: JSON.stringify(result),
         tool_call_id: toolCallId
       }
     ]
@@ -201,10 +207,12 @@ export function PromptForm({
       dispatch(
         addMessage({
           id: newAssistantChatId,
-          message: "You're all done! Thank you for choosing Custom Canopy!",
+          message:
+            "You're all done, thank you for choosing Custom Canopy! Click 'View Mockups' to preview your mockups. To generate more mockups, start a new chat.",
           role: 'assistant'
         })
       )
+      setMockups(generatedMockups)
     } else {
       console.error('Unable to submit tool outputs: ', run.status)
     }
@@ -289,8 +297,8 @@ export function PromptForm({
         })
       )
       setSelectedFiles([])
-      const blob = await generateCustomCanopy(logoFile)
-      await submitToolOutput(blob)
+      const { generatedMockups, blob } = await generateCustomCanopy(logoFile)
+      await submitToolOutput(blob, generatedMockups)
     }
   }
 
@@ -301,56 +309,77 @@ export function PromptForm({
   }, [])
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit}>
-      <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:px-4">
-        <div className="flex flex-wrap gap-4 mb-2">
-          {selectedFiles.map((fileData, index) => (
-            <FilePreview
-              key={index}
-              file={fileData.file}
-              previewUrl={fileData.previewUrl}
-              onRemove={() => handleRemoveFile(index)}
-            />
-          ))}
+    <>
+      {mockups ? (
+        <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:px-4">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2 w-full p-2"
+                onClick={() => setIsCarouselOpen(true)}
+              >
+                <IconPicture />
+                <span>View Mockups</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>View Mockups</TooltipContent>
+          </Tooltip>
         </div>
+      ) : awaitingColorPick ? (
+        <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:px-4">
+          <ColorPicker onColorSelect={handleColorPick} />
+        </div>
+      ) : (
+        <form ref={formRef} onSubmit={handleSubmit}>
+          <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:px-4">
+            <div className="flex flex-wrap gap-4 mb-2">
+              {selectedFiles.map((fileData, index) => (
+                <FilePreview
+                  key={index}
+                  file={fileData.file}
+                  previewUrl={fileData.previewUrl}
+                  onRemove={() => handleRemoveFile(index)}
+                />
+              ))}
+            </div>
 
-        <div className="flex space-between items-center mt-auto">
-          <div className="left-0 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4">
-            {awaitingColorPick ? (
-              <ColorPicker onColorSelect={handleColorPick} />
-            ) : (
-              <FileUploadPopover onFileSelect={handleFileSelect} />
-            )}
+            <div className="flex space-between items-center mt-auto">
+              <div className="left-0 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4">
+                <FileUploadPopover onFileSelect={handleFileSelect} />
+              </div>
+              <Textarea
+                ref={inputRef}
+                tabIndex={0}
+                onKeyDown={onKeyDown}
+                placeholder="Send a message."
+                className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
+                autoFocus
+                spellCheck={false}
+                autoComplete="off"
+                autoCorrect="off"
+                name="message"
+                rows={1}
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                disabled={awaitingColorPick}
+              />
+              <div className="right-0 top-[13px] sm:right-4">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button type="submit" size="icon" disabled={input === ''}>
+                      <IconArrowElbow />
+                      <span className="sr-only">Send message</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Send message</TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
           </div>
-          <Textarea
-            ref={inputRef}
-            tabIndex={0}
-            onKeyDown={onKeyDown}
-            placeholder="Send a message."
-            className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
-            autoFocus
-            spellCheck={false}
-            autoComplete="off"
-            autoCorrect="off"
-            name="message"
-            rows={1}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            disabled={awaitingColorPick}
-          />
-          <div className="right-0 top-[13px] sm:right-4">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button type="submit" size="icon" disabled={input === ''}>
-                  <IconArrowElbow />
-                  <span className="sr-only">Send message</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Send message</TooltipContent>
-            </Tooltip>
-          </div>
-        </div>
-      </div>
-    </form>
+        </form>
+      )}
+    </>
   )
 }
