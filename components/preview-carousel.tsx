@@ -52,7 +52,7 @@ export default function PreviewCarousel({
                     <img
                       src={image.data}
                       alt={`Mockup ${index} (${image.filename})`}
-                      className="w-[500] h-[500] overflow-hidden sm:rounded-md"
+                      className="w-[600] h-[600] overflow-hidden sm:rounded-md"
                     />
                   </div>
                 </CarouselItem>
