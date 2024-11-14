@@ -55,6 +55,7 @@ export function PromptForm({
   const chatId = useSelector((state: any) => state.chat.chatId)
   const [awaitingFileUpload, setAwaitingFileUpload] =
     React.useState<boolean>(false)
+  const messages = useSelector((state: any) => state.chat.messages)
   const [formData, setFormData] = React.useState({ color: '', text: '' })
   const [finalRun, setFinalRun] = React.useState<string>('')
   const [toolCallId, setToolCallId] = React.useState<string>('')
@@ -62,6 +63,8 @@ export function PromptForm({
   const [awaitingColorPick, setAwaitingColorPick] =
     React.useState<boolean>(false)
   const [bgrColor, setBgrColor] = React.useState<string>('')
+  const [isAssistantRunning, setIsAssistantRunning] =
+    React.useState<boolean>(false)
 
   async function submitUserMessage(currentChatId: string, value: string) {
     let chat = await getChat(currentChatId, session?.user.id as string)
@@ -160,7 +163,10 @@ export function PromptForm({
     try {
       const response = await fetch(`${backendUrl}/create-mockups`, {
         method: 'POST',
-        body: formRequestBody
+        body: formRequestBody,
+        headers: {
+          Connection: 'keep-alive'
+        }
       })
 
       if (!response.ok) {
@@ -219,6 +225,7 @@ export function PromptForm({
   }
 
   async function handleColorPick(color: string, colorName: string) {
+    setIsAssistantRunning(true)
     let currentChatId
     if (!chatId) {
       const newChatId = nanoid()
@@ -233,6 +240,7 @@ export function PromptForm({
     await submitUserMessage(currentChatId, colorName)
     setBgrColor(color)
     setAwaitingColorPick(false)
+    setIsAssistantRunning(false)
   }
 
   const handleFileSelect = (
@@ -249,6 +257,7 @@ export function PromptForm({
 
   const handleSubmit = async (e: any) => {
     e.preventDefault()
+    setIsAssistantRunning(true)
 
     const currentChatId = chatId || nanoid()
     if (!chatId) dispatch(setChatId(currentChatId))
@@ -267,6 +276,7 @@ export function PromptForm({
       dispatch(addMessage({ id: currentChatId, message: value, role: 'user' }))
       setSelectedFiles([])
       await submitUserMessage(currentChatId, value)
+      setIsAssistantRunning(false)
     } else {
       if (selectedFiles.length === 0) {
         dispatch(
@@ -280,6 +290,7 @@ export function PromptForm({
             role: 'assistant'
           })
         )
+        setIsAssistantRunning(false)
         return
       }
       const logoFile = selectedFiles[0].file
@@ -299,6 +310,7 @@ export function PromptForm({
       setSelectedFiles([])
       const { generatedMockups, blob } = await generateCustomCanopy(logoFile)
       await submitToolOutput(blob, generatedMockups)
+      setIsAssistantRunning(false)
     }
   }
 
@@ -329,7 +341,10 @@ export function PromptForm({
         </div>
       ) : awaitingColorPick ? (
         <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:px-4">
-          <ColorPicker onColorSelect={handleColorPick} />
+          <ColorPicker
+            onColorSelect={handleColorPick}
+            disabled={isAssistantRunning}
+          />
         </div>
       ) : (
         <form ref={formRef} onSubmit={handleSubmit}>
@@ -347,7 +362,10 @@ export function PromptForm({
 
             <div className="flex space-between items-center mt-auto">
               <div className="left-0 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4">
-                <FileUploadPopover onFileSelect={handleFileSelect} />
+                <FileUploadPopover
+                  onFileSelect={handleFileSelect}
+                  disabled={isAssistantRunning || messages.length === 1}
+                />
               </div>
               <Textarea
                 ref={inputRef}
@@ -363,7 +381,7 @@ export function PromptForm({
                 rows={1}
                 value={input}
                 onChange={e => setInput(e.target.value)}
-                disabled={awaitingColorPick}
+                disabled={isAssistantRunning || messages.length === 1}
               />
               <div className="right-0 top-[13px] sm:right-4">
                 <Tooltip>

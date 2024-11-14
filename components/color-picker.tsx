@@ -7,10 +7,12 @@ import { IconColorPicker } from './ui/icons'
 
 interface ColorPickerPopoverProps {
   onColorSelect: (color: string, colorName: string) => void
+  disabled: boolean
 }
 
 export default function ColorPickerPopover({
-  onColorSelect
+  onColorSelect,
+  disabled
 }: ColorPickerPopoverProps) {
   const [color, setColor] = useState('#000000')
   const [isPickerOpen, setPickerOpen] = useState(false)
@@ -38,7 +40,7 @@ export default function ColorPickerPopover({
   }
 
   return (
-    <Popover open={isPickerOpen} onOpenChange={setPickerOpen}>
+    <Popover open={isPickerOpen && !disabled} onOpenChange={setPickerOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -61,7 +63,12 @@ export default function ColorPickerPopover({
             >
               Cancel
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleConfirm}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleConfirm}
+              disabled={disabled}
+            >
               Confirm
             </Button>
           </div>

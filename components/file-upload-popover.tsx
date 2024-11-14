@@ -10,9 +10,11 @@ import {
 
 function FileUploadPopover({
   onFileSelect,
+  disabled,
   ...props
 }: {
   onFileSelect: (files: { file: File; previewUrl: string }[]) => void
+  disabled: boolean
 }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
@@ -45,7 +47,7 @@ function FileUploadPopover({
   }
 
   return (
-    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+    <Popover open={isPopoverOpen && !disabled} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
