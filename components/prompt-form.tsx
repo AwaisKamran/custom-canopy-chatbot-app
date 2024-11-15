@@ -184,7 +184,6 @@ export function PromptForm({
         generatedMockups.push({ filename: relativePath, data: imageSrc })
       })
 
-      setAwaitingFileUpload(false)
       return { generatedMockups, blob }
     } catch (error) {
       console.error(error)
@@ -315,7 +314,22 @@ export function PromptForm({
       )
       setSelectedFiles([])
       const { generatedMockups, blob } = await generateCustomCanopy(logoFile)
-      await submitToolOutput(blob, generatedMockups)
+      if (generatedMockups && blob) {
+        console.log(
+          `The mockups have been generated successfully: ${generatedMockups}`
+        )
+        setAwaitingFileUpload(false)
+        await submitToolOutput(blob, generatedMockups)
+      } else {
+        dispatch(
+          addMessage({
+            id: currentChatId,
+            message:
+              'My apologies, something went wrong. Please try uploading your file again',
+            role: 'assistant'
+          })
+        )
+      }
       setIsAssistantRunning(false)
     }
   }
