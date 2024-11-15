@@ -284,39 +284,51 @@ export function PromptForm({
       await submitUserMessage(currentChatId, value)
       setIsAssistantRunning(false)
     } else {
-      if (selectedFiles.length === 0) {
-        dispatch(
-          addMessage({ id: currentChatId, message: value, role: 'user' })
-        )
+      let isGenerated = false
+      while (!isGenerated) {
+        if (selectedFiles.length === 0) {
+          dispatch(
+            addMessage({ id: currentChatId, message: value, role: 'user' })
+          )
+          dispatch(
+            addMessage({
+              id: nanoid(),
+              message:
+                'I apologize but I would need this information to proceed. To complete your custom canopy design, please upload your logo.',
+              role: 'assistant'
+            })
+          )
+          setIsAssistantRunning(false)
+          return
+        }
+        const logoFile = selectedFiles[0].file
+        const previewUrl = URL.createObjectURL(logoFile)
+
         dispatch(
           addMessage({
-            id: nanoid(),
-            message:
-              'I apologize but I would need this information to proceed. To complete your custom canopy design, please upload your logo.',
-            role: 'assistant'
+            id: currentChatId,
+            message: `${value}`,
+            role: 'user',
+            file: {
+              name: logoFile.name,
+              previewUrl: previewUrl
+            }
           })
         )
+        setSelectedFiles([])
+        const { generatedMockups, blob } = await generateCustomCanopy(logoFile)
+        if (generatedMockups && blob) {
+          console.log(
+            `The mockups have been generated successfully: ${generatedMockups}`
+          )
+          isGenerated = true
+          await submitToolOutput(blob, generatedMockups)
+        } else {
+          console.log('The mockups could not be generated')
+          isGenerated = false
+        }
         setIsAssistantRunning(false)
-        return
       }
-      const logoFile = selectedFiles[0].file
-      const previewUrl = URL.createObjectURL(logoFile)
-
-      dispatch(
-        addMessage({
-          id: currentChatId,
-          message: `${value}`,
-          role: 'user',
-          file: {
-            name: logoFile.name,
-            previewUrl: previewUrl
-          }
-        })
-      )
-      setSelectedFiles([])
-      const { generatedMockups, blob } = await generateCustomCanopy(logoFile)
-      await submitToolOutput(blob, generatedMockups)
-      setIsAssistantRunning(false)
     }
   }
 
