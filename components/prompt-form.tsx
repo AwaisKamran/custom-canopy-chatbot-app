@@ -255,7 +255,6 @@ export function PromptForm({
     colorName: string,
     fontColor: string
   ) {
-    debugger
     setIsAssistantRunning(true)
     setFontColor(fontColor)
     let currentChatId
@@ -289,7 +288,6 @@ export function PromptForm({
 
   const handleSubmit = async (e: any) => {
     e.preventDefault()
-    debugger
     setIsAssistantRunning(true)
 
     const currentChatId = chatId || nanoid()
@@ -302,7 +300,7 @@ export function PromptForm({
 
     const value = input.trim()
     setInput('')
-    if (!value) return
+    if (!value && !awaitingFileUpload) return
 
     // Submit and get response message
     if (!awaitingFileUpload) {
@@ -421,7 +419,14 @@ export function PromptForm({
                 <div className="right-0 top-[13px] sm:right-4">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button type="submit" size="icon" disabled={input === ''}>
+                      <Button
+                        type="submit"
+                        size="icon"
+                        disabled={
+                          (!awaitingFileUpload && input === '') ||
+                          (awaitingFileUpload && selectedFiles.length === 0)
+                        }
+                      >
                         <IconArrowElbow />
                         <span className="sr-only">Send message</span>
                       </Button>
