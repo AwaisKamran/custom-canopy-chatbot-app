@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import Textarea from 'react-textarea-autosize'
-import LZString from 'lz-string'
 import JSZip from 'jszip'
 
 import { Button } from '@/components/ui/button'
@@ -56,9 +55,6 @@ export function PromptForm({
   const [awaitingFileUpload, setAwaitingFileUpload] =
     React.useState<boolean>(false)
   const messages = useSelector((state: any) => state.chat.messages)
-  const [formData, setFormData] = React.useState({ color: '', text: '' })
-  const [finalRun, setFinalRun] = React.useState<string>('')
-  const [toolCallId, setToolCallId] = React.useState<string>('')
   const [threadId, setThreadId] = React.useState<string>('')
   const [awaitingColorPick, setAwaitingColorPick] =
     React.useState<boolean>(false)
@@ -66,6 +62,7 @@ export function PromptForm({
   const [isAssistantRunning, setIsAssistantRunning] =
     React.useState<boolean>(false)
   const [fontColor, setFontColor] = React.useState<string>('')
+  const [logoFile, setLogoFile] = React.useState<File | null>(null)
 
   async function submitUserMessage(currentChatId: string, value: string) {
     let chat = await getChat(currentChatId, session?.user.id as string)
@@ -87,13 +84,10 @@ export function PromptForm({
     }
 
     setThreadId((chat as Chat).threadId)
-    const threadMessages = await openai.beta.threads.messages.create(
-      (chat as Chat).threadId,
-      {
-        role: 'user',
-        content: value
-      }
-    )
+    await openai.beta.threads.messages.create((chat as Chat).threadId, {
+      role: 'user',
+      content: value
+    })
 
     let run = await openai.beta.threads.runs.createAndPoll(
       (chat as Chat).threadId,
@@ -112,8 +106,20 @@ export function PromptForm({
         // @ts-ignore
         reversedMessages[reversedMessages.length - 1].content[0].text.value
 
-      if (assistantResponse.toLowerCase().includes('base color')) {
+      if (
+        assistantResponse.toLowerCase().includes('base color') &&
+        !assistantResponse.toLowerCase().includes('logo') &&
+        !assistantResponse.toLowerCase().includes(':')
+      ) {
         setAwaitingColorPick(true)
+      }
+
+      if (
+        assistantResponse.toLowerCase().includes('logo') &&
+        !assistantResponse.toLowerCase().includes('base color') &&
+        !assistantResponse.toLowerCase().includes(':')
+      ) {
+        setAwaitingFileUpload(true)
       }
 
       dispatch(
@@ -124,23 +130,27 @@ export function PromptForm({
         })
       )
     } else if (run.status === 'requires_action') {
-      dispatch(
-        addMessage({
-          id: nanoid(),
-          message:
-            'To complete your custom canopy design, please upload your logo.',
-          role: 'assistant'
-        })
-      )
-
       const toolCall = run.required_action?.submit_tool_outputs.tool_calls[0]
       const args = JSON.parse(toolCall?.function.arguments || '')
-      const { companyName, color, text, userName, email, phoneNumber } = args
+      const { companyName, color, text, userName, email, phoneNumber, logo } =
+        args
 
-      setFormData({ color: bgrColor, text: text })
-      setFinalRun(run.id)
-      setAwaitingFileUpload(true)
-      setToolCallId(toolCall?.id as string)
+      setAwaitingFileUpload(false)
+
+      const { generatedMockups, blob } = await generateCustomCanopy(
+        bgrColor,
+        text
+      )
+      console.log(
+        `The mockups have been generated successfully: ${generatedMockups}`
+      )
+      await submitToolOutput(
+        blob,
+        generatedMockups,
+        run.id,
+        toolCall?.id as string
+      )
+      setIsAssistantRunning(false)
 
       return
     } else {
@@ -154,11 +164,11 @@ export function PromptForm({
     }
   }
 
-  async function generateCustomCanopy(logoFile: any) {
+  async function generateCustomCanopy(baseColor: string, text: string) {
     const formRequestBody = new FormData()
-    formRequestBody.append('color', formData.color)
-    formRequestBody.append('text', formData.text)
-    formRequestBody.append('logo', logoFile)
+    formRequestBody.append('color', baseColor)
+    formRequestBody.append('text', text)
+    formRequestBody.append('logo', logoFile as any)
     formRequestBody.append('text_color', fontColor || '[0, 0, 0]')
 
     try {
@@ -178,11 +188,15 @@ export function PromptForm({
       const zip = await JSZip.loadAsync(blob)
 
       const generatedMockups: { filename: any; data: string }[] = []
-      zip.forEach(async (relativePath: any, file: any) => {
-        const fileData = await file.async('base64')
-        const imageSrc = `data:image/jpeg;base64,${fileData}`
-        generatedMockups.push({ filename: relativePath, data: imageSrc })
+      const filePromises: Promise<void>[] = []
+      zip.forEach((relativePath, file) => {
+        const promise = file.async('base64').then(fileData => {
+          const imageSrc = `data:image/jpeg;base64,${fileData}`
+          generatedMockups.push({ filename: relativePath, data: imageSrc })
+        })
+        filePromises.push(promise)
       })
+      await Promise.all(filePromises)
 
       return { generatedMockups, blob }
     } catch (error) {
@@ -191,8 +205,20 @@ export function PromptForm({
     }
   }
 
-  async function submitToolOutput(result: any, generatedMockups: any) {
-    const tool_outputs = [
+  async function submitToolOutput(
+    result: any,
+    generatedMockups: any,
+    finalRun: string,
+    toolCallId: string
+  ) {
+    if (!result || !generatedMockups) {
+      console.log(
+        'Something went wrong generating mockups. Please try again later'
+      )
+      return null
+    }
+
+    const toolOutputs = [
       {
         output: JSON.stringify(result),
         tool_call_id: toolCallId
@@ -204,7 +230,7 @@ export function PromptForm({
       threadId,
       finalRun,
       {
-        tool_outputs: tool_outputs
+        tool_outputs: toolOutputs
       }
     )
     if (run.status === 'completed') {
@@ -214,7 +240,7 @@ export function PromptForm({
         addMessage({
           id: newAssistantChatId,
           message:
-            "You're all done, thank you for choosing Custom Canopy! Click 'View Mockups' to preview your mockups. To generate more mockups, start a new chat.",
+            "You're all done, thank you for choosing Custom Canopy! Click 'View Mockups' to preview your mockups. You can also edit your selection and regenerate mockups if you wish to do so.",
           role: 'assistant'
         })
       )
@@ -229,6 +255,7 @@ export function PromptForm({
     colorName: string,
     fontColor: string
   ) {
+    debugger
     setIsAssistantRunning(true)
     setFontColor(fontColor)
     let currentChatId
@@ -262,6 +289,7 @@ export function PromptForm({
 
   const handleSubmit = async (e: any) => {
     e.preventDefault()
+    debugger
     setIsAssistantRunning(true)
 
     const currentChatId = chatId || nanoid()
@@ -312,25 +340,11 @@ export function PromptForm({
           }
         })
       )
+      setLogoFile(logoFile)
       setSelectedFiles([])
-      const { generatedMockups, blob } = await generateCustomCanopy(logoFile)
-      if (generatedMockups && blob) {
-        console.log(
-          `The mockups have been generated successfully: ${generatedMockups}`
-        )
-        setAwaitingFileUpload(false)
-        await submitToolOutput(blob, generatedMockups)
-      } else {
-        dispatch(
-          addMessage({
-            id: currentChatId,
-            message:
-              'My apologies, something went wrong. Please try uploading your file again',
-            role: 'assistant'
-          })
-        )
-      }
+      await submitUserMessage(currentChatId, previewUrl)
       setIsAssistantRunning(false)
+      setAwaitingFileUpload(false)
     }
   }
 
@@ -342,24 +356,7 @@ export function PromptForm({
 
   return (
     <>
-      {mockups ? (
-        <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:px-4">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex items-center gap-2 w-full p-2"
-                onClick={() => setIsCarouselOpen(true)}
-              >
-                <IconPicture />
-                <span>View Mockups</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>View Mockups</TooltipContent>
-          </Tooltip>
-        </div>
-      ) : awaitingColorPick ? (
+      {awaitingColorPick ? (
         <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:px-4">
           <ColorPicker
             onColorSelect={handleColorPick}
@@ -367,56 +364,75 @@ export function PromptForm({
           />
         </div>
       ) : (
-        <form ref={formRef} onSubmit={handleSubmit}>
-          <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:px-4">
-            <div className="flex flex-wrap gap-4 mb-2">
-              {selectedFiles.map((fileData, index) => (
-                <FilePreview
-                  key={index}
-                  file={fileData.file}
-                  previewUrl={fileData.previewUrl}
-                  onRemove={() => handleRemoveFile(index)}
-                />
-              ))}
+        <div>
+          {mockups && (
+            <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:px-4">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center gap-2 w-full p-2"
+                    onClick={() => setIsCarouselOpen(true)}
+                  >
+                    <IconPicture />
+                    <span>View Mockups</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>View Mockups</TooltipContent>
+              </Tooltip>
             </div>
-
-            <div className="flex space-between items-center mt-auto">
-              <div className="left-0 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4">
-                <FileUploadPopover
-                  onFileSelect={handleFileSelect}
+          )}
+          <form ref={formRef} onSubmit={handleSubmit}>
+            <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:px-4">
+              <div className="flex flex-wrap gap-4 mb-2">
+                {selectedFiles.map((fileData, index) => (
+                  <FilePreview
+                    key={index}
+                    file={fileData.file}
+                    previewUrl={fileData.previewUrl}
+                    onRemove={() => handleRemoveFile(index)}
+                  />
+                ))}
+              </div>
+              <div className="flex space-between items-center mt-auto">
+                <div className="left-0 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4">
+                  <FileUploadPopover
+                    onFileSelect={handleFileSelect}
+                    disabled={isAssistantRunning || messages.length === 1}
+                  />
+                </div>
+                <Textarea
+                  ref={inputRef}
+                  tabIndex={0}
+                  onKeyDown={onKeyDown}
+                  placeholder="Send a message."
+                  className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
+                  autoFocus
+                  spellCheck={false}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  name="message"
+                  rows={1}
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
                   disabled={isAssistantRunning || messages.length === 1}
                 />
-              </div>
-              <Textarea
-                ref={inputRef}
-                tabIndex={0}
-                onKeyDown={onKeyDown}
-                placeholder="Send a message."
-                className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
-                autoFocus
-                spellCheck={false}
-                autoComplete="off"
-                autoCorrect="off"
-                name="message"
-                rows={1}
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                disabled={isAssistantRunning || messages.length === 1}
-              />
-              <div className="right-0 top-[13px] sm:right-4">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button type="submit" size="icon" disabled={input === ''}>
-                      <IconArrowElbow />
-                      <span className="sr-only">Send message</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Send message</TooltipContent>
-                </Tooltip>
+                <div className="right-0 top-[13px] sm:right-4">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button type="submit" size="icon" disabled={input === ''}>
+                        <IconArrowElbow />
+                        <span className="sr-only">Send message</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Send message</TooltipContent>
+                  </Tooltip>
+                </div>
               </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       )}
     </>
   )

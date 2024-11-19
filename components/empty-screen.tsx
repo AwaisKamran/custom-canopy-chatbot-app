@@ -12,7 +12,10 @@ export function EmptyScreen() {
           Welcome to the Custom Canopy Chatbot!
         </h1>
         <p className="leading-normal text-muted-foreground">
-          Custom Canopy specializes in creating high-quality, custom-made canopies tailored to your exact specifications. Simply answer a few questions and receive mockups for your custom canopies that adhere to your requirements.
+          Custom Canopy specializes in creating high-quality, custom-made
+          canopies tailored to your exact specifications. Simply answer a few
+          questions and receive mockups for your custom canopies that adhere to
+          your requirements. To get started say hello!
         </p>
       </div>
     </div>
