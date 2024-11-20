@@ -397,7 +397,7 @@ export function PromptForm({
                 <div className="left-0 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4">
                   <FileUploadPopover
                     onFileSelect={handleFileSelect}
-                    disabled={isAssistantRunning || messages.length === 1}
+                    disabled={isAssistantRunning}
                   />
                 </div>
                 <Textarea
@@ -414,7 +414,7 @@ export function PromptForm({
                   rows={1}
                   value={input}
                   onChange={e => setInput(e.target.value)}
-                  disabled={isAssistantRunning || messages.length === 1}
+                  disabled={isAssistantRunning}
                 />
                 <div className="right-0 top-[13px] sm:right-4">
                   <Tooltip>
