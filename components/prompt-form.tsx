@@ -108,16 +108,14 @@ export function PromptForm({
 
       if (
         assistantResponse.toLowerCase().includes('base color') &&
-        !assistantResponse.toLowerCase().includes('logo') &&
-        !assistantResponse.toLowerCase().includes(':')
+        !assistantResponse.toLowerCase().includes('logo')
       ) {
         setAwaitingColorPick(true)
       }
 
       if (
         assistantResponse.toLowerCase().includes('logo') &&
-        !assistantResponse.toLowerCase().includes('base color') &&
-        !assistantResponse.toLowerCase().includes(':')
+        !assistantResponse.toLowerCase().includes('base color')
       ) {
         setAwaitingFileUpload(true)
       }
@@ -211,19 +209,23 @@ export function PromptForm({
     finalRun: string,
     toolCallId: string
   ) {
+    let toolOutputs
     if (!result || !generatedMockups) {
-      console.log(
-        'Something went wrong generating mockups. Please try again later'
-      )
-      return null
+      console.error('Something went wrong generating mockups.')
+      toolOutputs = [
+        {
+          output: JSON.stringify('Failed to generate Custom Canopy mockups.'),
+          tool_call_id: toolCallId
+        }
+      ]
+    } else {
+      toolOutputs = [
+        {
+          output: JSON.stringify(result),
+          tool_call_id: toolCallId
+        }
+      ]
     }
-
-    const toolOutputs = [
-      {
-        output: JSON.stringify(result),
-        tool_call_id: toolCallId
-      }
-    ]
 
     // Submit the result to the assistant
     const run = await openai.beta.threads.runs.submitToolOutputsAndPoll(
@@ -234,13 +236,19 @@ export function PromptForm({
       }
     )
     if (run.status === 'completed') {
+      const messages = await openai.beta.threads.messages.list(run.thread_id)
+
       const newAssistantChatId = nanoid()
+      const reversedMessages = messages.data.reverse()
+
+      const assistantResponse =
+        // @ts-ignore
+        reversedMessages[reversedMessages.length - 1].content[0].text.value
 
       dispatch(
         addMessage({
           id: newAssistantChatId,
-          message:
-            "You're all done, thank you for choosing Custom Canopy! Click 'View Mockups' to preview your mockups. You can also edit your selection and regenerate mockups if you wish to do so.",
+          message: assistantResponse,
           role: 'assistant'
         })
       )
