@@ -115,7 +115,7 @@ export function PromptForm({
 
       if (
         assistantResponse.toLowerCase().includes('logo') &&
-        !assistantResponse.toLowerCase().includes('base color')
+        !assistantResponse.toLowerCase().includes('color')
       ) {
         setAwaitingFileUpload(true)
       }
@@ -135,19 +135,11 @@ export function PromptForm({
 
       setAwaitingFileUpload(false)
 
-      const { generatedMockups, blob } = await generateCustomCanopy(
-        bgrColor,
-        text
-      )
+      const generatedMockups = await generateCustomCanopy(bgrColor, text)
       console.log(
         `The mockups have been generated successfully: ${generatedMockups}`
       )
-      await submitToolOutput(
-        blob,
-        generatedMockups,
-        run.id,
-        toolCall?.id as string
-      )
+      await submitToolOutput(generatedMockups, run.id, toolCall?.id as string)
       setIsAssistantRunning(false)
 
       return
@@ -198,21 +190,20 @@ export function PromptForm({
       await Promise.all(filePromises)
 
       console.log('The generated blob after processing is: ', blob)
-      return { generatedMockups, blob }
+      return generatedMockups
     } catch (error) {
       console.error(error)
-      return { generatedMockups: null, blob: null }
+      return null
     }
   }
 
   async function submitToolOutput(
-    result: any,
     generatedMockups: any,
     finalRun: string,
     toolCallId: string
   ) {
     let toolOutputs
-    if (!result || !generatedMockups) {
+    if (!generatedMockups) {
       console.error('Something went wrong generating mockups.')
       toolOutputs = [
         {
@@ -223,7 +214,7 @@ export function PromptForm({
     } else {
       toolOutputs = [
         {
-          output: result.text(),
+          output: JSON.stringify(generatedMockups[0]),
           tool_call_id: toolCallId
         }
       ]
