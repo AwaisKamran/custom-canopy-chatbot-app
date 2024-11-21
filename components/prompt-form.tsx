@@ -183,6 +183,7 @@ export function PromptForm({
       }
 
       const blob = await response.blob()
+      console.log('The generated blob before processing is: ', blob)
       const zip = await JSZip.loadAsync(blob)
 
       const generatedMockups: { filename: any; data: string }[] = []
@@ -196,6 +197,7 @@ export function PromptForm({
       })
       await Promise.all(filePromises)
 
+      console.log('The generated blob after processing is: ', blob)
       return { generatedMockups, blob }
     } catch (error) {
       console.error(error)
