@@ -223,7 +223,7 @@ export function PromptForm({
     } else {
       toolOutputs = [
         {
-          output: JSON.stringify(result),
+          output: result.text(),
           tool_call_id: toolCallId
         }
       ]
