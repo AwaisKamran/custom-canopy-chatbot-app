@@ -227,6 +227,7 @@ export function PromptForm({
       ]
     }
 
+    console.log('Submitting tool outputs: ', toolOutputs)
     // Submit the result to the assistant
     const run = await openai.beta.threads.runs.submitToolOutputsAndPoll(
       threadId,
