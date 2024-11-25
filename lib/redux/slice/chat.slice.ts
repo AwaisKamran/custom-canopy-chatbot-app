@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { nanoid } from 'nanoid';
 
 export interface ChatMessage {
   id: string;
@@ -14,7 +15,11 @@ const initialState: {
   messages: ChatMessage[];
   chatId: string | null;
 } = {
-  messages: [],
+  messages: [{
+    id: nanoid(),
+    message: "Hello! Welcome to Custom Canopy. I'm here to help you build a custom design for your 10'x10' canopy tent. Let's get started! \n \n What is the name of your company or organization?",
+    role: "assistant"
+  }],
   chatId: null,
 };
 
