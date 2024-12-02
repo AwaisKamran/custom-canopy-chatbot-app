@@ -11,8 +11,13 @@ import { Message, Session } from '@/lib/types'
 import { usePathname, useRouter } from 'next/navigation'
 import { useScrollAnchor } from '@/lib/hooks/use-scroll-anchor'
 import { toast } from 'sonner'
-import { useSelector } from 'react-redux'
-import { ChatMessage } from '@/lib/redux/slice/chat.slice'
+import { useDispatch, useSelector } from 'react-redux'
+import {
+  addMessage,
+  ChatMessage,
+  removeMessages,
+  setThreadId
+} from '@/lib/redux/slice/chat.slice'
 import PreviewCarousel from './preview-carousel'
 
 export interface ChatProps extends React.ComponentProps<'div'> {
@@ -20,6 +25,7 @@ export interface ChatProps extends React.ComponentProps<'div'> {
   id?: string
   session?: Session
   missingKeys: string[]
+  threadId: string
 }
 
 export function Chat({
@@ -27,16 +33,32 @@ export function Chat({
   initialMessages,
   className,
   session,
-  missingKeys
+  missingKeys,
+  threadId
 }: ChatProps) {
   const router = useRouter()
   const path = usePathname()
   const [input, setInput] = useState('')
   const messages = useSelector((state: any) => state.chat.messages)
+  const dispatch = useDispatch()
   const [mockups, setMockups] = useState(null)
   const [isCarouselOpen, setIsCarouselOpen] = useState(false)
 
   const [_, setNewChatId] = useLocalStorage('newChatId', id)
+
+  useEffect(() => {
+    if (messages.length !== 1) {
+      dispatch(setThreadId(''))
+      dispatch(removeMessages())
+    }
+  }, [path])
+
+  useEffect(() => {
+    dispatch(setThreadId(threadId))
+    initialMessages.forEach((message: ChatMessage) => {
+      dispatch(addMessage(message))
+    })
+  }, [initialMessages])
 
   useEffect(() => {
     if (session?.user) {

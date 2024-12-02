@@ -21,8 +21,14 @@ export function ChatList({ initialMessages, session, isShared }: ChatList) {
   // }
 
   const combinedMessages =
-    initialMessages && initialMessages?.length > 0
-      ? [...initialMessages, ...messages]
+    initialMessages && initialMessages.length > 0
+      ? [
+          ...Array.from(
+            new Map(
+              [...initialMessages, ...messages].map(msg => [msg.id, msg])
+            ).values()
+          )
+        ]
       : [...messages]
   const isLastMessageFromUser =
     combinedMessages[combinedMessages.length - 1].role === 'user'
