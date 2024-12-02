@@ -122,61 +122,85 @@ export function PromptForm({
       content: value
     })
 
-    let run = await openai.beta.threads.runs.createAndPoll(currentThreadId, {
-      assistant_id: openAIAssistantId || ''
+    const stream = await openai.beta.threads.runs.stream(currentThreadId, {
+      assistant_id: openAIAssistantId || '',
+      stream: true
     })
 
-    if (run.status === 'completed') {
-      const messages = await openai.beta.threads.messages.list(run.thread_id)
+    let assistantResponse = ''
+    const newAssistantChatId = nanoid()
 
-      const newAssistantChatId = nanoid()
-      const reversedMessages = messages.data.reverse()
-
-      const assistantResponse =
-        // @ts-ignore
-        reversedMessages[reversedMessages.length - 1].content[0].text.value
-
+    for await (const message of stream) {
       if (
-        assistantResponse.toLowerCase().includes('base color') &&
-        !assistantResponse.toLowerCase().includes('logo')
+        message.event === 'thread.message.delta' &&
+        message.data.delta.content
       ) {
-        setAwaitingColorPick(true)
+        const text = (message.data.delta.content[0] as any).text.value
+          ? (message.data.delta.content[0] as any).text.value
+          : ''
+        assistantResponse += text
+
+        dispatch(
+          addMessage({
+            id: newAssistantChatId,
+            message: assistantResponse,
+            role: 'assistant'
+          })
+        )
+      } else if (message.event === 'thread.run.requires_action') {
+        const toolCall =
+          message.data.required_action?.submit_tool_outputs.tool_calls[0]
+        const args = JSON.parse(toolCall?.function.arguments || '')
+        const { companyName, color, text, userName, email, phoneNumber, logo } =
+          args
+
+        setAwaitingFileUpload(false)
+
+        const generatedMockups = await generateCustomCanopy(bgrColor, text)
+        console.log(
+          `The mockups have been generated successfully: ${generatedMockups}`
+        )
+        await submitToolOutput(
+          generatedMockups,
+          message.data.id,
+          toolCall?.id as string,
+          chat
+        )
+        setIsAssistantRunning(false)
+        await saveChat(chat)
+        return {
+          id: messageId,
+          message: value,
+          role: 'user'
+        }
       }
-
-      if (
-        assistantResponse.toLowerCase().includes('logo') &&
-        !assistantResponse.toLowerCase().includes('color')
-      ) {
-        setAwaitingFileUpload(true)
-      }
-
-      const assistantMessage = {
-        id: newAssistantChatId,
-        message: assistantResponse,
-        role: 'assistant'
-      }
-
-      dispatch(addMessage(assistantMessage))
-      chat.messages
-        ? chat.messages.push(assistantMessage)
-        : (chat.messages = [assistantMessage])
-    } else if (run.status === 'requires_action') {
-      const toolCall = run.required_action?.submit_tool_outputs.tool_calls[0]
-      const args = JSON.parse(toolCall?.function.arguments || '')
-      const { companyName, color, text, userName, email, phoneNumber, logo } =
-        args
-
-      setAwaitingFileUpload(false)
-
-      const generatedMockups = await generateCustomCanopy(bgrColor, text)
-      console.log(
-        `The mockups have been generated successfully: ${generatedMockups}`
-      )
-      await submitToolOutput(generatedMockups, run.id, toolCall?.id as string)
-      setIsAssistantRunning(false)
-    } else {
-      console.error(run.status)
     }
+
+    if (
+      assistantResponse.toLowerCase().includes('base color') &&
+      !assistantResponse.toLowerCase().includes('logo')
+    ) {
+      setAwaitingColorPick(true)
+    }
+
+    if (
+      assistantResponse.toLowerCase().includes('logo') &&
+      !assistantResponse.toLowerCase().includes('color')
+    ) {
+      setAwaitingFileUpload(true)
+    }
+
+    const assistantMessage = {
+      id: newAssistantChatId,
+      message: assistantResponse,
+      role: 'assistant'
+    }
+
+    dispatch(addMessage(assistantMessage))
+
+    chat.messages
+      ? chat.messages.push(assistantMessage)
+      : (chat.messages = [assistantMessage])
 
     await saveChat(chat)
     return {
@@ -230,7 +254,8 @@ export function PromptForm({
   async function submitToolOutput(
     generatedMockups: any,
     finalRun: string,
-    toolCallId: string
+    toolCallId: string,
+    chat: Chat
   ) {
     let toolOutputs
     if (!generatedMockups) {
@@ -252,42 +277,48 @@ export function PromptForm({
 
     console.log('Submitting tool outputs: ', toolOutputs)
     // Submit the result to the assistant
-    const run = await openai.beta.threads.runs.submitToolOutputsAndPoll(
+    const stream = await openai.beta.threads.runs.submitToolOutputsStream(
       threadId,
       finalRun,
       {
-        tool_outputs: toolOutputs
+        tool_outputs: toolOutputs,
+        stream: true
       }
     )
-    if (run.status === 'completed') {
-      const messages = await openai.beta.threads.messages.list(run.thread_id)
 
-      const newAssistantChatId = nanoid()
-      const reversedMessages = messages.data.reverse()
+    let assistantResponse = ''
+    const newAssistantChatId = nanoid()
+    for await (const message of stream) {
+      if (
+        message.event === 'thread.message.delta' &&
+        message.data.delta.content
+      ) {
+        const text = (message.data.delta.content[0] as any).text.value
+          ? (message.data.delta.content[0] as any).text.value
+          : ''
+        assistantResponse += text
 
-      const assistantResponse =
-        // @ts-ignore
-        reversedMessages[reversedMessages.length - 1].content[0].text.value
+        dispatch(
+          addMessage({
+            id: newAssistantChatId,
+            message: assistantResponse,
+            role: 'assistant'
+          })
+        )
+      } else if (message.event === 'thread.message.completed') {
+        console.log('Tool outputs submitted successfully')
+        const assistantMessage = {
+          id: newAssistantChatId,
+          message: assistantResponse,
+          role: 'assistant'
+        }
+        dispatch(addMessage(assistantMessage))
 
-      const chat = (await getChat(
-        id as string,
-        session?.user?.id as string
-      )) as Chat
-
-      const assistantMessage = {
-        id: newAssistantChatId,
-        message: assistantResponse,
-        role: 'assistant'
+        chat.messages
+          ? chat.messages.push(assistantMessage)
+          : (chat.messages = [assistantMessage])
+        setMockups(generatedMockups)
       }
-
-      chat.messages.push(assistantMessage)
-
-      dispatch(addMessage(assistantMessage))
-
-      await saveChat(chat)
-      setMockups(generatedMockups)
-    } else {
-      console.error('Unable to submit tool outputs: ', run.status)
     }
   }
 
