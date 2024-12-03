@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@/lib/utils'
+import { cn, nanoid } from '@/lib/utils'
 import { ChatList } from '@/components/chat-list'
 import { ChatPanel } from '@/components/chat-panel'
 import { EmptyScreen } from '@/components/empty-screen'
@@ -47,9 +47,19 @@ export function Chat({
   const [_, setNewChatId] = useLocalStorage('newChatId', id)
 
   useEffect(() => {
-    if (messages.length !== 1) {
+    if (messages.length > 1) {
       dispatch(setThreadId(''))
       dispatch(removeMessages())
+      if (!path.includes('chat')) {
+        dispatch(
+          addMessage({
+            id: nanoid(),
+            message:
+              "Hello! Welcome to Custom Canopy. I'm here to help you build a custom design for your 10'x10' canopy tent. Let's get started! \n \n What is the name of your company or organization?",
+            role: 'assistant'
+          })
+        )
+      }
     }
   }, [path])
 
