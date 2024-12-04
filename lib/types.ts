@@ -41,3 +41,10 @@ export interface User extends Record<string, any> {
   password: string
   salt: string
 }
+
+export interface FileData {
+  file: File,
+  previewUrl: string
+  name?: string
+  fileType: string
+}

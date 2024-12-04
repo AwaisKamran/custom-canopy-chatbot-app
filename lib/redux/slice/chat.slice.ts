@@ -5,10 +5,7 @@ export interface ChatMessage {
   id: string;
   message: string;
   role?: string;
-  file?: {
-    name: string
-    previewUrl: string
-  }
+  files?: string
 }
 
 const initialState: {
@@ -36,7 +33,7 @@ const chatSlice = createSlice({
   initialState,
   reducers: {
     addMessage: (state, action) => {
-      const { id, message, role, file } = action.payload;
+      const { id, message, role, files } = action.payload;
       const existingMessageIndex = state.messages.findIndex((msg) => msg.id === id);
       if (existingMessageIndex !== -1) {
          state.messages = [
@@ -49,7 +46,7 @@ const chatSlice = createSlice({
            id,
            message,
            role,
-           file
+           files
          })
        }
     },

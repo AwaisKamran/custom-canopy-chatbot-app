@@ -62,35 +62,12 @@ export function ChatList({ initialMessages, session, isShared }: ChatList) {
       {combinedMessages.map((item: ChatMessage, index: number) => (
         <div key={item.id}>
           {item.role === 'user' ? (
-            <div className="relative flex flex-col items-start gap-2">
-              {item.file && item.message ? (
-                <>
-                  <div className="mt-2 max-w-32 max-h-32">
-                    <img
-                      src={item.file.previewUrl}
-                      alt={item.file.name}
-                      className="max-w-full h-auto rounded-md border bg-background shadow-md"
-                    />
-                  </div>
-                  <UserMessage>{item.message}</UserMessage>
-                </>
-              ) : item.file && !item.message ? (
-                <UserMessage>
-                  <div className="mt-2 max-w-32 max-h-32">
-                    <img
-                      src={item.file.previewUrl}
-                      alt={item.file.name}
-                      className="max-w-full h-auto rounded-md border bg-background shadow-md"
-                    />
-                  </div>
-                </UserMessage>
-              ) : (
-                <UserMessage>{item.message}</UserMessage>
-              )}
+            <div className="flex flex-col items-start">
+              <UserMessage content={item} />
               {isLastMessageFromUser &&
                 index === combinedMessages.length - 1 && (
                   <div className="mt-4">
-                    <IconSpinner />
+                    <IconSpinner></IconSpinner>
                   </div>
                 )}
             </div>
