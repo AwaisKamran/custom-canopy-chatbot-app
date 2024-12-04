@@ -11,8 +11,6 @@ export interface ChatMessage {
 const initialState: {
   messages: ChatMessage[]
   threadId: string
-  tentColors: { slope: string, canopy: string, walls: string }
-  fontColor: string
 } = {
   messages: [{
     id: nanoid(),
@@ -20,12 +18,6 @@ const initialState: {
     role: "assistant"
   }],
   threadId: '',
-  tentColors: {
-    slope: '',
-    canopy: '',
-    walls: ''
-  },
-  fontColor: '[0, 0, 0]'
 };
 
 const chatSlice = createSlice({
@@ -50,9 +42,6 @@ const chatSlice = createSlice({
          })
        }
     },
-    setTentColors: (state, action) => {
-      state.tentColors = action.payload
-    },
     setThreadId: (state, action) => {
        state.threadId = action.payload
     },
@@ -67,11 +56,8 @@ const chatSlice = createSlice({
         }]
       }
     },
-    setFontColor: (state, action) => {
-      state.fontColor = action.payload
-    }
   },
 });
 
-export const { addMessage, setTentColors, setThreadId, removeMessages, setFontColor } = chatSlice.actions;
+export const { addMessage, setThreadId, removeMessages } = chatSlice.actions;
 export default chatSlice.reducer;

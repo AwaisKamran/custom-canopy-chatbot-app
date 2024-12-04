@@ -48,3 +48,9 @@ export interface FileData {
   name?: string
   fileType: string
 }
+
+export interface TentColorRegions {
+    slope: string,
+    canopy: string
+    walls: string
+}

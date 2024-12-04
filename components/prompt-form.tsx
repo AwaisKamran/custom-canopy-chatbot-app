@@ -13,14 +13,9 @@ import {
 } from '@/components/ui/tooltip'
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
 import { nanoid } from 'nanoid'
-import { Chat, FileData, Session } from '@/lib/types'
+import { Chat, FileData, Session, TentColorRegions } from '@/lib/types'
 import { getChat, saveChat } from '@/app/actions'
-import {
-  addMessage,
-  setTentColors,
-  setThreadId,
-  setFontColor
-} from '@/lib/redux/slice/chat.slice'
+import { addMessage, setThreadId } from '@/lib/redux/slice/chat.slice'
 import { useDispatch, useSelector } from 'react-redux'
 import FileUploadPopover from './file-upload-popover'
 import OpenAI from 'openai'
@@ -56,13 +51,10 @@ export function PromptForm({
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
   const dispatch = useDispatch()
   const [selectedFiles, setSelectedFiles] = React.useState<FileData[]>([])
-  const chatId = useSelector((state: any) => state.chat.chatId)
   const [awaitingFileUpload, setAwaitingFileUpload] =
     React.useState<boolean>(false)
   const messages = useSelector((state: any) => state.chat.messages)
   const threadId = useSelector((state: any) => state.chat.threadId)
-  const tentColors = useSelector((state: any) => state.chat.tentColors)
-  const fontColor = useSelector((state: any) => state.chat.fontColor)
   const [awaitingColorPick, setAwaitingColorPick] =
     React.useState<boolean>(false)
   const [isMonochrome, setIsMonochrome] = React.useState<boolean>(true)
@@ -71,7 +63,11 @@ export function PromptForm({
   >('slope')
   const [isAssistantRunning, setIsAssistantRunning] =
     React.useState<boolean>(false)
-  const [logoFile, setLogoFile] = React.useState<File | null>(null)
+  const [tentColors, setTentColors] = React.useState<TentColorRegions>({
+    slope: '',
+    canopy: '',
+    walls: ''
+  })
 
   const saveFiles = async (files: FileData[], messageId: string) => {
     const fileBlobs: any[] = []
@@ -204,12 +200,35 @@ export function PromptForm({
         const toolCall =
           message.data.required_action?.submit_tool_outputs.tool_calls[0]
         const args = JSON.parse(toolCall?.function.arguments || '')
-        const { companyName, color, text, userName, email, phoneNumber, logo } =
-          args
+        const {
+          companyName,
+          tentColors,
+          text,
+          userName,
+          email,
+          phoneNumber,
+          logo,
+          fontColor
+        } = args
 
         setAwaitingFileUpload(false)
 
-        const generatedMockups = await generateCustomCanopy(text)
+        const bgrColors = { slope: '', canopy: '', walls: '' }
+        const convertToBGR = (rgb: string) => {
+          const [r, g, b] = JSON.parse(rgb)
+          return `[${b}, ${g}, ${r}]`
+        }
+
+        bgrColors.slope = convertToBGR(tentColors.slope)
+        bgrColors.canopy = convertToBGR(tentColors.canopy)
+        bgrColors.walls = convertToBGR(tentColors.walls)
+
+        const generatedMockups = await generateCustomCanopy(
+          bgrColors,
+          text,
+          logo,
+          fontColor
+        )
         console.log(
           `The mockups have been generated successfully: ${generatedMockups}`
         )
@@ -265,7 +284,8 @@ export function PromptForm({
       !assistantResponse.toLowerCase().includes('text') &&
       !assistantResponse.toLowerCase().includes('monochrome') &&
       !assistantResponse.toLowerCase().includes('different regions') &&
-      !assistantResponse.toLowerCase().includes('mockup')
+      !assistantResponse.toLowerCase().includes('mockup') &&
+      !assistantResponse.toLowerCase().includes('just to confirm')
     ) {
       setAwaitingColorPick(true)
     }
@@ -297,11 +317,23 @@ export function PromptForm({
     }
   }
 
-  async function generateCustomCanopy(text: string) {
+  async function generateCustomCanopy(
+    tentColors: TentColorRegions,
+    text: string,
+    logo: any,
+    fontColor: string
+  ) {
     const formRequestBody = new FormData()
-    formRequestBody.append('slope_color', tentColors.slope)
-    formRequestBody.append('canopy_color', tentColors.canopy)
-    formRequestBody.append('walls_color', tentColors.walls)
+    const logoResponse = await fetch(logo.previewUrl)
+    const blob = await logoResponse.blob()
+    const logoFile = new File([blob], logo.name, { type: logo.contentType })
+
+    formRequestBody.append('slope_color', tentColors.slope || '[250, 250, 250]')
+    formRequestBody.append(
+      'canopy_color',
+      tentColors.canopy || '[250, 250, 250]'
+    )
+    formRequestBody.append('walls_color', tentColors.walls || '[250, 250, 250]')
     formRequestBody.append('text', text)
     formRequestBody.append('logo', logoFile as any)
     formRequestBody.append('text_color', fontColor || '[0, 0, 0]')
@@ -417,30 +449,47 @@ export function PromptForm({
     fontColor: string
   ) {
     setIsAssistantRunning(true)
+    const messageId = nanoid()
+    dispatch(addMessage({ id: messageId, message: colorName, role: 'user' }))
     if (isMonochrome) {
-      dispatch(
-        setTentColors({
-          slope: color,
-          canopy: color,
-          walls: color
-        })
+      setTentColors({
+        slope: color,
+        canopy: color,
+        walls: color
+      })
+      await submitUserMessage(
+        messageId,
+        `Tent colors are: ${JSON.stringify({ slope: color, canopy: color, walls: color })} and font color is ${fontColor}`,
+        []
       )
-      dispatch(setFontColor(fontColor))
       setAwaitingColorPick(false)
     } else {
       if (currentRegion === 'slope') {
-        dispatch(setTentColors({ ...tentColors, slope: color }))
-      } else if (currentRegion === 'canopy') {
-        dispatch(setTentColors({ ...tentColors, canopy: color }))
-        dispatch(setFontColor(fontColor))
-      } else {
-        dispatch(setTentColors({ ...tentColors, walls: color }))
+        setTentColors({ ...tentColors, slope: color })
         setAwaitingColorPick(false)
+        await submitUserMessage(
+          messageId,
+          `Tent colors are: ${JSON.stringify({ ...tentColors, slope: color })}`,
+          []
+        )
+      } else if (currentRegion === 'canopy') {
+        setTentColors({ ...tentColors, canopy: color })
+        setAwaitingColorPick(false)
+        await submitUserMessage(
+          messageId,
+          `Tent colors are: ${JSON.stringify({ ...tentColors, canopy: color })} and font color is ${fontColor}`,
+          []
+        )
+      } else {
+        setTentColors({ ...tentColors, walls: color })
+        setAwaitingColorPick(false)
+        await submitUserMessage(
+          messageId,
+          `Tent colors are: ${JSON.stringify({ ...tentColors, walls: color })}`,
+          []
+        )
       }
     }
-    const messageId = nanoid()
-    dispatch(addMessage({ id: messageId, message: colorName, role: 'user' }))
-    await submitUserMessage(messageId, colorName, [])
     setIsAssistantRunning(false)
   }
 
@@ -490,7 +539,6 @@ export function PromptForm({
         setIsAssistantRunning(false)
         return
       }
-      const logoFile = selectedFiles[0].file
       const currFiles = selectedFiles.map(fileData => {
         return {
           file: fileData.file,
@@ -509,13 +557,7 @@ export function PromptForm({
           files: JSON.stringify(files)
         })
       )
-
-      setLogoFile(logoFile)
-      await submitUserMessage(
-        messageId,
-        JSON.stringify(files[0].previewUrl),
-        files
-      )
+      await submitUserMessage(messageId, JSON.stringify(files[0]), files)
       setIsAssistantRunning(false)
       setAwaitingFileUpload(false)
     }
