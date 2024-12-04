@@ -49,7 +49,11 @@ export function Chat({
   useEffect(() => {
     if (messages.length > 1) {
       dispatch(setThreadId(''))
-      dispatch(removeMessages())
+    }
+    if (initialMessages.length > 0) {
+      dispatch(removeMessages(true))
+    } else {
+      dispatch(removeMessages(false))
     }
   }, [path])
 
