@@ -15,7 +15,12 @@ import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
 import { nanoid } from 'nanoid'
 import { Chat, Session } from '@/lib/types'
 import { getChat, saveChat } from '@/app/actions'
-import { addMessage, setChatId } from '@/lib/redux/slice/chat.slice'
+import {
+  addMessage,
+  setTentColors,
+  setThreadId,
+  setFontColor
+} from '@/lib/redux/slice/chat.slice'
 import { useDispatch, useSelector } from 'react-redux'
 import FileUploadPopover from './file-upload-popover'
 import OpenAI from 'openai'
@@ -32,7 +37,8 @@ export function PromptForm({
   session,
   mockups,
   setIsCarouselOpen,
-  setMockups
+  setMockups,
+  id
 }: {
   input: string
   setInput: (value: string) => void
@@ -40,6 +46,7 @@ export function PromptForm({
   mockups: any
   setIsCarouselOpen: (value: boolean) => void
   setMockups: (value: any) => void
+  id?: string
 }) {
   const openai = new OpenAI({
     apiKey: openAIApiKey,
@@ -51,112 +58,201 @@ export function PromptForm({
   const [selectedFiles, setSelectedFiles] = React.useState<
     { file: File; previewUrl: string; textSnippet: string }[]
   >([])
-  const chatId = useSelector((state: any) => state.chat.chatId)
   const [awaitingFileUpload, setAwaitingFileUpload] =
     React.useState<boolean>(false)
   const messages = useSelector((state: any) => state.chat.messages)
-  const [threadId, setThreadId] = React.useState<string>('')
+  const threadId = useSelector((state: any) => state.chat.threadId)
+  const tentColors = useSelector((state: any) => state.chat.tentColors)
+  const fontColor = useSelector((state: any) => state.chat.fontColor)
+  const [logoFile, setLogoFile] = React.useState<File | null>(null)
   const [awaitingColorPick, setAwaitingColorPick] =
     React.useState<boolean>(false)
-  const [bgrColor, setBgrColor] = React.useState<string>('')
+  const [isMonochrome, setIsMonochrome] = React.useState<boolean>(true)
+  const [currentRegion, setCurrentRegion] = React.useState<
+    'slope' | 'canopy' | 'walls'
+  >('slope')
   const [isAssistantRunning, setIsAssistantRunning] =
     React.useState<boolean>(false)
-  const [fontColor, setFontColor] = React.useState<string>('')
-  const [logoFile, setLogoFile] = React.useState<File | null>(null)
 
-  async function submitUserMessage(currentChatId: string, value: string) {
-    let chat = await getChat(currentChatId, session?.user.id as string)
-    if (!chat) {
-      const createdAt = new Date()
-      const path = `/chat/${currentChatId}`
-      const firstMessageContent = value as string
-      const title = firstMessageContent.substring(0, 100)
+  const getCurrentChat = async (messageId: string, value: string) => {
+    const createdAt = new Date()
+    const firstMessageContent = value as string
+    const title = firstMessageContent.substring(0, 100)
+
+    let currentThreadId = threadId
+    let chat: Chat
+
+    if (!threadId) {
       const emptyThread = await openai.beta.threads.create()
+      dispatch(setThreadId(emptyThread.id))
+      currentThreadId = emptyThread.id
 
       chat = {
-        id: currentChatId,
+        id: id as string,
         title,
         createdAt,
-        path,
-        threadId: emptyThread.id
+        path: `/chat/${id}`,
+        messages: [
+          ...messages,
+          { id: messageId, message: value, role: 'user' }
+        ],
+        threadId: currentThreadId
       }
-      await saveChat(chat)
+    } else {
+      chat = (await getChat(id as string, session?.user?.id as string)) as Chat
+      if (!chat) {
+        throw new Error('Chat not found!')
+      }
+
+      chat.messages = [
+        ...(chat.messages || []),
+        {
+          id: messageId,
+          role: 'user',
+          message: value
+        }
+      ]
+      currentThreadId = chat.threadId
     }
 
-    setThreadId((chat as Chat).threadId)
-    await openai.beta.threads.messages.create((chat as Chat).threadId, {
+    return { currentThreadId, chat }
+  }
+
+  async function submitUserMessage(messageId: string, value: string) {
+    const { currentThreadId, chat } = await getCurrentChat(messageId, value)
+
+    await openai.beta.threads.messages.create(currentThreadId, {
       role: 'user',
       content: value
     })
 
-    let run = await openai.beta.threads.runs.createAndPoll(
-      (chat as Chat).threadId,
-      {
-        assistant_id: openAIAssistantId || ''
-      }
-    )
+    const stream = await openai.beta.threads.runs.stream(currentThreadId, {
+      assistant_id: openAIAssistantId || '',
+      stream: true
+    })
 
-    if (run.status === 'completed') {
-      const messages = await openai.beta.threads.messages.list(run.thread_id)
+    let assistantResponse = ''
+    const newAssistantChatId = nanoid()
 
-      const newAssistantChatId = nanoid()
-      const reversedMessages = messages.data.reverse()
-
-      const assistantResponse =
-        // @ts-ignore
-        reversedMessages[reversedMessages.length - 1].content[0].text.value
-
+    for await (const message of stream) {
       if (
-        assistantResponse.toLowerCase().includes('base color') &&
-        !assistantResponse.toLowerCase().includes('logo')
+        message.event === 'thread.message.delta' &&
+        message.data.delta.content
       ) {
-        setAwaitingColorPick(true)
+        const text = (message.data.delta.content[0] as any).text.value
+          ? (message.data.delta.content[0] as any).text.value
+          : ''
+        assistantResponse += text
+
+        dispatch(
+          addMessage({
+            id: newAssistantChatId,
+            message: assistantResponse,
+            role: 'assistant'
+          })
+        )
+      } else if (message.event === 'thread.run.requires_action') {
+        const toolCall =
+          message.data.required_action?.submit_tool_outputs.tool_calls[0]
+        const args = JSON.parse(toolCall?.function.arguments || '')
+        const { companyName, color, text, userName, email, phoneNumber, logo } =
+          args
+
+        setAwaitingFileUpload(false)
+
+        const generatedMockups = await generateCustomCanopy(text)
+        console.log(
+          `The mockups have been generated successfully: ${generatedMockups}`
+        )
+        await submitToolOutput(
+          generatedMockups,
+          message.data.id,
+          toolCall?.id as string,
+          chat
+        )
+        setIsAssistantRunning(false)
+        await saveChat(chat)
+        return {
+          id: messageId,
+          message: value,
+          role: 'user'
+        }
       }
-
-      if (
-        assistantResponse.toLowerCase().includes('logo') &&
-        !assistantResponse.toLowerCase().includes('color')
-      ) {
-        setAwaitingFileUpload(true)
-      }
-
-      dispatch(
-        addMessage({
-          id: newAssistantChatId,
-          message: assistantResponse,
-          role: 'assistant'
-        })
-      )
-    } else if (run.status === 'requires_action') {
-      const toolCall = run.required_action?.submit_tool_outputs.tool_calls[0]
-      const args = JSON.parse(toolCall?.function.arguments || '')
-      const { companyName, color, text, userName, email, phoneNumber, logo } =
-        args
-
-      setAwaitingFileUpload(false)
-
-      const generatedMockups = await generateCustomCanopy(bgrColor, text)
-      console.log(
-        `The mockups have been generated successfully: ${generatedMockups}`
-      )
-      await submitToolOutput(generatedMockups, run.id, toolCall?.id as string)
-      setIsAssistantRunning(false)
-
-      return
-    } else {
-      console.error(run.status)
     }
 
+    if (assistantResponse.toLowerCase().includes('slope')) {
+      setCurrentRegion('slope')
+      setIsMonochrome(false)
+    }
+
+    if (
+      assistantResponse.toLowerCase().includes('canopy') &&
+      !assistantResponse.toLowerCase().includes('custom')
+    ) {
+      setCurrentRegion('canopy')
+      setIsMonochrome(false)
+    }
+
+    if (
+      assistantResponse.toLowerCase().includes('walls') &&
+      assistantResponse.toLowerCase().includes('color')
+    ) {
+      setCurrentRegion('walls')
+      setIsMonochrome(false)
+    }
+
+    if (
+      !assistantResponse.toLowerCase().includes('slope') &&
+      !assistantResponse.toLowerCase().includes('canopy') &&
+      !assistantResponse.toLowerCase().includes('walls') &&
+      assistantResponse.toLowerCase().includes('color')
+    ) {
+      setIsMonochrome(true)
+    }
+
+    if (
+      assistantResponse.toLowerCase().includes('color') &&
+      !assistantResponse.toLowerCase().includes('logo') &&
+      !assistantResponse.toLowerCase().includes('text') &&
+      !assistantResponse.toLowerCase().includes('monochrome') &&
+      !assistantResponse.toLowerCase().includes('different regions') &&
+      !assistantResponse.toLowerCase().includes('mockup')
+    ) {
+      setAwaitingColorPick(true)
+    }
+
+    if (
+      assistantResponse.toLowerCase().includes('logo') &&
+      !assistantResponse.toLowerCase().includes('color')
+    ) {
+      setAwaitingFileUpload(true)
+    }
+
+    const assistantMessage = {
+      id: newAssistantChatId,
+      message: assistantResponse,
+      role: 'assistant'
+    }
+
+    dispatch(addMessage(assistantMessage))
+
+    chat.messages
+      ? chat.messages.push(assistantMessage)
+      : (chat.messages = [assistantMessage])
+
+    await saveChat(chat)
     return {
-      id: currentChatId,
+      id: messageId,
       message: value,
       role: 'user'
     }
   }
 
-  async function generateCustomCanopy(baseColor: string, text: string) {
+  async function generateCustomCanopy(text: string) {
     const formRequestBody = new FormData()
-    formRequestBody.append('color', baseColor)
+    formRequestBody.append('slope_color', tentColors.slope)
+    formRequestBody.append('canopy_color', tentColors.canopy)
+    formRequestBody.append('walls_color', tentColors.walls)
     formRequestBody.append('text', text)
     formRequestBody.append('logo', logoFile as any)
     formRequestBody.append('text_color', fontColor || '[0, 0, 0]')
@@ -198,7 +294,8 @@ export function PromptForm({
   async function submitToolOutput(
     generatedMockups: any,
     finalRun: string,
-    toolCallId: string
+    toolCallId: string,
+    chat: Chat
   ) {
     let toolOutputs
     if (!generatedMockups) {
@@ -220,33 +317,48 @@ export function PromptForm({
 
     console.log('Submitting tool outputs: ', toolOutputs)
     // Submit the result to the assistant
-    const run = await openai.beta.threads.runs.submitToolOutputsAndPoll(
+    const stream = await openai.beta.threads.runs.submitToolOutputsStream(
       threadId,
       finalRun,
       {
-        tool_outputs: toolOutputs
+        tool_outputs: toolOutputs,
+        stream: true
       }
     )
-    if (run.status === 'completed') {
-      const messages = await openai.beta.threads.messages.list(run.thread_id)
 
-      const newAssistantChatId = nanoid()
-      const reversedMessages = messages.data.reverse()
+    let assistantResponse = ''
+    const newAssistantChatId = nanoid()
+    for await (const message of stream) {
+      if (
+        message.event === 'thread.message.delta' &&
+        message.data.delta.content
+      ) {
+        const text = (message.data.delta.content[0] as any).text.value
+          ? (message.data.delta.content[0] as any).text.value
+          : ''
+        assistantResponse += text
 
-      const assistantResponse =
-        // @ts-ignore
-        reversedMessages[reversedMessages.length - 1].content[0].text.value
-
-      dispatch(
-        addMessage({
+        dispatch(
+          addMessage({
+            id: newAssistantChatId,
+            message: assistantResponse,
+            role: 'assistant'
+          })
+        )
+      } else if (message.event === 'thread.message.completed') {
+        console.log('Tool outputs submitted successfully')
+        const assistantMessage = {
           id: newAssistantChatId,
           message: assistantResponse,
           role: 'assistant'
-        })
-      )
-      setMockups(generatedMockups)
-    } else {
-      console.error('Unable to submit tool outputs: ', run.status)
+        }
+        dispatch(addMessage(assistantMessage))
+
+        chat.messages
+          ? chat.messages.push(assistantMessage)
+          : (chat.messages = [assistantMessage])
+        setMockups(generatedMockups)
+      }
     }
   }
 
@@ -256,21 +368,30 @@ export function PromptForm({
     fontColor: string
   ) {
     setIsAssistantRunning(true)
-    setFontColor(fontColor)
-    let currentChatId
-    if (!chatId) {
-      const newChatId = nanoid()
-      dispatch(setChatId(newChatId))
-      currentChatId = newChatId
+    if (isMonochrome) {
+      dispatch(
+        setTentColors({
+          slope: color,
+          canopy: color,
+          walls: color
+        })
+      )
+      dispatch(setFontColor(fontColor))
+      setAwaitingColorPick(false)
     } else {
-      currentChatId = chatId
+      if (currentRegion === 'slope') {
+        dispatch(setTentColors({ ...tentColors, slope: color }))
+      } else if (currentRegion === 'canopy') {
+        dispatch(setTentColors({ ...tentColors, canopy: color }))
+        dispatch(setFontColor(fontColor))
+      } else {
+        dispatch(setTentColors({ ...tentColors, walls: color }))
+        setAwaitingColorPick(false)
+      }
     }
-    dispatch(
-      addMessage({ id: currentChatId, message: colorName, role: 'user' })
-    )
-    await submitUserMessage(currentChatId, colorName)
-    setBgrColor(color)
-    setAwaitingColorPick(false)
+    const messageId = nanoid()
+    dispatch(addMessage({ id: messageId, message: colorName, role: 'user' }))
+    await submitUserMessage(messageId, colorName)
     setIsAssistantRunning(false)
   }
 
@@ -290,8 +411,7 @@ export function PromptForm({
     e.preventDefault()
     setIsAssistantRunning(true)
 
-    const currentChatId = chatId || nanoid()
-    if (!chatId) dispatch(setChatId(currentChatId))
+    const messageId = nanoid()
 
     // Blur focus on mobile
     if (window.innerWidth < 600) {
@@ -304,15 +424,13 @@ export function PromptForm({
 
     // Submit and get response message
     if (!awaitingFileUpload) {
-      dispatch(addMessage({ id: currentChatId, message: value, role: 'user' }))
-      setSelectedFiles([])
-      await submitUserMessage(currentChatId, value)
+      dispatch(addMessage({ id: messageId, message: value, role: 'user' }))
+      setSelectedFiles([]) // ignore file uploads if files are not asked for by the ai
+      await submitUserMessage(messageId, value)
       setIsAssistantRunning(false)
     } else {
       if (selectedFiles.length === 0) {
-        dispatch(
-          addMessage({ id: currentChatId, message: value, role: 'user' })
-        )
+        dispatch(addMessage({ id: messageId, message: value, role: 'user' }))
         dispatch(
           addMessage({
             id: nanoid(),
@@ -329,7 +447,7 @@ export function PromptForm({
 
       dispatch(
         addMessage({
-          id: currentChatId,
+          id: messageId,
           message: `${value}`,
           role: 'user',
           file: {
@@ -338,9 +456,10 @@ export function PromptForm({
           }
         })
       )
+
       setLogoFile(logoFile)
       setSelectedFiles([])
-      await submitUserMessage(currentChatId, previewUrl)
+      await submitUserMessage(messageId, previewUrl)
       setIsAssistantRunning(false)
       setAwaitingFileUpload(false)
     }
