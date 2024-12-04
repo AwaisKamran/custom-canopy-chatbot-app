@@ -1,6 +1,6 @@
 'use client'
 
-import { IconOpenAI, IconPDF, IconUser } from '@/components/ui/icons'
+import { IconOpenAI, IconUser } from '@/components/ui/icons'
 import { cn } from '@/lib/utils'
 import { spinner } from './spinner'
 import { CodeBlock } from '../ui/codeblock'
@@ -10,41 +10,17 @@ import remarkMath from 'remark-math'
 import rehypeRaw from 'rehype-raw'
 import { StreamableValue } from 'ai/rsc'
 import { useStreamableText } from '@/lib/hooks/use-streamable-text'
-import { ChatMessage } from '@/lib/redux/slice/chat.slice'
 
 // Different types of message bubbles.
 
-export function UserMessage({ content }: { content: ChatMessage }) {
-  let files = null
-  if (content.files) {
-    files = JSON.parse(content.files)
-  }
+export function UserMessage({ children }: { children: React.ReactNode }) {
   return (
     <div className="group relative flex items-start md:-ml-12">
       <div className="flex size-[25px] shrink-0 select-none items-center justify-center rounded-md border bg-background shadow-sm">
         <IconUser />
       </div>
-      <div className="flex flex-col flex-1">
-        {files && (
-          <div className="flex flex-wrap gap-4 mx-4 mb-2">
-            {files.map((file: any, index: any) => {
-              return (
-                <div key={index} className="flex items-start gap-4">
-                  {file.type && file.type.startsWith('image') && (
-                    <img
-                      src={file.previewUrl}
-                      alt={file.name}
-                      className="w-32 h-32 sm:rounded-md sm:border sm:bg-background sm:shadow-md"
-                    />
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        )}
-        <div className="ml-4 flex-1 space-y-2 overflow-hidden pl-2">
-          {content.message}
-        </div>
+      <div className="ml-4 flex-1 space-y-2 overflow-hidden pl-2">
+        {children}
       </div>
     </div>
   )

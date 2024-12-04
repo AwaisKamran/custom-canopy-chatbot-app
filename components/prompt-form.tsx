@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/tooltip'
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
 import { nanoid } from 'nanoid'
-import { Chat, FileData, Session } from '@/lib/types'
+import { Chat, Session } from '@/lib/types'
 import { getChat, saveChat } from '@/app/actions'
 import {
   addMessage,
@@ -55,14 +55,16 @@ export function PromptForm({
   const { formRef, onKeyDown } = useEnterSubmit()
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
   const dispatch = useDispatch()
-  const [selectedFiles, setSelectedFiles] = React.useState<FileData[]>([])
-  const chatId = useSelector((state: any) => state.chat.chatId)
+  const [selectedFiles, setSelectedFiles] = React.useState<
+    { file: File; previewUrl: string; textSnippet: string }[]
+  >([])
   const [awaitingFileUpload, setAwaitingFileUpload] =
     React.useState<boolean>(false)
   const messages = useSelector((state: any) => state.chat.messages)
   const threadId = useSelector((state: any) => state.chat.threadId)
   const tentColors = useSelector((state: any) => state.chat.tentColors)
   const fontColor = useSelector((state: any) => state.chat.fontColor)
+  const [logoFile, setLogoFile] = React.useState<File | null>(null)
   const [awaitingColorPick, setAwaitingColorPick] =
     React.useState<boolean>(false)
   const [isMonochrome, setIsMonochrome] = React.useState<boolean>(true)
@@ -71,45 +73,8 @@ export function PromptForm({
   >('slope')
   const [isAssistantRunning, setIsAssistantRunning] =
     React.useState<boolean>(false)
-  const [logoFile, setLogoFile] = React.useState<File | null>(null)
 
-  const saveFiles = async (files: FileData[], messageId: string) => {
-    const fileBlobs: any[] = []
-    try {
-      for (const file of files) {
-        const response = await fetch(
-          `/api/save-files?chatId=${id}&filename=${file.file.name}&userId=${session?.user.id}&messageId=${messageId}`,
-          {
-            method: 'POST',
-            body: file.file
-          }
-        )
-
-        if (!response.ok) {
-          throw new Error(
-            `Unable to save uploaded files. Response is ${response}`
-          )
-        } else {
-          const value = await response.json()
-          console.log(`Saved uploaded files successfully: ${value}`)
-          fileBlobs.push({
-            name: value.pathname,
-            previewUrl: value.downloadUrl,
-            type: value.contentType
-          })
-        }
-      }
-      return fileBlobs
-    } catch (error) {
-      console.error('Error saving file:', error)
-    }
-  }
-
-  const getCurrentChat = async (
-    messageId: string,
-    value: string,
-    files: any[]
-  ) => {
+  const getCurrentChat = async (messageId: string, value: string) => {
     const createdAt = new Date()
     const firstMessageContent = value as string
     const title = firstMessageContent.substring(0, 100)
@@ -129,12 +94,7 @@ export function PromptForm({
         path: `/chat/${id}`,
         messages: [
           ...messages,
-          {
-            id: messageId,
-            message: value,
-            role: 'user',
-            files: JSON.stringify(files)
-          }
+          { id: messageId, message: value, role: 'user' }
         ],
         threadId: currentThreadId
       }
@@ -149,8 +109,7 @@ export function PromptForm({
         {
           id: messageId,
           role: 'user',
-          message: value,
-          files: JSON.stringify(files)
+          message: value
         }
       ]
       currentThreadId = chat.threadId
@@ -159,16 +118,8 @@ export function PromptForm({
     return { currentThreadId, chat }
   }
 
-  async function submitUserMessage(
-    messageId: string,
-    value: string,
-    files: any[]
-  ) {
-    const { currentThreadId, chat } = await getCurrentChat(
-      messageId,
-      value,
-      files
-    )
+  async function submitUserMessage(messageId: string, value: string) {
+    const { currentThreadId, chat } = await getCurrentChat(messageId, value)
 
     await openai.beta.threads.messages.create(currentThreadId, {
       role: 'user',
@@ -440,11 +391,13 @@ export function PromptForm({
     }
     const messageId = nanoid()
     dispatch(addMessage({ id: messageId, message: colorName, role: 'user' }))
-    await submitUserMessage(messageId, colorName, [])
+    await submitUserMessage(messageId, colorName)
     setIsAssistantRunning(false)
   }
 
-  const handleFileSelect = (files: FileData[]) => {
+  const handleFileSelect = (
+    files: { file: File; previewUrl: string | null }[]
+  ) => {
     setSelectedFiles((prevFiles: any) => [...prevFiles, ...files])
   }
 
@@ -470,11 +423,10 @@ export function PromptForm({
     if (!value && !awaitingFileUpload) return
 
     // Submit and get response message
-    let files: any[] = []
     if (!awaitingFileUpload) {
       dispatch(addMessage({ id: messageId, message: value, role: 'user' }))
       setSelectedFiles([]) // ignore file uploads if files are not asked for by the ai
-      await submitUserMessage(messageId, value, files)
+      await submitUserMessage(messageId, value)
       setIsAssistantRunning(false)
     } else {
       if (selectedFiles.length === 0) {
@@ -491,31 +443,23 @@ export function PromptForm({
         return
       }
       const logoFile = selectedFiles[0].file
-      const currFiles = selectedFiles.map(fileData => {
-        return {
-          file: fileData.file,
-          name: fileData.name,
-          previewUrl: fileData.previewUrl
-        } as FileData
-      })
-      setSelectedFiles([])
-      files = (await saveFiles(currFiles, messageId)) || []
+      const previewUrl = URL.createObjectURL(logoFile)
 
       dispatch(
         addMessage({
           id: messageId,
           message: `${value}`,
           role: 'user',
-          files: JSON.stringify(files)
+          file: {
+            name: logoFile.name,
+            previewUrl: previewUrl
+          }
         })
       )
 
       setLogoFile(logoFile)
-      await submitUserMessage(
-        messageId,
-        JSON.stringify(files[0].previewUrl),
-        files
-      )
+      setSelectedFiles([])
+      await submitUserMessage(messageId, previewUrl)
       setIsAssistantRunning(false)
       setAwaitingFileUpload(false)
     }
