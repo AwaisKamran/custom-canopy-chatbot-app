@@ -55,6 +55,9 @@ export function Chat({
     } else {
       dispatch(removeMessages(false))
     }
+    if (messages.length === 1) {
+      setMockups(null)
+    }
   }, [path])
 
   useEffect(() => {
