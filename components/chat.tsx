@@ -47,7 +47,7 @@ export function Chat({
   const [_, setNewChatId] = useLocalStorage('newChatId', id)
 
   useEffect(() => {
-    if (messages.length !== 1) {
+    if (messages.length > 1) {
       dispatch(setThreadId(''))
       dispatch(removeMessages())
     }
