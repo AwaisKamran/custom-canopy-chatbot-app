@@ -1,7 +1,9 @@
 import { clearChats, getChats } from '@/app/actions'
+import { Error401Response } from '@/app/constants'
 import { ClearHistory } from '@/components/clear-history'
 import { SidebarItems } from '@/components/sidebar-items'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { Chat } from '@/lib/types'
 import { redirect } from 'next/navigation'
 import { cache } from 'react'
 
@@ -17,15 +19,16 @@ const loadChats = cache(async (userId?: string) => {
 export async function SidebarList({ userId }: SidebarListProps) {
   const chats = await loadChats(userId)
 
-  if (!chats || 'error' in chats) {
+  if (!chats || Error401Response.message in chats) {
     redirect('/')
   } else {
+    const chatsArray = chats as Chat[]
     return (
       <div className="flex flex-1 flex-col overflow-hidden">
         <div className="flex-1 overflow-auto">
-          {chats?.length ? (
+          {chatsArray?.length ? (
             <div className="space-y-2 px-2">
-              <SidebarItems chats={chats} />
+              <SidebarItems chats={chatsArray} />
             </div>
           ) : (
             <div className="p-8 text-center">
@@ -35,7 +38,10 @@ export async function SidebarList({ userId }: SidebarListProps) {
         </div>
         <div className="flex items-center justify-between p-4">
           <ThemeToggle />
-          <ClearHistory clearChats={clearChats} isEnabled={chats?.length > 0} />
+          <ClearHistory
+            clearChats={clearChats}
+            isEnabled={chatsArray?.length > 0}
+          />
         </div>
       </div>
     )

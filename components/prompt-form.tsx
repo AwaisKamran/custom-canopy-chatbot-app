@@ -82,9 +82,8 @@ export function PromptForm({
         )
 
         if (!response.ok) {
-          throw new Error(
-            `Unable to save uploaded files. Response is ${response}`
-          )
+          const error = `Unable to save uploaded files. Response is ${response}`
+          throw new Error(error)
         } else {
           const value = await response.json()
           console.log(`Saved uploaded files successfully: ${value}`)

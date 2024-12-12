@@ -1,6 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { nanoid } from 'nanoid';
 
+export enum Roles {
+  "user" = "user",
+  "assistant" = "assistant"
+}
+
 export interface ChatMessage {
   id: string;
   message: string;
