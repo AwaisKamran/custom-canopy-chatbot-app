@@ -4,7 +4,7 @@ export const Error401Response = {
 }
 
 export const Error400Response = {
-    "status": 401,
+    "status": 400,
     "message": "Bad Request"
 }
 
