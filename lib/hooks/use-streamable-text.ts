@@ -9,6 +9,10 @@ export const useStreamableText = (
   )
 
   useEffect(() => {
+      setRawContent(content as string)
+   }, [content])
+
+  useEffect(() => {
     ;(async () => {
       if (typeof content === 'object') {
         let value = ''

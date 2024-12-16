@@ -23,7 +23,7 @@ export default function ColorPickerPopover({
     const g = (bigint >> 8) & 255
     const b = bigint & 255
 
-    return { b, g, r }
+    return { r, g, b }
   }
 
   const handleColorChange = (newColor: string) => {
@@ -41,11 +41,11 @@ export default function ColorPickerPopover({
   }
 
   const handleConfirm = () => {
-    const { b, g, r } = hexToBGR(color)
+    const { r, g, b } = hexToBGR(color)
     const contrastFontColor = getContrastColor(b, g, r)
     const colorName = getColorName(color) || color
-    const bgrColor = `[${b}, ${g}, ${r}]`
-    onColorSelect(bgrColor, colorName, contrastFontColor)
+    const rgbColor = `[${r}, ${g}, ${b}]`
+    onColorSelect(rgbColor, colorName, contrastFontColor)
     setPickerOpen(false)
   }
 

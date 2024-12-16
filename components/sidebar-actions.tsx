@@ -22,16 +22,14 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import { ErrorMessage } from '@/app/constants'
 
 interface SidebarActionsProps {
   chat: Chat
   removeChat: (args: { id: string; path: string }) => ServerActionResult<void>
 }
 
-export function SidebarActions({
-  chat,
-  removeChat
-}: SidebarActionsProps) {
+export function SidebarActions({ chat, removeChat }: SidebarActionsProps) {
   const router = useRouter()
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [isRemovePending, startRemoveTransition] = React.useTransition()
@@ -78,7 +76,7 @@ export function SidebarActions({
                     path: chat.path
                   })
 
-                  if (result && 'error' in result) {
+                  if (result && ErrorMessage.message in result) {
                     toast.error(result.error)
                     return
                   }

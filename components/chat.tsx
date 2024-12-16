@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@/lib/utils'
+import { cn, nanoid } from '@/lib/utils'
 import { ChatList } from '@/components/chat-list'
 import { ChatPanel } from '@/components/chat-panel'
 import { EmptyScreen } from '@/components/empty-screen'
@@ -16,6 +16,7 @@ import {
   addMessage,
   ChatMessage,
   removeMessages,
+  Roles,
   setThreadId
 } from '@/lib/redux/slice/chat.slice'
 import PreviewCarousel from './preview-carousel'
@@ -49,7 +50,27 @@ export function Chat({
   useEffect(() => {
     if (messages.length > 1) {
       dispatch(setThreadId(''))
-      dispatch(removeMessages())
+      dispatch(removeMessages(true))
+      if (!path.includes('chat') && initialMessages.length === 0) {
+        const firstMessage =
+          "Hello! Welcome to Custom Canopy. I'm here to help you build a custom design for your 10'x10' canopy tent. Let's get started! \n \n What is the name of your company or organization?"
+        dispatch(
+          addMessage({
+            id: nanoid(),
+            message: firstMessage,
+            role: Roles.assistant
+          })
+        )
+      }
+    }
+    if (
+      path.includes('chat') &&
+      (messages.length > 1 || initialMessages.length > 1)
+    ) {
+      dispatch(removeMessages(true))
+    }
+    if (messages.length === 1) {
+      setMockups(null)
     }
   }, [path])
 
