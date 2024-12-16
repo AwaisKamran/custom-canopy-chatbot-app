@@ -11,7 +11,7 @@ export interface Chat extends Record<string, any> {
   createdAt: Date
   userId?: string
   path: string
-  messages?: ChatMessage[]
+  messages: ChatMessage[]
   sharePath?: string
   threadId: string
 }
@@ -40,4 +40,17 @@ export interface User extends Record<string, any> {
   email: string
   password: string
   salt: string
+}
+
+export interface FileData {
+  file: File,
+  previewUrl: string
+  name?: string
+  fileType: string
+}
+
+export interface TentColorRegions {
+    slope: string,
+    canopy: string
+    walls: string
 }

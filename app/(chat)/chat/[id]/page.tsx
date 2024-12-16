@@ -3,9 +3,10 @@ import { notFound, redirect } from 'next/navigation'
 
 import { auth } from '@/auth'
 import { getChat, getMissingKeys } from '@/app/actions'
-import { Chat } from '@/components/chat'
 import { Chat as UserChatMessage, Session } from '@/lib/types'
-import { ChatMessage } from '@/lib/redux/slice/chat.slice'
+import { ChatMessage, Roles } from '@/lib/redux/slice/chat.slice'
+import { Error401Response } from '@/app/constants'
+import { Chat } from '@/components/chat'
 
 export interface ChatPageProps {
   params: {
@@ -22,10 +23,12 @@ export async function generateMetadata({
     return {}
   }
 
-  const chat = await getChat(params.id, session.user.id)
-  if (!chat || 'error' in chat) {
+  const existingChat = await getChat(params.id, session.user.id)
+  let chat: UserChatMessage
+  if (!existingChat || Error401Response.message in existingChat) {
     redirect('/')
   } else {
+    chat = existingChat as UserChatMessage
     return {
       title: chat?.title.toString().slice(0, 50) ?? 'Chat'
     }
@@ -41,29 +44,39 @@ export default async function ChatPage({ params }: ChatPageProps) {
   }
 
   const userId = session.user.id as string
-  const chat: UserChatMessage | null | { error: string} = await getChat(params.id, userId)
+  let existingChat: UserChatMessage | null | { error: string } = await getChat(
+    params.id,
+    userId
+  )
 
-  if (!chat || 'error' in chat) {
+  if (!existingChat || Error401Response.message in existingChat) {
     redirect('/')
   } else {
-    if (chat?.userId !== session?.user?.id) {
+    existingChat = existingChat as UserChatMessage
+    if (existingChat?.userId !== session?.user?.id) {
       notFound()
     }
 
-    const {id, title} = chat as UserChatMessage
-    const updatedChats: ChatMessage[] = [{
-      id: id,
-      message: title,
-      role: "user"
-    }]
+    const { id, title } = existingChat as UserChatMessage
+    const updatedChats: ChatMessage[] = existingChat.messages
+      ? existingChat.messages
+      : [
+          {
+            id: id,
+            message: title,
+            role: 'user'
+          }
+        ]
+    const threadId = existingChat.threadId
 
     return (
-        <Chat
-          id={chat.id}
-          session={session}
-          initialMessages={updatedChats}
-          missingKeys={missingKeys}
-        />
+      <Chat
+        id={existingChat.id}
+        session={session}
+        initialMessages={updatedChats}
+        missingKeys={missingKeys}
+        threadId={threadId}
+      />
     )
   }
 }
