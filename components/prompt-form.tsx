@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/tooltip'
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
 import { nanoid } from 'nanoid'
-import { Chat, Session } from '@/lib/types'
+import { Chat, RegionsType, Regions, Session } from '@/lib/types'
 import { getChat, saveChat } from '@/app/actions'
 import {
   addMessage,
@@ -69,9 +69,9 @@ export function PromptForm({
   const [awaitingColorPick, setAwaitingColorPick] =
     React.useState<boolean>(false)
   const [isMonochrome, setIsMonochrome] = React.useState<boolean>(true)
-  const [currentRegion, setCurrentRegion] = React.useState<
-    'slope' | 'canopy' | 'walls'
-  >('slope')
+  const [currentRegion, setCurrentRegion] = React.useState<RegionsType>(
+    Regions.slope
+  )
   const [isAssistantRunning, setIsAssistantRunning] =
     React.useState<boolean>(false)
 
@@ -160,9 +160,8 @@ export function PromptForm({
         setAwaitingFileUpload(false)
 
         const generatedMockups = await generateCustomCanopy(text)
-        console.log(
-          `The mockups have been generated successfully: ${generatedMockups}`
-        )
+        const success = `The mockups have been generated successfully: `
+        console.log(success, generatedMockups)
         await submitToolOutput(
           generatedMockups,
           message.data.id,
@@ -180,7 +179,7 @@ export function PromptForm({
     }
 
     if (assistantResponse.toLowerCase().includes('slope')) {
-      setCurrentRegion('slope')
+      setCurrentRegion(Regions.slope)
       setIsMonochrome(false)
     }
 
@@ -188,7 +187,7 @@ export function PromptForm({
       assistantResponse.toLowerCase().includes('canopy') &&
       !assistantResponse.toLowerCase().includes('custom')
     ) {
-      setCurrentRegion('canopy')
+      setCurrentRegion(Regions.canopy)
       setIsMonochrome(false)
     }
 
@@ -196,7 +195,7 @@ export function PromptForm({
       assistantResponse.toLowerCase().includes('walls') &&
       assistantResponse.toLowerCase().includes('color')
     ) {
-      setCurrentRegion('walls')
+      setCurrentRegion(Regions.walls)
       setIsMonochrome(false)
     }
 
@@ -378,9 +377,9 @@ export function PromptForm({
       dispatch(setFontColor(fontColor))
       setAwaitingColorPick(false)
     } else {
-      if (currentRegion === 'slope') {
+      if (currentRegion === Regions.slope) {
         dispatch(setTentColors({ ...tentColors, slope: color }))
-      } else if (currentRegion === 'canopy') {
+      } else if (currentRegion === Regions.canopy) {
         dispatch(setTentColors({ ...tentColors, canopy: color }))
         dispatch(setFontColor(fontColor))
       } else {
