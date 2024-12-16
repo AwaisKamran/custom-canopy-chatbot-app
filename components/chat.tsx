@@ -16,6 +16,7 @@ import {
   addMessage,
   ChatMessage,
   removeMessages,
+  Roles,
   setThreadId
 } from '@/lib/redux/slice/chat.slice'
 import PreviewCarousel from './preview-carousel'
@@ -49,11 +50,18 @@ export function Chat({
   useEffect(() => {
     if (messages.length > 1) {
       dispatch(setThreadId(''))
-    }
-    if (initialMessages.length > 0) {
       dispatch(removeMessages(true))
-    } else {
-      dispatch(removeMessages(false))
+    }
+    if (!path.includes('chat') && initialMessages.length === 0) {
+      const firstMessage =
+        "Hello! Welcome to Custom Canopy. I'm here to help you build a custom design for your 10'x10' canopy tent. Let's get started! \n \n What is the name of your company or organization?"
+      dispatch(
+        addMessage({
+          id: nanoid(),
+          message: firstMessage,
+          role: Roles.assistant
+        })
+      )
     }
     if (messages.length === 1) {
       setMockups(null)

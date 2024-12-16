@@ -64,7 +64,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
           {
             id: id,
             message: title,
-            role: 'user'
+            role: Roles.user
           }
         ]
     const threadId = existingChat.threadId
