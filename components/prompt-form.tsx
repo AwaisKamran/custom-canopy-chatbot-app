@@ -304,7 +304,8 @@ export function PromptForm({
           })
         )
       } else if (message.event === complete) {
-        console.log('Tool outputs submitted successfully')
+        const success = 'Tool outputs submitted successfully'
+        console.log(success)
         const assistantMessage = {
           id: newAssistantChatId,
           message: assistantResponse,
