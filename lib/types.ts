@@ -54,3 +54,12 @@ export interface TentColorRegions {
     canopy: string
     walls: string
 }
+
+export type RegionsType = 'slope' | 'canopy' | 'walls'
+
+
+export enum Regions {
+  slope = 'slope',
+  canopy = 'canopy',
+  walls = 'walls'
+}

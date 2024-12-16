@@ -13,7 +13,14 @@ import {
 } from '@/components/ui/tooltip'
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
 import { nanoid } from 'nanoid'
-import { Chat, FileData, Session, TentColorRegions } from '@/lib/types'
+import {
+  Chat,
+  FileData,
+  RegionsType,
+  Regions,
+  Session,
+  TentColorRegions
+} from '@/lib/types'
 import { getChat, saveChat } from '@/app/actions'
 import { addMessage, Roles, setThreadId } from '@/lib/redux/slice/chat.slice'
 import { useDispatch, useSelector } from 'react-redux'
@@ -58,9 +65,9 @@ export function PromptForm({
   const [awaitingColorPick, setAwaitingColorPick] =
     React.useState<boolean>(false)
   const [isMonochrome, setIsMonochrome] = React.useState<boolean>(true)
-  const [currentRegion, setCurrentRegion] = React.useState<
-    'slope' | 'canopy' | 'walls'
-  >('slope')
+  const [currentRegion, setCurrentRegion] = React.useState<RegionsType>(
+    Regions.slope
+  )
   const [isAssistantRunning, setIsAssistantRunning] =
     React.useState<boolean>(false)
   const [tentColors, setTentColors] = React.useState<TentColorRegions>({
@@ -177,12 +184,10 @@ export function PromptForm({
 
     let assistantResponse = ''
     const newAssistantChatId = nanoid()
-
+    const delta = 'thread.message.delta'
+    const requires_action = 'thread.run.requires_action'
     for await (const message of stream) {
-      if (
-        message.event === 'thread.message.delta' &&
-        message.data.delta.content
-      ) {
+      if (message.event === delta && message.data.delta.content) {
         const text = (message.data.delta.content[0] as any).text.value
           ? (message.data.delta.content[0] as any).text.value
           : ''
@@ -195,7 +200,7 @@ export function PromptForm({
             role: Roles.assistant
           })
         )
-      } else if (message.event === 'thread.run.requires_action') {
+      } else if (message.event === requires_action) {
         const toolCall =
           message.data.required_action?.submit_tool_outputs.tool_calls[0]
         const args = JSON.parse(toolCall?.function.arguments || '')
@@ -228,9 +233,8 @@ export function PromptForm({
           logo,
           fontColor
         )
-        console.log(
-          `The mockups have been generated successfully: ${generatedMockups}`
-        )
+        const success = `The mockups have been generated successfully: `
+        console.log(success, generatedMockups)
         await submitToolOutput(
           generatedMockups,
           message.data.id,
@@ -248,7 +252,7 @@ export function PromptForm({
     }
 
     if (assistantResponse.toLowerCase().includes('slope')) {
-      setCurrentRegion('slope')
+      setCurrentRegion(Regions.slope)
       setIsMonochrome(false)
     }
 
@@ -256,7 +260,7 @@ export function PromptForm({
       assistantResponse.toLowerCase().includes('canopy') &&
       !assistantResponse.toLowerCase().includes('custom')
     ) {
-      setCurrentRegion('canopy')
+      setCurrentRegion(Regions.canopy)
       setIsMonochrome(false)
     }
 
@@ -264,7 +268,7 @@ export function PromptForm({
       assistantResponse.toLowerCase().includes('walls') &&
       assistantResponse.toLowerCase().includes('color')
     ) {
-      setCurrentRegion('walls')
+      setCurrentRegion(Regions.walls)
       setIsMonochrome(false)
     }
 
@@ -408,11 +412,10 @@ export function PromptForm({
 
     let assistantResponse = ''
     const newAssistantChatId = nanoid()
+    const delta = 'thread.message.delta'
+    const complete = 'thread.message.completed'
     for await (const message of stream) {
-      if (
-        message.event === 'thread.message.delta' &&
-        message.data.delta.content
-      ) {
+      if (message.event === delta && message.data.delta.content) {
         const text = (message.data.delta.content[0] as any).text.value
           ? (message.data.delta.content[0] as any).text.value
           : ''
@@ -425,8 +428,9 @@ export function PromptForm({
             role: Roles.assistant
           })
         )
-      } else if (message.event === 'thread.message.completed') {
-        console.log('Tool outputs submitted successfully')
+      } else if (message.event === complete) {
+        const success = 'Tool outputs submitted successfully'
+        console.log(success)
         const assistantMessage = {
           id: newAssistantChatId,
           message: assistantResponse,
@@ -463,7 +467,7 @@ export function PromptForm({
       )
       setAwaitingColorPick(false)
     } else {
-      if (currentRegion === 'slope') {
+      if (currentRegion === Regions.slope) {
         setTentColors({ ...tentColors, slope: color })
         setAwaitingColorPick(false)
         await submitUserMessage(
@@ -471,7 +475,7 @@ export function PromptForm({
           `Tent colors are: ${JSON.stringify({ ...tentColors, slope: color })}`,
           []
         )
-      } else if (currentRegion === 'canopy') {
+      } else if (currentRegion === Regions.canopy) {
         setTentColors({ ...tentColors, canopy: color })
         setAwaitingColorPick(false)
         await submitUserMessage(
