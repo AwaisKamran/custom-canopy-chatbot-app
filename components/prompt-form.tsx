@@ -264,14 +264,20 @@ export function PromptForm({
       }
     }
 
-    if (assistantResponse.toLowerCase().includes('slope')) {
+    if (
+      assistantResponse.toLowerCase().includes('slope') &&
+      !assistantResponse.toLowerCase().includes('text') &&
+      !assistantResponse.toLowerCase().includes('logo')
+    ) {
       setCurrentRegion(Regions.slope)
       setIsMonochrome(false)
     }
 
     if (
       assistantResponse.toLowerCase().includes('canopy') &&
-      !assistantResponse.toLowerCase().includes('custom')
+      !assistantResponse.toLowerCase().includes('custom') &&
+      !assistantResponse.toLowerCase().includes('text') &&
+      !assistantResponse.toLowerCase().includes('logo')
     ) {
       setCurrentRegion(Regions.canopy)
       setIsMonochrome(false)
@@ -279,7 +285,9 @@ export function PromptForm({
 
     if (
       assistantResponse.toLowerCase().includes('walls') &&
-      assistantResponse.toLowerCase().includes('color')
+      assistantResponse.toLowerCase().includes('color') &&
+      !assistantResponse.toLowerCase().includes('text') &&
+      !assistantResponse.toLowerCase().includes('logo')
     ) {
       setCurrentRegion(Regions.walls_primary)
       setIsMonochrome(false)
@@ -289,7 +297,9 @@ export function PromptForm({
       assistantResponse.toLowerCase().includes('secondary') &&
       assistantResponse.toLowerCase().includes('color') &&
       !assistantResponse.toLowerCase().includes('mockup') &&
-      !assistantResponse.toLowerCase().includes('just to confirm')
+      !assistantResponse.toLowerCase().includes('just to confirm') &&
+      !assistantResponse.toLowerCase().includes('text') &&
+      !assistantResponse.toLowerCase().includes('logo')
     ) {
       setCurrentRegion(Regions.walls_secondary)
       setIsPatterned(true)
@@ -299,7 +309,9 @@ export function PromptForm({
       assistantResponse.toLowerCase().includes('tertiary') &&
       assistantResponse.toLowerCase().includes('color') &&
       !assistantResponse.toLowerCase().includes('mockup') &&
-      !assistantResponse.toLowerCase().includes('just to confirm')
+      !assistantResponse.toLowerCase().includes('just to confirm') &&
+      !assistantResponse.toLowerCase().includes('text') &&
+      !assistantResponse.toLowerCase().includes('logo')
     ) {
       setCurrentRegion(Regions.walls_tertiary)
       setIsPatterned(true)
@@ -339,6 +351,14 @@ export function PromptForm({
       !assistantResponse.toLowerCase().includes('color')
     ) {
       setAwaitingFileUpload(true)
+    }
+
+    if (
+      assistantResponse.toLowerCase().includes('text') &&
+      assistantResponse.toLowerCase().includes('logo') &&
+      assistantResponse.toLowerCase().includes('color')
+    ) {
+      setCurrentRegion(Regions.slope)
     }
 
     const assistantMessage = {
@@ -437,7 +457,8 @@ export function PromptForm({
   ) {
     let toolOutputs
     if (!generatedMockups) {
-      console.error('Something went wrong generating mockups.')
+      const error = 'Something went wrong generating mockups.'
+      console.error(error)
       toolOutputs = [
         {
           output: JSON.stringify('Failed to generate Custom Canopy mockups.'),
@@ -510,75 +531,101 @@ export function PromptForm({
     dispatch(addMessage({ id: messageId, message: colorName, role: 'user' }))
     if (isMonochrome) {
       if (currentRegion === Regions.walls_primary) {
-        setTentColors({
+        const newColors = {
           slope: color,
           canopy: color,
           walls_primary: color,
           walls_secondary: color,
           walls_tertiary: color
-        })
-        setAwaitingColorPick(false)
-      } else if (currentRegion === Regions.walls_secondary && isPatterned) {
-        setTentColors({
-          ...tentColors,
-          walls_secondary: color
-        })
-        setAwaitingColorPick(false)
-      } else if (currentRegion === Regions.walls_tertiary && isPatterned) {
-        setTentColors({
-          ...tentColors,
-          walls_tertiary: color
-        })
-        setAwaitingColorPick(false)
-      }
-      await submitUserMessage(
-        messageId,
-        `Tent colors are: ${JSON.stringify({ slope: color, canopy: color, walls: color })} and font color is ${fontColor}`,
-        []
-      )
-    } else {
-      if (currentRegion === Regions.slope) {
-        setTentColors({ ...tentColors, slope: color })
+        }
+        setTentColors(newColors)
         setAwaitingColorPick(false)
         await submitUserMessage(
           messageId,
-          `Tent colors are: ${JSON.stringify({ ...tentColors, slope: color })}`,
+          `Tent colors are: ${JSON.stringify(newColors)} and font color is ${fontColor}`,
+          []
+        )
+      } else if (currentRegion === Regions.walls_secondary && isPatterned) {
+        const newColors = {
+          ...tentColors,
+          walls_secondary: color
+        }
+        setTentColors(newColors)
+        setAwaitingColorPick(false)
+        await submitUserMessage(
+          messageId,
+          `Tent colors are: ${JSON.stringify(newColors)}`,
+          []
+        )
+      } else if (currentRegion === Regions.walls_tertiary && isPatterned) {
+        const newColors = {
+          ...tentColors,
+          walls_tertiary: color
+        }
+        setTentColors(newColors)
+        setAwaitingColorPick(false)
+        await submitUserMessage(
+          messageId,
+          `Tent colors are: ${JSON.stringify(newColors)}`,
+          []
+        )
+      }
+    } else {
+      if (currentRegion === Regions.slope) {
+        const newColors = { ...tentColors, slope: color }
+        setTentColors(newColors)
+        setAwaitingColorPick(false)
+        await submitUserMessage(
+          messageId,
+          `Tent colors are: ${JSON.stringify(newColors)}`,
           []
         )
       } else if (currentRegion === Regions.canopy) {
-        setTentColors({ ...tentColors, canopy: color })
+        const newColors = { ...tentColors, canopy: color }
+        setTentColors(newColors)
         setAwaitingColorPick(false)
         await submitUserMessage(
           messageId,
-          `Tent colors are: ${JSON.stringify({ ...tentColors, canopy: color })} and font color is ${fontColor}`,
+          `Tent colors are: ${JSON.stringify(newColors)} and font color is ${fontColor}`,
           []
         )
-      } else {
-        if (currentRegion === Regions.walls_primary) {
-          setTentColors({
-            ...tentColors,
-            walls_primary: color,
-            walls_secondary: color,
-            walls_tertiary: color
-          })
-          setAwaitingColorPick(false)
-        } else if (currentRegion === Regions.walls_secondary && isPatterned) {
-          setTentColors({
-            ...tentColors,
-            walls_secondary: color
-          })
-          setAwaitingColorPick(false)
-        } else if (currentRegion === Regions.walls_tertiary && isPatterned) {
-          setTentColors({
-            ...tentColors,
-            walls_tertiary: color
-          })
-          setCurrentRegion('slope')
-          setAwaitingColorPick(false)
+      } else if (currentRegion === Regions.walls_primary) {
+        const newColors = {
+          ...tentColors,
+          walls_primary: color,
+          walls_secondary: color,
+          walls_tertiary: color
         }
+        setTentColors(newColors)
+        setAwaitingColorPick(false)
         await submitUserMessage(
           messageId,
-          `Tent colors are: ${JSON.stringify({ ...tentColors, walls: color })}`,
+          `Tent colors are: ${JSON.stringify(newColors)}`,
+          []
+        )
+      } else if (currentRegion === Regions.walls_secondary && isPatterned) {
+        const newColors = {
+          ...tentColors,
+          walls_secondary: color
+        }
+        setTentColors(newColors)
+        setAwaitingColorPick(false)
+        await submitUserMessage(
+          messageId,
+          `Tent colors are: ${JSON.stringify(newColors)}`,
+          []
+        )
+      } else if (currentRegion === Regions.walls_tertiary && isPatterned) {
+        const newColors = {
+          ...tentColors,
+          walls_tertiary: color
+        }
+        setTentColors(newColors)
+        setCurrentRegion(Regions.slope)
+        setAwaitingColorPick(false)
+        await submitUserMessage(
+          messageId,
+          `Tent colors are: ${JSON.stringify(newColors)}`,
           []
         )
       }
