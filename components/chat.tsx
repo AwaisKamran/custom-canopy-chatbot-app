@@ -52,11 +52,12 @@ export function Chat({
       dispatch(setThreadId(''))
       dispatch(removeMessages())
       if (!path.includes('chat')) {
+        const firstMessage =
+          "Hello! Welcome to Custom Canopy. I'm here to help you build a custom design for your 10'x10' canopy tent. Let's get started! \n \n What is the name of your company or organization?"
         dispatch(
           addMessage({
             id: nanoid(),
-            message:
-              "Hello! Welcome to Custom Canopy. I'm here to help you build a custom design for your 10'x10' canopy tent. Let's get started! \n \n What is the name of your company or organization?",
+            message: firstMessage,
             role: Roles.assistant
           })
         )
