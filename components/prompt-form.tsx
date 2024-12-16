@@ -17,6 +17,7 @@ import { Chat, Session } from '@/lib/types'
 import { getChat, saveChat } from '@/app/actions'
 import {
   addMessage,
+  Roles,
   setChatId,
   setThreadId
 } from '@/lib/redux/slice/chat.slice'
@@ -90,7 +91,7 @@ export function PromptForm({
         path: `/chat/${id}`,
         messages: [
           ...messages,
-          { id: messageId, message: value, role: 'user' }
+          { id: messageId, message: value, role: Roles.user }
         ],
         threadId: currentThreadId
       }
@@ -104,7 +105,7 @@ export function PromptForm({
         ...(chat.messages || []),
         {
           id: messageId,
-          role: 'user',
+          role: Roles.user,
           message: value
         }
       ]
@@ -118,7 +119,7 @@ export function PromptForm({
     const { currentThreadId, chat } = await getCurrentChat(messageId, value)
 
     await openai.beta.threads.messages.create(currentThreadId, {
-      role: 'user',
+      role: Roles.user,
       content: value
     })
 
@@ -193,7 +194,7 @@ export function PromptForm({
     const assistantMessage = {
       id: newAssistantChatId,
       message: assistantResponse,
-      role: 'assistant'
+      role: Roles.assistant
     }
 
     dispatch(addMessage(assistantMessage))
@@ -206,7 +207,7 @@ export function PromptForm({
     return {
       id: messageId,
       message: value,
-      role: 'user'
+      role: Roles.user
     }
   }
 
@@ -310,7 +311,7 @@ export function PromptForm({
         const assistantMessage = {
           id: newAssistantChatId,
           message: assistantResponse,
-          role: 'assistant'
+          role: Roles.assistant
         }
         dispatch(addMessage(assistantMessage))
 
@@ -338,7 +339,7 @@ export function PromptForm({
       currentChatId = chatId
     }
     dispatch(
-      addMessage({ id: currentChatId, message: colorName, role: 'user' })
+      addMessage({ id: currentChatId, message: colorName, role: Roles.user })
     )
     await submitUserMessage(currentChatId, colorName)
     setBgrColor(color)
@@ -375,19 +376,21 @@ export function PromptForm({
 
     // Submit and get response message
     if (!awaitingFileUpload) {
-      dispatch(addMessage({ id: messageId, message: value, role: 'user' }))
+      dispatch(addMessage({ id: messageId, message: value, role: Roles.user }))
       setSelectedFiles([]) // ignore file uploads if files are not asked for by the ai
       await submitUserMessage(messageId, value)
       setIsAssistantRunning(false)
     } else {
       if (selectedFiles.length === 0) {
-        dispatch(addMessage({ id: messageId, message: value, role: 'user' }))
+        dispatch(
+          addMessage({ id: messageId, message: value, role: Roles.user })
+        )
         dispatch(
           addMessage({
             id: nanoid(),
             message:
               'I apologize but I would need this information to proceed. To complete your custom canopy design, please upload your logo.',
-            role: 'assistant'
+            role: Roles.assistant
           })
         )
         setIsAssistantRunning(false)
@@ -400,7 +403,7 @@ export function PromptForm({
         addMessage({
           id: messageId,
           message: `${value}`,
-          role: 'user',
+          role: Roles.user,
           file: {
             name: logoFile.name,
             previewUrl: previewUrl
