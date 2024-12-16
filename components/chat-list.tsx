@@ -2,7 +2,7 @@ import { Separator } from '@/components/ui/separator'
 import { Session } from '@/lib/types'
 import Link from 'next/link'
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons'
-import { ChatMessage } from '@/lib/redux/slice/chat.slice'
+import { ChatMessage, Roles } from '@/lib/redux/slice/chat.slice'
 import { BotMessage, UserMessage } from './stocks/message'
 import { useSelector } from 'react-redux'
 import { IconSpinner } from './ui/icons'
@@ -25,13 +25,16 @@ export function ChatList({ initialMessages, session, isShared }: ChatList) {
       ? [
           ...Array.from(
             new Map(
-              [...initialMessages, ...messages].map(msg => [msg.id, msg])
+              [...initialMessages, ...messages].map(message => [
+                message.id,
+                message
+              ])
             ).values()
           )
         ]
       : [...messages]
   const isLastMessageFromUser =
-    combinedMessages[combinedMessages.length - 1].role === 'user'
+    combinedMessages[combinedMessages.length - 1].role === Roles.user
 
   return (
     <div className="relative mx-auto max-w-2xl px-4">

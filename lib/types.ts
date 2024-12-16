@@ -56,3 +56,16 @@ export interface TentColorRegions {
     walls_secondary: string
     walls_tertiary: string
 }
+
+export type RegionsType = 'slope' | 'canopy' | 'walls_primary' | 'walls_secondary' | 'walls_tertiary'
+
+
+export enum Regions {
+  slope = 'slope',
+  canopy = 'canopy',
+  walls_primary = 'walls_primary',
+  walls_secondary = 'walls_secondary',
+  walls_tertiary = 'walls_tertiary'
+}
+
+export type ChatResponse = Chat | null | { error: string }

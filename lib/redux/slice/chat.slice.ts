@@ -20,7 +20,7 @@ const initialState: {
   messages: [{
     id: nanoid(),
     message: "Hello! Welcome to Custom Canopy. I'm here to help you build a custom design for your 10'x10' canopy tent. Let's get started! \n \n What is the name of your company or organization?",
-    role: "assistant"
+    role: Roles.assistant
   }],
   threadId: '',
 };
@@ -31,7 +31,7 @@ const chatSlice = createSlice({
   reducers: {
     addMessage: (state, action) => {
       const { id, message, role, files } = action.payload;
-      const existingMessageIndex = state.messages.findIndex((msg) => msg.id === id);
+      const existingMessageIndex = state.messages.findIndex((message) => message.id === id);
       if (existingMessageIndex !== -1) {
          state.messages = [
            ...state.messages.slice(0, existingMessageIndex),

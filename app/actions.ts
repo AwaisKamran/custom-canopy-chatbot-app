@@ -133,6 +133,9 @@ export async function deleteSavedFiles(chatId: string, userId: string, path?: st
        for (const file of files) {
          deleteFileUrls.push(file.previewUrl)
        }
+     } else {
+       const error = `No files to be deleted for message ${message.id}`
+       console.log(error)
      }
    }
 

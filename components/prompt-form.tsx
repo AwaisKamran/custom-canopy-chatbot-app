@@ -13,9 +13,16 @@ import {
 } from '@/components/ui/tooltip'
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
 import { nanoid } from 'nanoid'
-import { Chat, FileData, Session, TentColorRegions } from '@/lib/types'
+import {
+  Chat,
+  FileData,
+  RegionsType,
+  Regions,
+  Session,
+  TentColorRegions
+} from '@/lib/types'
 import { getChat, saveChat } from '@/app/actions'
-import { addMessage, setThreadId } from '@/lib/redux/slice/chat.slice'
+import { addMessage, Roles, setThreadId } from '@/lib/redux/slice/chat.slice'
 import { useDispatch, useSelector } from 'react-redux'
 import FileUploadPopover from './file-upload-popover'
 import OpenAI from 'openai'
@@ -59,9 +66,9 @@ export function PromptForm({
     React.useState<boolean>(false)
   const [isMonochrome, setIsMonochrome] = React.useState<boolean>(true)
   const [isPatterned, setIsPatterned] = React.useState<boolean>(false)
-  const [currentRegion, setCurrentRegion] = React.useState<
-    'slope' | 'canopy' | 'walls_primary' | 'walls_secondary' | 'walls_tertiary'
-  >('slope')
+  const [currentRegion, setCurrentRegion] = React.useState<RegionsType>(
+    Regions.slope
+  )
   const [isAssistantRunning, setIsAssistantRunning] =
     React.useState<boolean>(false)
   const [tentColors, setTentColors] = React.useState<TentColorRegions>({
@@ -130,7 +137,7 @@ export function PromptForm({
           {
             id: messageId,
             message: value,
-            role: 'user',
+            role: Roles.user,
             files: JSON.stringify(files)
           }
         ],
@@ -146,7 +153,7 @@ export function PromptForm({
         ...(chat.messages || []),
         {
           id: messageId,
-          role: 'user',
+          role: Roles.user,
           message: value,
           files: JSON.stringify(files)
         }
@@ -169,7 +176,7 @@ export function PromptForm({
     )
 
     await openai.beta.threads.messages.create(currentThreadId, {
-      role: 'user',
+      role: Roles.user,
       content: value
     })
 
@@ -180,12 +187,10 @@ export function PromptForm({
 
     let assistantResponse = ''
     const newAssistantChatId = nanoid()
-
+    const delta = 'thread.message.delta'
+    const requires_action = 'thread.run.requires_action'
     for await (const message of stream) {
-      if (
-        message.event === 'thread.message.delta' &&
-        message.data.delta.content
-      ) {
+      if (message.event === delta && message.data.delta.content) {
         const text = (message.data.delta.content[0] as any).text.value
           ? (message.data.delta.content[0] as any).text.value
           : ''
@@ -195,10 +200,10 @@ export function PromptForm({
           addMessage({
             id: newAssistantChatId,
             message: assistantResponse,
-            role: 'assistant'
+            role: Roles.assistant
           })
         )
-      } else if (message.event === 'thread.run.requires_action') {
+      } else if (message.event === requires_action) {
         const toolCall =
           message.data.required_action?.submit_tool_outputs.tool_calls[0]
         const args = JSON.parse(toolCall?.function.arguments || '')
@@ -241,9 +246,8 @@ export function PromptForm({
           fontColor,
           isPatterned
         )
-        console.log(
-          `The mockups have been generated successfully: ${generatedMockups}`
-        )
+        const success = `The mockups have been generated successfully: `
+        console.log(success, generatedMockups)
         await submitToolOutput(
           generatedMockups,
           message.data.id,
@@ -255,13 +259,13 @@ export function PromptForm({
         return {
           id: messageId,
           message: value,
-          role: 'user'
+          role: Roles.user
         }
       }
     }
 
     if (assistantResponse.toLowerCase().includes('slope')) {
-      setCurrentRegion('slope')
+      setCurrentRegion(Regions.slope)
       setIsMonochrome(false)
     }
 
@@ -269,7 +273,7 @@ export function PromptForm({
       assistantResponse.toLowerCase().includes('canopy') &&
       !assistantResponse.toLowerCase().includes('custom')
     ) {
-      setCurrentRegion('canopy')
+      setCurrentRegion(Regions.canopy)
       setIsMonochrome(false)
     }
 
@@ -277,7 +281,7 @@ export function PromptForm({
       assistantResponse.toLowerCase().includes('walls') &&
       assistantResponse.toLowerCase().includes('color')
     ) {
-      setCurrentRegion('walls_primary')
+      setCurrentRegion(Regions.walls_primary)
       setIsMonochrome(false)
     }
 
@@ -287,7 +291,7 @@ export function PromptForm({
       !assistantResponse.toLowerCase().includes('mockup') &&
       !assistantResponse.toLowerCase().includes('just to confirm')
     ) {
-      setCurrentRegion('walls_secondary')
+      setCurrentRegion(Regions.walls_secondary)
       setIsPatterned(true)
       setAwaitingColorPick(true)
     }
@@ -297,7 +301,7 @@ export function PromptForm({
       !assistantResponse.toLowerCase().includes('mockup') &&
       !assistantResponse.toLowerCase().includes('just to confirm')
     ) {
-      setCurrentRegion('walls_tertiary')
+      setCurrentRegion(Regions.walls_tertiary)
       setIsPatterned(true)
       setAwaitingColorPick(true)
     }
@@ -311,7 +315,7 @@ export function PromptForm({
       assistantResponse.toLowerCase().includes('color')
     ) {
       setIsMonochrome(true)
-      setCurrentRegion('walls_primary')
+      setCurrentRegion(Regions.walls_primary)
     }
 
     if (assistantResponse.toLowerCase().includes('text')) {
@@ -340,7 +344,7 @@ export function PromptForm({
     const assistantMessage = {
       id: newAssistantChatId,
       message: assistantResponse,
-      role: 'assistant'
+      role: Roles.assistant
     }
 
     dispatch(addMessage(assistantMessage))
@@ -353,7 +357,7 @@ export function PromptForm({
     return {
       id: messageId,
       message: value,
-      role: 'user'
+      role: Roles.user
     }
   }
 
@@ -462,11 +466,10 @@ export function PromptForm({
 
     let assistantResponse = ''
     const newAssistantChatId = nanoid()
+    const delta = 'thread.message.delta'
+    const complete = 'thread.message.completed'
     for await (const message of stream) {
-      if (
-        message.event === 'thread.message.delta' &&
-        message.data.delta.content
-      ) {
+      if (message.event === delta && message.data.delta.content) {
         const text = (message.data.delta.content[0] as any).text.value
           ? (message.data.delta.content[0] as any).text.value
           : ''
@@ -476,15 +479,16 @@ export function PromptForm({
           addMessage({
             id: newAssistantChatId,
             message: assistantResponse,
-            role: 'assistant'
+            role: Roles.assistant
           })
         )
-      } else if (message.event === 'thread.message.completed') {
-        console.log('Tool outputs submitted successfully')
+      } else if (message.event === complete) {
+        const success = 'Tool outputs submitted successfully'
+        console.log(success)
         const assistantMessage = {
           id: newAssistantChatId,
           message: assistantResponse,
-          role: 'assistant'
+          role: Roles.assistant
         }
         dispatch(addMessage(assistantMessage))
 
@@ -505,7 +509,7 @@ export function PromptForm({
     const messageId = nanoid()
     dispatch(addMessage({ id: messageId, message: colorName, role: 'user' }))
     if (isMonochrome) {
-      if (currentRegion === 'walls_primary') {
+      if (currentRegion === Regions.walls_primary) {
         setTentColors({
           slope: color,
           canopy: color,
@@ -514,16 +518,16 @@ export function PromptForm({
           walls_tertiary: color
         })
         setAwaitingColorPick(false)
-      } else if (currentRegion === 'walls_secondary' && isPatterned) {
+      } else if (currentRegion === Regions.walls_secondary && isPatterned) {
         setTentColors({
           ...tentColors,
           walls_secondary: color
         })
         setAwaitingColorPick(false)
-      } else if (currentRegion === 'walls_tertiary' && isPatterned) {
+      } else if (currentRegion === Regions.walls_tertiary && isPatterned) {
         setTentColors({
           ...tentColors,
-          walls_secondary: color
+          walls_tertiary: color
         })
         setAwaitingColorPick(false)
       }
@@ -533,7 +537,7 @@ export function PromptForm({
         []
       )
     } else {
-      if (currentRegion === 'slope') {
+      if (currentRegion === Regions.slope) {
         setTentColors({ ...tentColors, slope: color })
         setAwaitingColorPick(false)
         await submitUserMessage(
@@ -541,7 +545,7 @@ export function PromptForm({
           `Tent colors are: ${JSON.stringify({ ...tentColors, slope: color })}`,
           []
         )
-      } else if (currentRegion === 'canopy') {
+      } else if (currentRegion === Regions.canopy) {
         setTentColors({ ...tentColors, canopy: color })
         setAwaitingColorPick(false)
         await submitUserMessage(
@@ -550,7 +554,7 @@ export function PromptForm({
           []
         )
       } else {
-        if (currentRegion === 'walls_primary') {
+        if (currentRegion === Regions.walls_primary) {
           setTentColors({
             ...tentColors,
             walls_primary: color,
@@ -558,13 +562,13 @@ export function PromptForm({
             walls_tertiary: color
           })
           setAwaitingColorPick(false)
-        } else if (currentRegion === 'walls_secondary' && isPatterned) {
+        } else if (currentRegion === Regions.walls_secondary && isPatterned) {
           setTentColors({
             ...tentColors,
             walls_secondary: color
           })
           setAwaitingColorPick(false)
-        } else if (currentRegion === 'walls_tertiary' && isPatterned) {
+        } else if (currentRegion === Regions.walls_tertiary && isPatterned) {
           setTentColors({
             ...tentColors,
             walls_tertiary: color
@@ -609,19 +613,21 @@ export function PromptForm({
 
     let files: any[] = []
     if (!awaitingFileUpload) {
-      dispatch(addMessage({ id: messageId, message: value, role: 'user' }))
+      dispatch(addMessage({ id: messageId, message: value, role: Roles.user }))
       setSelectedFiles([]) // ignore file uploads if files are not asked for by the ai
       await submitUserMessage(messageId, value, files)
       setIsAssistantRunning(false)
     } else {
       if (selectedFiles.length === 0) {
-        dispatch(addMessage({ id: messageId, message: value, role: 'user' }))
+        dispatch(
+          addMessage({ id: messageId, message: value, role: Roles.user })
+        )
         dispatch(
           addMessage({
             id: nanoid(),
             message:
               'I apologize but I would need this information to proceed. To complete your custom canopy design, please upload your logo.',
-            role: 'assistant'
+            role: Roles.assistant
           })
         )
         setIsAssistantRunning(false)
@@ -641,7 +647,7 @@ export function PromptForm({
         addMessage({
           id: messageId,
           message: `${value}`,
-          role: 'user',
+          role: Roles.user,
           files: JSON.stringify(files)
         })
       )

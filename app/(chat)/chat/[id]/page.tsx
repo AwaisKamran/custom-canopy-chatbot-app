@@ -3,7 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 
 import { auth } from '@/auth'
 import { getChat, getMissingKeys } from '@/app/actions'
-import { Chat as UserChatMessage, Session } from '@/lib/types'
+import { Chat as UserChatMessage, Session, ChatResponse } from '@/lib/types'
 import { ChatMessage, Roles } from '@/lib/redux/slice/chat.slice'
 import { Error401Response } from '@/app/constants'
 import { Chat } from '@/components/chat'
@@ -44,10 +44,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
   }
 
   const userId = session.user.id as string
-  let existingChat: UserChatMessage | null | { error: string } = await getChat(
-    params.id,
-    userId
-  )
+  let existingChat: ChatResponse = await getChat(params.id, userId)
 
   if (!existingChat || Error401Response.message in existingChat) {
     redirect('/')
@@ -64,10 +61,10 @@ export default async function ChatPage({ params }: ChatPageProps) {
           {
             id: id,
             message: title,
-            role: 'user'
+            role: Roles.user
           }
         ]
-    const threadId = existingChat.threadId
+    const threadId = existingChat.threadId || ''
 
     return (
       <Chat
