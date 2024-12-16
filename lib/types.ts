@@ -63,3 +63,5 @@ export enum Regions {
   canopy = 'canopy',
   walls = 'walls'
 }
+
+export type ChatResponse = Chat | null | { error: string }

@@ -25,7 +25,10 @@ export function ChatList({ initialMessages, session, isShared }: ChatList) {
       ? [
           ...Array.from(
             new Map(
-              [...initialMessages, ...messages].map(msg => [msg.id, msg])
+              [...initialMessages, ...messages].map(message => [
+                message.id,
+                message
+              ])
             ).values()
           )
         ]

@@ -1,4 +1,4 @@
-import { Error400Response, Error401Response, Error500Response } from '@/app/constants'
+import { BlobAccess, Error400Response, Error401Response, Error500Response } from '@/app/constants'
 import { auth } from '@/auth'
  import { put } from '@vercel/blob'
  import { NextRequest, NextResponse } from 'next/server'
@@ -11,16 +11,15 @@ import { auth } from '@/auth'
      const filename = searchParams.get('filename')
      const userId = searchParams.get('userId')
      const file = await request.body
-     const currUser = session?.user?.id
-     const access = 'public'
+     const currentUser = session?.user?.id
 
      if (chatId && filename && userId && file && userId) {
-       if (currUser === userId) {
+       if (currentUser === userId) {
          const blob = await put(
            `user:${userId}/chat:${chatId}/${filename}`,
            file,
            {
-             access
+             access: BlobAccess.public
            }
          )
          return NextResponse.json(blob)

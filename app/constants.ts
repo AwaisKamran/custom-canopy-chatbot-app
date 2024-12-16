@@ -20,3 +20,9 @@ export const ErrorMessage = {
 export const SuccessMessage = {
     "message": "success"
 }
+
+export type AccessType = 'public'
+
+export const BlobAccess = {
+    public: 'public' as AccessType
+}
