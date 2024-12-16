@@ -50,7 +50,9 @@ export interface FileData {
 }
 
 export interface TentColorRegions {
-    slope: string,
+    slope: string
     canopy: string
-    walls: string
+    walls_primary: string
+    walls_secondary: string
+    walls_tertiary: string
 }

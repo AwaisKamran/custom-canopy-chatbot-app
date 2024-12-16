@@ -58,15 +58,18 @@ export function PromptForm({
   const [awaitingColorPick, setAwaitingColorPick] =
     React.useState<boolean>(false)
   const [isMonochrome, setIsMonochrome] = React.useState<boolean>(true)
+  const [isPatterned, setIsPatterned] = React.useState<boolean>(false)
   const [currentRegion, setCurrentRegion] = React.useState<
-    'slope' | 'canopy' | 'walls'
+    'slope' | 'canopy' | 'walls_primary' | 'walls_secondary' | 'walls_tertiary'
   >('slope')
   const [isAssistantRunning, setIsAssistantRunning] =
     React.useState<boolean>(false)
   const [tentColors, setTentColors] = React.useState<TentColorRegions>({
     slope: '',
     canopy: '',
-    walls: ''
+    walls_primary: '',
+    walls_secondary: '',
+    walls_tertiary: ''
   })
 
   const saveFiles = async (files: FileData[], messageId: string) => {
@@ -201,6 +204,7 @@ export function PromptForm({
         const args = JSON.parse(toolCall?.function.arguments || '')
         const {
           companyName,
+          isPatterned,
           tentColors,
           text,
           userName,
@@ -212,7 +216,13 @@ export function PromptForm({
 
         setAwaitingFileUpload(false)
 
-        const bgrColors = { slope: '', canopy: '', walls: '' }
+        const bgrColors = {
+          slope: '',
+          canopy: '',
+          walls_primary: '',
+          walls_secondary: '',
+          walls_tertiary: ''
+        }
         const convertToBGR = (rgb: string) => {
           const [r, g, b] = JSON.parse(rgb)
           return `[${b}, ${g}, ${r}]`
@@ -220,13 +230,16 @@ export function PromptForm({
 
         bgrColors.slope = convertToBGR(tentColors.slope)
         bgrColors.canopy = convertToBGR(tentColors.canopy)
-        bgrColors.walls = convertToBGR(tentColors.walls)
+        bgrColors.walls_primary = convertToBGR(tentColors.walls_primary)
+        bgrColors.walls_secondary = convertToBGR(tentColors.walls_secondary)
+        bgrColors.walls_tertiary = convertToBGR(tentColors.walls_tertiary)
 
         const generatedMockups = await generateCustomCanopy(
           bgrColors,
           text,
           logo,
-          fontColor
+          fontColor,
+          isPatterned
         )
         console.log(
           `The mockups have been generated successfully: ${generatedMockups}`
@@ -264,17 +277,45 @@ export function PromptForm({
       assistantResponse.toLowerCase().includes('walls') &&
       assistantResponse.toLowerCase().includes('color')
     ) {
-      setCurrentRegion('walls')
+      setCurrentRegion('walls_primary')
       setIsMonochrome(false)
+    }
+
+    if (
+      assistantResponse.toLowerCase().includes('secondary') &&
+      assistantResponse.toLowerCase().includes('color') &&
+      !assistantResponse.toLowerCase().includes('mockup') &&
+      !assistantResponse.toLowerCase().includes('just to confirm')
+    ) {
+      setCurrentRegion('walls_secondary')
+      setIsPatterned(true)
+      setAwaitingColorPick(true)
+    }
+    if (
+      assistantResponse.toLowerCase().includes('tertiary') &&
+      assistantResponse.toLowerCase().includes('color') &&
+      !assistantResponse.toLowerCase().includes('mockup') &&
+      !assistantResponse.toLowerCase().includes('just to confirm')
+    ) {
+      setCurrentRegion('walls_tertiary')
+      setIsPatterned(true)
+      setAwaitingColorPick(true)
     }
 
     if (
       !assistantResponse.toLowerCase().includes('slope') &&
       !assistantResponse.toLowerCase().includes('canopy') &&
       !assistantResponse.toLowerCase().includes('walls') &&
+      !assistantResponse.toLowerCase().includes('secondary') &&
+      !assistantResponse.toLowerCase().includes('tertiary') &&
       assistantResponse.toLowerCase().includes('color')
     ) {
       setIsMonochrome(true)
+      setCurrentRegion('walls_primary')
+    }
+
+    if (assistantResponse.toLowerCase().includes('text')) {
+      setAwaitingColorPick(false)
     }
 
     if (
@@ -320,7 +361,8 @@ export function PromptForm({
     tentColors: TentColorRegions,
     text: string,
     logo: any,
-    fontColor: string
+    fontColor: string,
+    patterned: boolean
   ) {
     const formRequestBody = new FormData()
     const logoResponse = await fetch(logo.previewUrl)
@@ -332,10 +374,22 @@ export function PromptForm({
       'canopy_color',
       tentColors.canopy || '[250, 250, 250]'
     )
-    formRequestBody.append('walls_color', tentColors.walls || '[250, 250, 250]')
+    formRequestBody.append(
+      'walls_primary_color',
+      tentColors.walls_primary || '[250, 250, 250]'
+    )
+    formRequestBody.append(
+      'walls_secondary_color',
+      tentColors.walls_secondary || '[250, 250, 250]'
+    )
+    formRequestBody.append(
+      'walls_tertiary_color',
+      tentColors.walls_tertiary || '[250, 250, 250]'
+    )
     formRequestBody.append('text', text)
     formRequestBody.append('logo', logoFile as any)
     formRequestBody.append('text_color', fontColor || '[0, 0, 0]')
+    formRequestBody.append('patterned', `${patterned}`)
 
     try {
       const response = await fetch(`${backendUrl}/create-mockups`, {
@@ -451,17 +505,33 @@ export function PromptForm({
     const messageId = nanoid()
     dispatch(addMessage({ id: messageId, message: colorName, role: 'user' }))
     if (isMonochrome) {
-      setTentColors({
-        slope: color,
-        canopy: color,
-        walls: color
-      })
+      if (currentRegion === 'walls_primary') {
+        setTentColors({
+          slope: color,
+          canopy: color,
+          walls_primary: color,
+          walls_secondary: color,
+          walls_tertiary: color
+        })
+        setAwaitingColorPick(false)
+      } else if (currentRegion === 'walls_secondary' && isPatterned) {
+        setTentColors({
+          ...tentColors,
+          walls_secondary: color
+        })
+        setAwaitingColorPick(false)
+      } else if (currentRegion === 'walls_tertiary' && isPatterned) {
+        setTentColors({
+          ...tentColors,
+          walls_secondary: color
+        })
+        setAwaitingColorPick(false)
+      }
       await submitUserMessage(
         messageId,
         `Tent colors are: ${JSON.stringify({ slope: color, canopy: color, walls: color })} and font color is ${fontColor}`,
         []
       )
-      setAwaitingColorPick(false)
     } else {
       if (currentRegion === 'slope') {
         setTentColors({ ...tentColors, slope: color })
@@ -480,8 +550,28 @@ export function PromptForm({
           []
         )
       } else {
-        setTentColors({ ...tentColors, walls: color })
-        setAwaitingColorPick(false)
+        if (currentRegion === 'walls_primary') {
+          setTentColors({
+            ...tentColors,
+            walls_primary: color,
+            walls_secondary: color,
+            walls_tertiary: color
+          })
+          setAwaitingColorPick(false)
+        } else if (currentRegion === 'walls_secondary' && isPatterned) {
+          setTentColors({
+            ...tentColors,
+            walls_secondary: color
+          })
+          setAwaitingColorPick(false)
+        } else if (currentRegion === 'walls_tertiary' && isPatterned) {
+          setTentColors({
+            ...tentColors,
+            walls_tertiary: color
+          })
+          setCurrentRegion('slope')
+          setAwaitingColorPick(false)
+        }
         await submitUserMessage(
           messageId,
           `Tent colors are: ${JSON.stringify({ ...tentColors, walls: color })}`,
@@ -517,7 +607,6 @@ export function PromptForm({
     setInput('')
     if (!value && !awaitingFileUpload) return
 
-    // Submit and get response message
     let files: any[] = []
     if (!awaitingFileUpload) {
       dispatch(addMessage({ id: messageId, message: value, role: 'user' }))
