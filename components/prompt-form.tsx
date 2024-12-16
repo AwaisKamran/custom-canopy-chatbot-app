@@ -145,7 +145,7 @@ export function PromptForm({
           addMessage({
             id: newAssistantChatId,
             message: assistantResponse,
-            role: 'assistant'
+            role: Roles.assistant
           })
         )
       } else if (message.event === 'thread.run.requires_action') {
@@ -172,7 +172,7 @@ export function PromptForm({
         return {
           id: messageId,
           message: value,
-          role: 'user'
+          role: Roles.user
         }
       }
     }
@@ -303,7 +303,7 @@ export function PromptForm({
           addMessage({
             id: newAssistantChatId,
             message: assistantResponse,
-            role: 'assistant'
+            role: Roles.assistant
           })
         )
       } else if (message.event === 'thread.message.completed') {
