@@ -130,12 +130,10 @@ export function PromptForm({
 
     let assistantResponse = ''
     const newAssistantChatId = nanoid()
-
+    const delta = 'thread.message.delta'
+    const requires_action = 'thread.run.requires_action'
     for await (const message of stream) {
-      if (
-        message.event === 'thread.message.delta' &&
-        message.data.delta.content
-      ) {
+      if (message.event === delta && message.data.delta.content) {
         const text = (message.data.delta.content[0] as any).text.value
           ? (message.data.delta.content[0] as any).text.value
           : ''
@@ -148,7 +146,7 @@ export function PromptForm({
             role: Roles.assistant
           })
         )
-      } else if (message.event === 'thread.run.requires_action') {
+      } else if (message.event === requires_action) {
         const toolCall =
           message.data.required_action?.submit_tool_outputs.tool_calls[0]
         const args = JSON.parse(toolCall?.function.arguments || '')
@@ -289,11 +287,10 @@ export function PromptForm({
 
     let assistantResponse = ''
     const newAssistantChatId = nanoid()
+    const delta = 'thread.message.delta'
+    const complete = 'thread.message.completed'
     for await (const message of stream) {
-      if (
-        message.event === 'thread.message.delta' &&
-        message.data.delta.content
-      ) {
+      if (message.event === delta && message.data.delta.content) {
         const text = (message.data.delta.content[0] as any).text.value
           ? (message.data.delta.content[0] as any).text.value
           : ''
@@ -306,7 +303,7 @@ export function PromptForm({
             role: Roles.assistant
           })
         )
-      } else if (message.event === 'thread.message.completed') {
+      } else if (message.event === complete) {
         console.log('Tool outputs submitted successfully')
         const assistantMessage = {
           id: newAssistantChatId,
