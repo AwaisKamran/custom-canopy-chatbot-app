@@ -51,17 +51,23 @@ export function Chat({
     if (messages.length > 1) {
       dispatch(setThreadId(''))
       dispatch(removeMessages(true))
+      if (!path.includes('chat') && initialMessages.length === 0) {
+        const firstMessage =
+          "Hello! Welcome to Custom Canopy. I'm here to help you build a custom design for your 10'x10' canopy tent. Let's get started! \n \n What is the name of your company or organization?"
+        dispatch(
+          addMessage({
+            id: nanoid(),
+            message: firstMessage,
+            role: Roles.assistant
+          })
+        )
+      }
     }
-    if (!path.includes('chat') && initialMessages.length === 0) {
-      const firstMessage =
-        "Hello! Welcome to Custom Canopy. I'm here to help you build a custom design for your 10'x10' canopy tent. Let's get started! \n \n What is the name of your company or organization?"
-      dispatch(
-        addMessage({
-          id: nanoid(),
-          message: firstMessage,
-          role: Roles.assistant
-        })
-      )
+    if (
+      path.includes('chat') &&
+      (messages.length > 1 || initialMessages.length > 1)
+    ) {
+      dispatch(removeMessages(true))
     }
     if (messages.length === 1) {
       setMockups(null)

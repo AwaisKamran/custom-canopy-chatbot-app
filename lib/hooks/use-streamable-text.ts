@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react'
 export const useStreamableText = (
   content: string | StreamableValue<string>
 ) => {
-  const [rawContent, setRawContent] = useState<string | StreamableValue<string>>(
+  const [rawContent, setRawContent] = useState(
     typeof content === 'string' ? content : ''
   )
 
   useEffect(() => {
-    setRawContent(content)
+      setRawContent(content as string)
    }, [content])
 
   useEffect(() => {
