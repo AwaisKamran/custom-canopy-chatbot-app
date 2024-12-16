@@ -15,7 +15,12 @@ import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
 import { nanoid } from 'nanoid'
 import { Chat, Session } from '@/lib/types'
 import { getChat, saveChat } from '@/app/actions'
-import { addMessage, setChatId } from '@/lib/redux/slice/chat.slice'
+import {
+  addMessage,
+  Roles,
+  setChatId,
+  setThreadId
+} from '@/lib/redux/slice/chat.slice'
 import { useDispatch, useSelector } from 'react-redux'
 import FileUploadPopover from './file-upload-popover'
 import OpenAI from 'openai'
@@ -32,7 +37,8 @@ export function PromptForm({
   session,
   mockups,
   setIsCarouselOpen,
-  setMockups
+  setMockups,
+  id
 }: {
   input: string
   setInput: (value: string) => void
@@ -40,6 +46,7 @@ export function PromptForm({
   mockups: any
   setIsCarouselOpen: (value: boolean) => void
   setMockups: (value: any) => void
+  id?: string
 }) {
   const openai = new OpenAI({
     apiKey: openAIApiKey,
@@ -55,7 +62,7 @@ export function PromptForm({
   const [awaitingFileUpload, setAwaitingFileUpload] =
     React.useState<boolean>(false)
   const messages = useSelector((state: any) => state.chat.messages)
-  const [threadId, setThreadId] = React.useState<string>('')
+  const threadId = useSelector((state: any) => state.chat.threadId)
   const [awaitingColorPick, setAwaitingColorPick] =
     React.useState<boolean>(false)
   const [bgrColor, setBgrColor] = React.useState<string>('')
@@ -64,37 +71,61 @@ export function PromptForm({
   const [fontColor, setFontColor] = React.useState<string>('')
   const [logoFile, setLogoFile] = React.useState<File | null>(null)
 
-  async function submitUserMessage(currentChatId: string, value: string) {
-    let chat = await getChat(currentChatId, session?.user.id as string)
-    if (!chat) {
-      const createdAt = new Date()
-      const path = `/chat/${currentChatId}`
-      const firstMessageContent = value as string
-      const title = firstMessageContent.substring(0, 100)
+  const getCurrentChat = async (messageId: string, value: string) => {
+    const createdAt = new Date()
+    const firstMessageContent = value as string
+    const title = firstMessageContent.substring(0, 100)
+
+    let currentThreadId = threadId
+    let chat: Chat
+
+    if (!threadId) {
       const emptyThread = await openai.beta.threads.create()
+      dispatch(setThreadId(emptyThread.id))
+      currentThreadId = emptyThread.id
 
       chat = {
-        id: currentChatId,
+        id: id as string,
         title,
         createdAt,
-        path,
-        threadId: emptyThread.id
+        path: `/chat/${id}`,
+        messages: [
+          ...messages,
+          { id: messageId, message: value, role: Roles.user }
+        ],
+        threadId: currentThreadId
       }
-      await saveChat(chat)
+    } else {
+      chat = (await getChat(id as string, session?.user?.id as string)) as Chat
+      if (!chat) {
+        throw new Error('Chat not found!')
+      }
+
+      chat.messages = [
+        ...(chat.messages || []),
+        {
+          id: messageId,
+          role: Roles.user,
+          message: value
+        }
+      ]
+      currentThreadId = chat.threadId
     }
 
-    setThreadId((chat as Chat).threadId)
-    await openai.beta.threads.messages.create((chat as Chat).threadId, {
-      role: 'user',
+    return { currentThreadId, chat }
+  }
+
+  async function submitUserMessage(messageId: string, value: string) {
+    const { currentThreadId, chat } = await getCurrentChat(messageId, value)
+
+    await openai.beta.threads.messages.create(currentThreadId, {
+      role: Roles.user,
       content: value
     })
 
-    let run = await openai.beta.threads.runs.createAndPoll(
-      (chat as Chat).threadId,
-      {
-        assistant_id: openAIAssistantId || ''
-      }
-    )
+    let run = await openai.beta.threads.runs.createAndPoll(currentThreadId, {
+      assistant_id: openAIAssistantId || ''
+    })
 
     if (run.status === 'completed') {
       const messages = await openai.beta.threads.messages.list(run.thread_id)
@@ -120,13 +151,16 @@ export function PromptForm({
         setAwaitingFileUpload(true)
       }
 
-      dispatch(
-        addMessage({
-          id: newAssistantChatId,
-          message: assistantResponse,
-          role: 'assistant'
-        })
-      )
+      const assistantMessage = {
+        id: newAssistantChatId,
+        message: assistantResponse,
+        role: Roles.assistant
+      }
+
+      dispatch(addMessage(assistantMessage))
+      chat.messages
+        ? chat.messages.push(assistantMessage)
+        : (chat.messages = [assistantMessage])
     } else if (run.status === 'requires_action') {
       const toolCall = run.required_action?.submit_tool_outputs.tool_calls[0]
       const args = JSON.parse(toolCall?.function.arguments || '')
@@ -141,16 +175,15 @@ export function PromptForm({
       )
       await submitToolOutput(generatedMockups, run.id, toolCall?.id as string)
       setIsAssistantRunning(false)
-
-      return
     } else {
       console.error(run.status)
     }
 
+    await saveChat(chat)
     return {
-      id: currentChatId,
+      id: messageId,
       message: value,
-      role: 'user'
+      role: Roles.user
     }
   }
 
@@ -237,13 +270,22 @@ export function PromptForm({
         // @ts-ignore
         reversedMessages[reversedMessages.length - 1].content[0].text.value
 
-      dispatch(
-        addMessage({
-          id: newAssistantChatId,
-          message: assistantResponse,
-          role: 'assistant'
-        })
-      )
+      const chat = (await getChat(
+        id as string,
+        session?.user?.id as string
+      )) as Chat
+
+      const assistantMessage = {
+        id: newAssistantChatId,
+        message: assistantResponse,
+        role: Roles.assistant
+      }
+
+      chat.messages.push(assistantMessage)
+
+      dispatch(addMessage(assistantMessage))
+
+      await saveChat(chat)
       setMockups(generatedMockups)
     } else {
       console.error('Unable to submit tool outputs: ', run.status)
@@ -266,7 +308,7 @@ export function PromptForm({
       currentChatId = chatId
     }
     dispatch(
-      addMessage({ id: currentChatId, message: colorName, role: 'user' })
+      addMessage({ id: currentChatId, message: colorName, role: Roles.user })
     )
     await submitUserMessage(currentChatId, colorName)
     setBgrColor(color)
@@ -290,8 +332,7 @@ export function PromptForm({
     e.preventDefault()
     setIsAssistantRunning(true)
 
-    const currentChatId = chatId || nanoid()
-    if (!chatId) dispatch(setChatId(currentChatId))
+    const messageId = nanoid()
 
     // Blur focus on mobile
     if (window.innerWidth < 600) {
@@ -304,21 +345,21 @@ export function PromptForm({
 
     // Submit and get response message
     if (!awaitingFileUpload) {
-      dispatch(addMessage({ id: currentChatId, message: value, role: 'user' }))
-      setSelectedFiles([])
-      await submitUserMessage(currentChatId, value)
+      dispatch(addMessage({ id: messageId, message: value, role: Roles.user }))
+      setSelectedFiles([]) // ignore file uploads if files are not asked for by the ai
+      await submitUserMessage(messageId, value)
       setIsAssistantRunning(false)
     } else {
       if (selectedFiles.length === 0) {
         dispatch(
-          addMessage({ id: currentChatId, message: value, role: 'user' })
+          addMessage({ id: messageId, message: value, role: Roles.user })
         )
         dispatch(
           addMessage({
             id: nanoid(),
             message:
               'I apologize but I would need this information to proceed. To complete your custom canopy design, please upload your logo.',
-            role: 'assistant'
+            role: Roles.assistant
           })
         )
         setIsAssistantRunning(false)
@@ -329,18 +370,19 @@ export function PromptForm({
 
       dispatch(
         addMessage({
-          id: currentChatId,
+          id: messageId,
           message: `${value}`,
-          role: 'user',
+          role: Roles.user,
           file: {
             name: logoFile.name,
             previewUrl: previewUrl
           }
         })
       )
+
       setLogoFile(logoFile)
       setSelectedFiles([])
-      await submitUserMessage(currentChatId, previewUrl)
+      await submitUserMessage(messageId, previewUrl)
       setIsAssistantRunning(false)
       setAwaitingFileUpload(false)
     }
