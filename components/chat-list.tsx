@@ -64,7 +64,7 @@ export function ChatList({ initialMessages, session, isShared }: ChatList) {
 
       {combinedMessages.map((item: ChatMessage, index: number) => (
         <div key={item.id}>
-          {item.role === 'user' ? (
+          {item.role === Roles.user ? (
             <div className="flex flex-col items-start">
               <UserMessage content={item} />
               {isLastMessageFromUser &&

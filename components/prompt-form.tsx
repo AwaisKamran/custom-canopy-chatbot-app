@@ -528,7 +528,9 @@ export function PromptForm({
   ) {
     setIsAssistantRunning(true)
     const messageId = nanoid()
-    dispatch(addMessage({ id: messageId, message: colorName, role: 'user' }))
+    dispatch(
+      addMessage({ id: messageId, message: colorName, role: Roles.user })
+    )
     if (isMonochrome) {
       if (currentRegion === Regions.walls_primary) {
         const newColors = {
