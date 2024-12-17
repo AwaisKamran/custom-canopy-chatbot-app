@@ -41,3 +41,31 @@ export interface User extends Record<string, any> {
   password: string
   salt: string
 }
+
+export interface FileData {
+  file: File,
+  previewUrl: string
+  name?: string
+  fileType: string
+}
+
+export interface TentColorRegions {
+    slope: string
+    canopy: string
+    walls_primary: string
+    walls_secondary: string
+    walls_tertiary: string
+}
+
+export type RegionsType = 'slope' | 'canopy' | 'walls_primary' | 'walls_secondary' | 'walls_tertiary'
+
+
+export enum Regions {
+  slope = 'slope',
+  canopy = 'canopy',
+  walls_primary = 'walls_primary',
+  walls_secondary = 'walls_secondary',
+  walls_tertiary = 'walls_tertiary'
+}
+
+export type ChatResponse = Chat | null | { error: string }
