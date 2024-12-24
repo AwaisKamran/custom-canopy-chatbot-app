@@ -41,3 +41,13 @@ export interface User extends Record<string, any> {
   password: string
   salt: string
 }
+
+
+export type RegionsType = 'slope' | 'canopy' | 'walls'
+
+
+export enum Regions {
+  slope = 'slope',
+  canopy = 'canopy',
+  walls = 'walls'
+}
