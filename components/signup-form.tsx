@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { IconSpinner } from './ui/icons'
 import { getMessageFromCode } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
+import { ErrorMessage } from '@/app/constants'
 
 export default function SignupForm() {
   const router = useRouter()
@@ -15,7 +16,7 @@ export default function SignupForm() {
 
   useEffect(() => {
     if (result) {
-      if (result.type === 'error') {
+      if (result.type === ErrorMessage.message) {
         toast.error(getMessageFromCode(result.resultCode))
       } else {
         toast.success(getMessageFromCode(result.resultCode))
@@ -30,7 +31,11 @@ export default function SignupForm() {
       className="flex flex-col items-center gap-4 space-y-3"
     >
       <div className="w-full flex-1 rounded-lg border bg-white px-6 pb-4 pt-8 shadow-md md:w-96 dark:bg-zinc-950">
-        <img src="/custom-canopy-logo.png" alt="logo" className="invert dark:invert-0 mx-auto h-21 w-auto mb-5" />
+        <img
+          src="/custom-canopy-logo.png"
+          alt="logo"
+          className="invert dark:invert-0 mx-auto h-21 w-auto mb-5"
+        />
         <h1 className="mb-3 text-2xl font-bold">Sign up for an account!</h1>
         <div className="w-full">
           <div>
