@@ -9,9 +9,7 @@ export const useStreamableText = (
   )
 
   useEffect(() => {
-     if (typeof content === 'string') {
-       setRawContent(content)
-     }
+      setRawContent(content as string)
    }, [content])
 
   useEffect(() => {
