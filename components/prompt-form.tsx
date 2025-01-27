@@ -13,13 +13,14 @@ import {
 } from '@/components/ui/tooltip'
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
 import { nanoid } from 'nanoid'
-import { Chat, Session } from '@/lib/types'
+import { Chat, RegionsType, Regions, Session } from '@/lib/types'
 import { getChat, saveChat } from '@/app/actions'
 import {
   addMessage,
   Roles,
-  setChatId,
-  setThreadId
+  setTentColors,
+  setThreadId,
+  setFontColor
 } from '@/lib/redux/slice/chat.slice'
 import { useDispatch, useSelector } from 'react-redux'
 import FileUploadPopover from './file-upload-popover'
@@ -58,18 +59,21 @@ export function PromptForm({
   const [selectedFiles, setSelectedFiles] = React.useState<
     { file: File; previewUrl: string; textSnippet: string }[]
   >([])
-  const chatId = useSelector((state: any) => state.chat.chatId)
   const [awaitingFileUpload, setAwaitingFileUpload] =
     React.useState<boolean>(false)
   const messages = useSelector((state: any) => state.chat.messages)
   const threadId = useSelector((state: any) => state.chat.threadId)
+  const tentColors = useSelector((state: any) => state.chat.tentColors)
+  const fontColor = useSelector((state: any) => state.chat.fontColor)
+  const [logoFile, setLogoFile] = React.useState<File | null>(null)
   const [awaitingColorPick, setAwaitingColorPick] =
     React.useState<boolean>(false)
-  const [bgrColor, setBgrColor] = React.useState<string>('')
+  const [isMonochrome, setIsMonochrome] = React.useState<boolean>(true)
+  const [currentRegion, setCurrentRegion] = React.useState<RegionsType>(
+    Regions.slope
+  )
   const [isAssistantRunning, setIsAssistantRunning] =
     React.useState<boolean>(false)
-  const [fontColor, setFontColor] = React.useState<string>('')
-  const [logoFile, setLogoFile] = React.useState<File | null>(null)
 
   const getCurrentChat = async (messageId: string, value: string) => {
     const createdAt = new Date()
@@ -155,10 +159,9 @@ export function PromptForm({
 
         setAwaitingFileUpload(false)
 
-        const generatedMockups = await generateCustomCanopy(bgrColor, text)
-        console.log(
-          `The mockups have been generated successfully: ${generatedMockups}`
-        )
+        const generatedMockups = await generateCustomCanopy(text)
+        const success = `The mockups have been generated successfully: `
+        console.log(success, generatedMockups)
         await submitToolOutput(
           generatedMockups,
           message.data.id,
@@ -175,9 +178,43 @@ export function PromptForm({
       }
     }
 
+    if (assistantResponse.toLowerCase().includes('slope')) {
+      setCurrentRegion(Regions.slope)
+      setIsMonochrome(false)
+    }
+
     if (
-      assistantResponse.toLowerCase().includes('base color') &&
-      !assistantResponse.toLowerCase().includes('logo')
+      assistantResponse.toLowerCase().includes('canopy') &&
+      !assistantResponse.toLowerCase().includes('custom')
+    ) {
+      setCurrentRegion(Regions.canopy)
+      setIsMonochrome(false)
+    }
+
+    if (
+      assistantResponse.toLowerCase().includes('walls') &&
+      assistantResponse.toLowerCase().includes('color')
+    ) {
+      setCurrentRegion(Regions.walls)
+      setIsMonochrome(false)
+    }
+
+    if (
+      !assistantResponse.toLowerCase().includes('slope') &&
+      !assistantResponse.toLowerCase().includes('canopy') &&
+      !assistantResponse.toLowerCase().includes('walls') &&
+      assistantResponse.toLowerCase().includes('color')
+    ) {
+      setIsMonochrome(true)
+    }
+
+    if (
+      assistantResponse.toLowerCase().includes('color') &&
+      !assistantResponse.toLowerCase().includes('logo') &&
+      !assistantResponse.toLowerCase().includes('text') &&
+      !assistantResponse.toLowerCase().includes('monochrome') &&
+      !assistantResponse.toLowerCase().includes('different regions') &&
+      !assistantResponse.toLowerCase().includes('mockup')
     ) {
       setAwaitingColorPick(true)
     }
@@ -209,9 +246,11 @@ export function PromptForm({
     }
   }
 
-  async function generateCustomCanopy(baseColor: string, text: string) {
+  async function generateCustomCanopy(text: string) {
     const formRequestBody = new FormData()
-    formRequestBody.append('color', baseColor)
+    formRequestBody.append('slope_color', tentColors.slope)
+    formRequestBody.append('canopy_color', tentColors.canopy)
+    formRequestBody.append('walls_color', tentColors.walls)
     formRequestBody.append('text', text)
     formRequestBody.append('logo', logoFile as any)
     formRequestBody.append('text_color', fontColor || '[0, 0, 0]')
@@ -327,21 +366,30 @@ export function PromptForm({
     fontColor: string
   ) {
     setIsAssistantRunning(true)
-    setFontColor(fontColor)
-    let currentChatId
-    if (!chatId) {
-      const newChatId = nanoid()
-      dispatch(setChatId(newChatId))
-      currentChatId = newChatId
+    if (isMonochrome) {
+      dispatch(
+        setTentColors({
+          slope: color,
+          canopy: color,
+          walls: color
+        })
+      )
+      dispatch(setFontColor(fontColor))
+      setAwaitingColorPick(false)
     } else {
-      currentChatId = chatId
+      if (currentRegion === Regions.slope) {
+        dispatch(setTentColors({ ...tentColors, slope: color }))
+      } else if (currentRegion === Regions.canopy) {
+        dispatch(setTentColors({ ...tentColors, canopy: color }))
+        dispatch(setFontColor(fontColor))
+      } else {
+        dispatch(setTentColors({ ...tentColors, walls: color }))
+        setAwaitingColorPick(false)
+      }
     }
-    dispatch(
-      addMessage({ id: currentChatId, message: colorName, role: Roles.user })
-    )
-    await submitUserMessage(currentChatId, colorName)
-    setBgrColor(color)
-    setAwaitingColorPick(false)
+    const messageId = nanoid()
+    dispatch(addMessage({ id: messageId, message: colorName, role: 'user' }))
+    await submitUserMessage(messageId, colorName)
     setIsAssistantRunning(false)
   }
 
