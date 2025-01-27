@@ -7,13 +7,14 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@/components/ui/popover'
+import { FileData } from '@/lib/types'
 
 function FileUploadPopover({
   onFileSelect,
   disabled,
   ...props
 }: {
-  onFileSelect: (files: { file: File; previewUrl: string }[]) => void
+  onFileSelect: (files: FileData[]) => void
   disabled: boolean
 }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
@@ -28,13 +29,17 @@ function FileUploadPopover({
   ): void => {
     const files = event.target.files
     if (files) {
-      const fileDataArray: { file: File; previewUrl: string }[] = []
+      const fileDataArray: FileData[] = []
       let filesRead = 0
 
       Array.from(files).forEach(file => {
         const reader = new FileReader()
         reader.onloadend = () => {
-          fileDataArray.push({ file, previewUrl: reader.result as string })
+          fileDataArray.push({
+            file,
+            previewUrl: reader.result as string,
+            fileType: file.type
+          })
           filesRead++
           if (filesRead === files.length) {
             onFileSelect(fileDataArray)

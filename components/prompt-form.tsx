@@ -13,15 +13,16 @@ import {
 } from '@/components/ui/tooltip'
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
 import { nanoid } from 'nanoid'
-import { Chat, RegionsType, Regions, Session } from '@/lib/types'
-import { getChat, saveChat } from '@/app/actions'
 import {
-  addMessage,
-  Roles,
-  setTentColors,
-  setThreadId,
-  setFontColor
-} from '@/lib/redux/slice/chat.slice'
+  Chat,
+  FileData,
+  RegionsType,
+  Regions,
+  Session,
+  TentColorRegions
+} from '@/lib/types'
+import { getChat, saveChat } from '@/app/actions'
+import { addMessage, Roles, setThreadId } from '@/lib/redux/slice/chat.slice'
 import { useDispatch, useSelector } from 'react-redux'
 import FileUploadPopover from './file-upload-popover'
 import OpenAI from 'openai'
@@ -56,26 +57,64 @@ export function PromptForm({
   const { formRef, onKeyDown } = useEnterSubmit()
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
   const dispatch = useDispatch()
-  const [selectedFiles, setSelectedFiles] = React.useState<
-    { file: File; previewUrl: string; textSnippet: string }[]
-  >([])
+  const [selectedFiles, setSelectedFiles] = React.useState<FileData[]>([])
   const [awaitingFileUpload, setAwaitingFileUpload] =
     React.useState<boolean>(false)
   const messages = useSelector((state: any) => state.chat.messages)
   const threadId = useSelector((state: any) => state.chat.threadId)
-  const tentColors = useSelector((state: any) => state.chat.tentColors)
-  const fontColor = useSelector((state: any) => state.chat.fontColor)
-  const [logoFile, setLogoFile] = React.useState<File | null>(null)
   const [awaitingColorPick, setAwaitingColorPick] =
     React.useState<boolean>(false)
   const [isMonochrome, setIsMonochrome] = React.useState<boolean>(true)
+  const [isPatterned, setIsPatterned] = React.useState<boolean>(false)
   const [currentRegion, setCurrentRegion] = React.useState<RegionsType>(
     Regions.slope
   )
   const [isAssistantRunning, setIsAssistantRunning] =
     React.useState<boolean>(false)
+  const [tentColors, setTentColors] = React.useState<TentColorRegions>({
+    slope: '',
+    canopy: '',
+    walls_primary: '',
+    walls_secondary: '',
+    walls_tertiary: ''
+  })
 
-  const getCurrentChat = async (messageId: string, value: string) => {
+  const saveFiles = async (files: FileData[], messageId: string) => {
+    const fileBlobs: any[] = []
+    try {
+      for (const file of files) {
+        const response = await fetch(
+          `/api/save-files?chatId=${id}&filename=${file.file.name}&userId=${session?.user.id}&messageId=${messageId}`,
+          {
+            method: 'POST',
+            body: file.file
+          }
+        )
+
+        if (!response.ok) {
+          const error = `Unable to save uploaded files. Response is ${response}`
+          throw new Error(error)
+        } else {
+          const value = await response.json()
+          console.log(`Saved uploaded files successfully: ${value}`)
+          fileBlobs.push({
+            name: value.pathname,
+            previewUrl: value.downloadUrl,
+            type: value.contentType
+          })
+        }
+      }
+      return fileBlobs
+    } catch (error) {
+      console.error('Error saving file:', error)
+    }
+  }
+
+  const getCurrentChat = async (
+    messageId: string,
+    value: string,
+    files: any[]
+  ) => {
     const createdAt = new Date()
     const firstMessageContent = value as string
     const title = firstMessageContent.substring(0, 100)
@@ -95,7 +134,12 @@ export function PromptForm({
         path: `/chat/${id}`,
         messages: [
           ...messages,
-          { id: messageId, message: value, role: Roles.user }
+          {
+            id: messageId,
+            message: value,
+            role: Roles.user,
+            files: JSON.stringify(files)
+          }
         ],
         threadId: currentThreadId
       }
@@ -110,7 +154,8 @@ export function PromptForm({
         {
           id: messageId,
           role: Roles.user,
-          message: value
+          message: value,
+          files: JSON.stringify(files)
         }
       ]
       currentThreadId = chat.threadId
@@ -119,8 +164,16 @@ export function PromptForm({
     return { currentThreadId, chat }
   }
 
-  async function submitUserMessage(messageId: string, value: string) {
-    const { currentThreadId, chat } = await getCurrentChat(messageId, value)
+  async function submitUserMessage(
+    messageId: string,
+    value: string,
+    files: any[]
+  ) {
+    const { currentThreadId, chat } = await getCurrentChat(
+      messageId,
+      value,
+      files
+    )
 
     await openai.beta.threads.messages.create(currentThreadId, {
       role: Roles.user,
@@ -154,12 +207,45 @@ export function PromptForm({
         const toolCall =
           message.data.required_action?.submit_tool_outputs.tool_calls[0]
         const args = JSON.parse(toolCall?.function.arguments || '')
-        const { companyName, color, text, userName, email, phoneNumber, logo } =
-          args
+        const {
+          companyName,
+          isPatterned,
+          tentColors,
+          text,
+          userName,
+          email,
+          phoneNumber,
+          logo,
+          fontColor
+        } = args
 
         setAwaitingFileUpload(false)
 
-        const generatedMockups = await generateCustomCanopy(text)
+        const bgrColors = {
+          slope: '',
+          canopy: '',
+          walls_primary: '',
+          walls_secondary: '',
+          walls_tertiary: ''
+        }
+        const convertToBGR = (rgb: string) => {
+          const [r, g, b] = JSON.parse(rgb)
+          return `[${b}, ${g}, ${r}]`
+        }
+
+        bgrColors.slope = convertToBGR(tentColors.slope)
+        bgrColors.canopy = convertToBGR(tentColors.canopy)
+        bgrColors.walls_primary = convertToBGR(tentColors.walls_primary)
+        bgrColors.walls_secondary = convertToBGR(tentColors.walls_secondary)
+        bgrColors.walls_tertiary = convertToBGR(tentColors.walls_tertiary)
+
+        const generatedMockups = await generateCustomCanopy(
+          bgrColors,
+          text,
+          logo,
+          fontColor,
+          isPatterned
+        )
         const success = `The mockups have been generated successfully: `
         console.log(success, generatedMockups)
         await submitToolOutput(
@@ -178,14 +264,20 @@ export function PromptForm({
       }
     }
 
-    if (assistantResponse.toLowerCase().includes('slope')) {
+    if (
+      assistantResponse.toLowerCase().includes('slope') &&
+      !assistantResponse.toLowerCase().includes('text') &&
+      !assistantResponse.toLowerCase().includes('logo')
+    ) {
       setCurrentRegion(Regions.slope)
       setIsMonochrome(false)
     }
 
     if (
       assistantResponse.toLowerCase().includes('canopy') &&
-      !assistantResponse.toLowerCase().includes('custom')
+      !assistantResponse.toLowerCase().includes('custom') &&
+      !assistantResponse.toLowerCase().includes('text') &&
+      !assistantResponse.toLowerCase().includes('logo')
     ) {
       setCurrentRegion(Regions.canopy)
       setIsMonochrome(false)
@@ -193,19 +285,53 @@ export function PromptForm({
 
     if (
       assistantResponse.toLowerCase().includes('walls') &&
-      assistantResponse.toLowerCase().includes('color')
+      assistantResponse.toLowerCase().includes('color') &&
+      !assistantResponse.toLowerCase().includes('text') &&
+      !assistantResponse.toLowerCase().includes('logo')
     ) {
-      setCurrentRegion(Regions.walls)
+      setCurrentRegion(Regions.walls_primary)
       setIsMonochrome(false)
+    }
+
+    if (
+      assistantResponse.toLowerCase().includes('secondary') &&
+      assistantResponse.toLowerCase().includes('color') &&
+      !assistantResponse.toLowerCase().includes('mockup') &&
+      !assistantResponse.toLowerCase().includes('just to confirm') &&
+      !assistantResponse.toLowerCase().includes('text') &&
+      !assistantResponse.toLowerCase().includes('logo')
+    ) {
+      setCurrentRegion(Regions.walls_secondary)
+      setIsPatterned(true)
+      setAwaitingColorPick(true)
+    }
+    if (
+      assistantResponse.toLowerCase().includes('tertiary') &&
+      assistantResponse.toLowerCase().includes('color') &&
+      !assistantResponse.toLowerCase().includes('mockup') &&
+      !assistantResponse.toLowerCase().includes('just to confirm') &&
+      !assistantResponse.toLowerCase().includes('text') &&
+      !assistantResponse.toLowerCase().includes('logo')
+    ) {
+      setCurrentRegion(Regions.walls_tertiary)
+      setIsPatterned(true)
+      setAwaitingColorPick(true)
     }
 
     if (
       !assistantResponse.toLowerCase().includes('slope') &&
       !assistantResponse.toLowerCase().includes('canopy') &&
       !assistantResponse.toLowerCase().includes('walls') &&
+      !assistantResponse.toLowerCase().includes('secondary') &&
+      !assistantResponse.toLowerCase().includes('tertiary') &&
       assistantResponse.toLowerCase().includes('color')
     ) {
       setIsMonochrome(true)
+      setCurrentRegion(Regions.walls_primary)
+    }
+
+    if (assistantResponse.toLowerCase().includes('text')) {
+      setAwaitingColorPick(false)
     }
 
     if (
@@ -214,7 +340,8 @@ export function PromptForm({
       !assistantResponse.toLowerCase().includes('text') &&
       !assistantResponse.toLowerCase().includes('monochrome') &&
       !assistantResponse.toLowerCase().includes('different regions') &&
-      !assistantResponse.toLowerCase().includes('mockup')
+      !assistantResponse.toLowerCase().includes('mockup') &&
+      !assistantResponse.toLowerCase().includes('just to confirm')
     ) {
       setAwaitingColorPick(true)
     }
@@ -224,6 +351,14 @@ export function PromptForm({
       !assistantResponse.toLowerCase().includes('color')
     ) {
       setAwaitingFileUpload(true)
+    }
+
+    if (
+      assistantResponse.toLowerCase().includes('text') &&
+      assistantResponse.toLowerCase().includes('logo') &&
+      assistantResponse.toLowerCase().includes('color')
+    ) {
+      setCurrentRegion(Regions.slope)
     }
 
     const assistantMessage = {
@@ -246,14 +381,39 @@ export function PromptForm({
     }
   }
 
-  async function generateCustomCanopy(text: string) {
+  async function generateCustomCanopy(
+    tentColors: TentColorRegions,
+    text: string,
+    logo: any,
+    fontColor: string,
+    patterned: boolean
+  ) {
     const formRequestBody = new FormData()
-    formRequestBody.append('slope_color', tentColors.slope)
-    formRequestBody.append('canopy_color', tentColors.canopy)
-    formRequestBody.append('walls_color', tentColors.walls)
+    const logoResponse = await fetch(logo.previewUrl)
+    const blob = await logoResponse.blob()
+    const logoFile = new File([blob], logo.name, { type: logo.contentType })
+
+    formRequestBody.append('slope_color', tentColors.slope || '[250, 250, 250]')
+    formRequestBody.append(
+      'canopy_color',
+      tentColors.canopy || '[250, 250, 250]'
+    )
+    formRequestBody.append(
+      'walls_primary_color',
+      tentColors.walls_primary || '[250, 250, 250]'
+    )
+    formRequestBody.append(
+      'walls_secondary_color',
+      tentColors.walls_secondary || '[250, 250, 250]'
+    )
+    formRequestBody.append(
+      'walls_tertiary_color',
+      tentColors.walls_tertiary || '[250, 250, 250]'
+    )
     formRequestBody.append('text', text)
     formRequestBody.append('logo', logoFile as any)
     formRequestBody.append('text_color', fontColor || '[0, 0, 0]')
+    formRequestBody.append('patterned', `${patterned}`)
 
     try {
       const response = await fetch(`${backendUrl}/create-mockups`, {
@@ -297,7 +457,8 @@ export function PromptForm({
   ) {
     let toolOutputs
     if (!generatedMockups) {
-      console.error('Something went wrong generating mockups.')
+      const error = 'Something went wrong generating mockups.'
+      console.error(error)
       toolOutputs = [
         {
           output: JSON.stringify('Failed to generate Custom Canopy mockups.'),
@@ -366,36 +527,115 @@ export function PromptForm({
     fontColor: string
   ) {
     setIsAssistantRunning(true)
+    const messageId = nanoid()
+    dispatch(
+      addMessage({ id: messageId, message: colorName, role: Roles.user })
+    )
     if (isMonochrome) {
-      dispatch(
-        setTentColors({
+      if (currentRegion === Regions.walls_primary) {
+        const newColors = {
           slope: color,
           canopy: color,
-          walls: color
-        })
-      )
-      dispatch(setFontColor(fontColor))
-      setAwaitingColorPick(false)
+          walls_primary: color,
+          walls_secondary: color,
+          walls_tertiary: color
+        }
+        setTentColors(newColors)
+        setAwaitingColorPick(false)
+        await submitUserMessage(
+          messageId,
+          `Tent colors are: ${JSON.stringify(newColors)} and font color is ${fontColor}`,
+          []
+        )
+      } else if (currentRegion === Regions.walls_secondary && isPatterned) {
+        const newColors = {
+          ...tentColors,
+          walls_secondary: color
+        }
+        setTentColors(newColors)
+        setAwaitingColorPick(false)
+        await submitUserMessage(
+          messageId,
+          `Tent colors are: ${JSON.stringify(newColors)}`,
+          []
+        )
+      } else if (currentRegion === Regions.walls_tertiary && isPatterned) {
+        const newColors = {
+          ...tentColors,
+          walls_tertiary: color
+        }
+        setTentColors(newColors)
+        setAwaitingColorPick(false)
+        await submitUserMessage(
+          messageId,
+          `Tent colors are: ${JSON.stringify(newColors)}`,
+          []
+        )
+      }
     } else {
       if (currentRegion === Regions.slope) {
-        dispatch(setTentColors({ ...tentColors, slope: color }))
-      } else if (currentRegion === Regions.canopy) {
-        dispatch(setTentColors({ ...tentColors, canopy: color }))
-        dispatch(setFontColor(fontColor))
-      } else {
-        dispatch(setTentColors({ ...tentColors, walls: color }))
+        const newColors = { ...tentColors, slope: color }
+        setTentColors(newColors)
         setAwaitingColorPick(false)
+        await submitUserMessage(
+          messageId,
+          `Tent colors are: ${JSON.stringify(newColors)}`,
+          []
+        )
+      } else if (currentRegion === Regions.canopy) {
+        const newColors = { ...tentColors, canopy: color }
+        setTentColors(newColors)
+        setAwaitingColorPick(false)
+        await submitUserMessage(
+          messageId,
+          `Tent colors are: ${JSON.stringify(newColors)} and font color is ${fontColor}`,
+          []
+        )
+      } else if (currentRegion === Regions.walls_primary) {
+        const newColors = {
+          ...tentColors,
+          walls_primary: color,
+          walls_secondary: color,
+          walls_tertiary: color
+        }
+        setTentColors(newColors)
+        setAwaitingColorPick(false)
+        await submitUserMessage(
+          messageId,
+          `Tent colors are: ${JSON.stringify(newColors)}`,
+          []
+        )
+      } else if (currentRegion === Regions.walls_secondary && isPatterned) {
+        const newColors = {
+          ...tentColors,
+          walls_secondary: color
+        }
+        setTentColors(newColors)
+        setAwaitingColorPick(false)
+        await submitUserMessage(
+          messageId,
+          `Tent colors are: ${JSON.stringify(newColors)}`,
+          []
+        )
+      } else if (currentRegion === Regions.walls_tertiary && isPatterned) {
+        const newColors = {
+          ...tentColors,
+          walls_tertiary: color
+        }
+        setTentColors(newColors)
+        setCurrentRegion(Regions.slope)
+        setAwaitingColorPick(false)
+        await submitUserMessage(
+          messageId,
+          `Tent colors are: ${JSON.stringify(newColors)}`,
+          []
+        )
       }
     }
-    const messageId = nanoid()
-    dispatch(addMessage({ id: messageId, message: colorName, role: 'user' }))
-    await submitUserMessage(messageId, colorName)
     setIsAssistantRunning(false)
   }
 
-  const handleFileSelect = (
-    files: { file: File; previewUrl: string | null }[]
-  ) => {
+  const handleFileSelect = (files: FileData[]) => {
     setSelectedFiles((prevFiles: any) => [...prevFiles, ...files])
   }
 
@@ -420,11 +660,11 @@ export function PromptForm({
     setInput('')
     if (!value && !awaitingFileUpload) return
 
-    // Submit and get response message
+    let files: any[] = []
     if (!awaitingFileUpload) {
       dispatch(addMessage({ id: messageId, message: value, role: Roles.user }))
       setSelectedFiles([]) // ignore file uploads if files are not asked for by the ai
-      await submitUserMessage(messageId, value)
+      await submitUserMessage(messageId, value, files)
       setIsAssistantRunning(false)
     } else {
       if (selectedFiles.length === 0) {
@@ -442,24 +682,25 @@ export function PromptForm({
         setIsAssistantRunning(false)
         return
       }
-      const logoFile = selectedFiles[0].file
-      const previewUrl = URL.createObjectURL(logoFile)
+      const currFiles = selectedFiles.map(fileData => {
+        return {
+          file: fileData.file,
+          name: fileData.name,
+          previewUrl: fileData.previewUrl
+        } as FileData
+      })
+      setSelectedFiles([])
+      files = (await saveFiles(currFiles, messageId)) || []
 
       dispatch(
         addMessage({
           id: messageId,
           message: `${value}`,
           role: Roles.user,
-          file: {
-            name: logoFile.name,
-            previewUrl: previewUrl
-          }
+          files: JSON.stringify(files)
         })
       )
-
-      setLogoFile(logoFile)
-      setSelectedFiles([])
-      await submitUserMessage(messageId, previewUrl)
+      await submitUserMessage(messageId, JSON.stringify(files[0]), files)
       setIsAssistantRunning(false)
       setAwaitingFileUpload(false)
     }

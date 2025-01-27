@@ -18,6 +18,7 @@ import {
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog'
 import { IconSpinner } from '@/components/ui/icons'
+import { ErrorMessage } from '@/app/constants'
 
 interface ClearHistoryProps {
   isEnabled: boolean
@@ -56,7 +57,7 @@ export function ClearHistory({
               event.preventDefault()
               startTransition(async () => {
                 const result = await clearChats()
-                if (result && 'error' in result) {
+                if (result && ErrorMessage.message in result) {
                   toast.error(result.error)
                   return
                 }

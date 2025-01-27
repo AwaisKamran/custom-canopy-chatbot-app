@@ -2,25 +2,20 @@ import { createSlice } from '@reduxjs/toolkit';
 import { nanoid } from 'nanoid';
 
 export enum Roles {
-  user = 'user',
-  assistant = 'assistant'
+  "user" = "user",
+  "assistant" = "assistant"
 }
 
 export interface ChatMessage {
   id: string;
   message: string;
   role?: string;
-  file?: {
-    name: string
-    previewUrl: string
-  }
+  files?: string
 }
 
 const initialState: {
   messages: ChatMessage[]
   threadId: string
-  tentColors: { slope: string, canopy: string, walls: string }
-  fontColor: string
 } = {
   messages: [{
     id: nanoid(),
@@ -28,12 +23,6 @@ const initialState: {
     role: Roles.assistant
   }],
   threadId: '',
-  tentColors: {
-    slope: '',
-    canopy: '',
-    walls: ''
-  },
-  fontColor: '[0, 0, 0]'
 };
 
 const chatSlice = createSlice({
@@ -41,8 +30,8 @@ const chatSlice = createSlice({
   initialState,
   reducers: {
     addMessage: (state, action) => {
-      const { id, message, role, file } = action.payload;
-      const existingMessageIndex = state.messages.findIndex((msg) => msg.id === id);
+      const { id, message, role, files } = action.payload;
+      const existingMessageIndex = state.messages.findIndex((message) => message.id === id);
       if (existingMessageIndex !== -1) {
          state.messages = [
            ...state.messages.slice(0, existingMessageIndex),
@@ -54,12 +43,9 @@ const chatSlice = createSlice({
            id,
            message,
            role,
-           file
+           files
          })
        }
-    },
-    setTentColors: (state, action) => {
-      state.tentColors = action.payload
     },
     setThreadId: (state, action) => {
        state.threadId = action.payload
@@ -75,11 +61,8 @@ const chatSlice = createSlice({
         }]
       }
     },
-    setFontColor: (state, action) => {
-      state.fontColor = action.payload
-    }
   },
 });
 
-export const { addMessage, setTentColors, setThreadId, removeMessages, setFontColor } = chatSlice.actions;
+export const { addMessage, setThreadId, removeMessages } = chatSlice.actions;
 export default chatSlice.reducer;
