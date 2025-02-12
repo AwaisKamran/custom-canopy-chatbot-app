@@ -19,6 +19,9 @@ import {
 } from '@/components/ui/alert-dialog'
 import { IconSpinner } from '@/components/ui/icons'
 import { ErrorMessage } from '@/app/constants'
+import { useDispatch } from 'react-redux'
+import { AppDispatch } from '@/lib/redux/store'
+import { initiateChat } from '@/lib/redux/slice/chat'
 
 interface ClearHistoryProps {
   isEnabled: boolean
@@ -31,7 +34,8 @@ export function ClearHistory({
 }: ClearHistoryProps) {
   const [open, setOpen] = React.useState(false)
   const [isPending, startTransition] = React.useTransition()
-  const router = useRouter()
+  const dispatch: AppDispatch = useDispatch()
+
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
@@ -61,7 +65,7 @@ export function ClearHistory({
                   toast.error(result.error)
                   return
                 }
-
+                dispatch(initiateChat(null))
                 setOpen(false)
               })
             }}

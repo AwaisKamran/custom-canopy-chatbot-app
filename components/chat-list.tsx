@@ -12,7 +12,7 @@ export interface ChatList {
 }
 
 export function ChatList({ session, isShared }: ChatList) {
-  const messages = useSelector((state: any) => state.chat.messages)
+  const { messages } = useSelector((state: any) => state.chatReducer)
 
   // if (!messages?.length) {
   //   return null

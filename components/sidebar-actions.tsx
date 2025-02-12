@@ -23,6 +23,9 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import { ErrorMessage } from '@/app/constants'
+import { AppDispatch } from '@/lib/redux/store'
+import { useDispatch } from 'react-redux'
+import { initiateChat } from '@/lib/redux/slice/chat'
 
 interface SidebarActionsProps {
   chat: Chat
@@ -33,6 +36,7 @@ export function SidebarActions({ chat, removeChat }: SidebarActionsProps) {
   const router = useRouter()
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [isRemovePending, startRemoveTransition] = React.useTransition()
+  const dispatch: AppDispatch = useDispatch()
 
   return (
     <>
@@ -80,7 +84,7 @@ export function SidebarActions({ chat, removeChat }: SidebarActionsProps) {
                     toast.error(result.error)
                     return
                   }
-
+                  dispatch(initiateChat(null))
                   setDeleteDialogOpen(false)
                   router.refresh()
                   router.push('/')

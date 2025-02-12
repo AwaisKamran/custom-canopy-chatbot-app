@@ -74,7 +74,6 @@ const tentMockupSlice = createSlice({
   initialState,
   reducers: {
     setMockUpPrompt: (state, action) => {
-      console.log(action)
       return { ...state, ...action.payload }
     },
     resetFormData: () => initialState

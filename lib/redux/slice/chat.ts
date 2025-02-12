@@ -131,7 +131,6 @@ const chatSlice = createSlice({
   initialState,
   reducers: {
     initiateChat: (state, action) => {
-      console.log('action initaiate', action.payload)
       if (action.payload) {
         return { ...state, ...action.payload }
       } else {
