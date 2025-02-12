@@ -1,104 +1,58 @@
 'use client'
 
-import { cn, nanoid } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { ChatList } from '@/components/chat-list'
 import { ChatPanel } from '@/components/chat-panel'
 import { EmptyScreen } from '@/components/empty-screen'
 import { useLocalStorage } from '@/lib/hooks/use-local-storage'
 import { useEffect, useState } from 'react'
-import { useAIState } from 'ai/rsc'
-import { Message, Session } from '@/lib/types'
-import { usePathname, useRouter } from 'next/navigation'
+import { Chat as ChatInterface, Session } from '@/lib/types'
+import { usePathname } from 'next/navigation'
 import { useScrollAnchor } from '@/lib/hooks/use-scroll-anchor'
 import { toast } from 'sonner'
 import { useDispatch, useSelector } from 'react-redux'
-import {
-  addMessage,
-  ChatMessage,
-  removeMessages,
-  Roles,
-  setThreadId
-} from '@/lib/redux/slice/chat.slice'
 import PreviewCarousel from './preview-carousel'
+import { initiateChat } from '@/lib/redux/slice/chat'
+import { AppDispatch, RootState } from '@/lib/redux/store'
 
 export interface ChatProps extends React.ComponentProps<'div'> {
-  initialMessages: ChatMessage[]
-  id?: string
+  className?: string
   session?: Session
   missingKeys: string[]
-  threadId: string
+  chat?: ChatInterface
 }
 
-export function Chat({
-  id,
-  initialMessages,
-  className,
-  session,
-  missingKeys,
-  threadId
-}: ChatProps) {
-  const router = useRouter()
+export function Chat({ className, session, missingKeys, chat }: ChatProps) {
   const path = usePathname()
   const [input, setInput] = useState('')
-  const messages = useSelector((state: any) => state.chat.messages)
-  const dispatch = useDispatch()
-  const [mockups, setMockups] = useState(null)
+  const {
+    id,
+    messages,
+    path: chatPath
+  } = useSelector((state: any) => state.chatReducer)
+  const { generatedMockups } = useSelector(
+    (state: RootState) => state.tentMockUpPromptReducer
+  )
   const [isCarouselOpen, setIsCarouselOpen] = useState(false)
-
+  const dispatch: AppDispatch = useDispatch()
   const [_, setNewChatId] = useLocalStorage('newChatId', id)
-
   useEffect(() => {
-    if (messages.length > 1) {
-      dispatch(setThreadId(''))
-      dispatch(removeMessages(true))
-      if (!path.includes('chat') && initialMessages.length === 0) {
-        const firstMessage =
-          "Hello! Welcome to Custom Canopy. I'm here to help you build a custom design for your 10'x10' canopy tent. Let's get started! \n \n What is the name of your company or organization?"
-        dispatch(
-          addMessage({
-            id: nanoid(),
-            message: firstMessage,
-            role: Roles.assistant
-          })
-        )
-      }
+    if (!id) {
+      dispatch(initiateChat(chat))
     }
-    if (
-      path.includes('chat') &&
-      (messages.length > 1 || initialMessages.length > 1)
-    ) {
-      dispatch(removeMessages(true))
-    }
-    if (messages.length === 1) {
-      setMockups(null)
-    }
-  }, [path])
-
-  useEffect(() => {
-    dispatch(setThreadId(threadId))
-    initialMessages.forEach((message: ChatMessage) => {
-      dispatch(addMessage(message))
-    })
-  }, [initialMessages])
+  }, [id])
 
   useEffect(() => {
     if (session?.user) {
-      if (!path.includes('chat') && messages?.length === 1) {
-        window.history.replaceState({}, '', `/chat/${id}`)
+      if (!path.includes('chat')) {
+        window.history.replaceState({}, '', chatPath)
       }
     }
-  }, [id, path, session?.user, messages])
-
-  useEffect(() => {
-    const messagesLength = messages?.length
-    if (messagesLength === 2) {
-      router.refresh()
-    }
-  }, [router])
+  }, [id, path, session?.user])
 
   useEffect(() => {
     setNewChatId(id)
-  })
+  }, [id])
 
   useEffect(() => {
     missingKeys.map(key => {
@@ -120,31 +74,24 @@ export function Chat({
       >
         {isCarouselOpen ? (
           <PreviewCarousel
-            mockups={mockups}
+            mockups={generatedMockups}
             isOpen={isCarouselOpen}
             onClose={() => setIsCarouselOpen(false)}
           />
         ) : messages?.length ? (
-          <ChatList
-            initialMessages={initialMessages}
-            isShared={false}
-            session={session}
-          />
+          <ChatList isShared={false} session={session} />
         ) : (
           <EmptyScreen />
         )}
         <div className="w-full h-px" ref={visibilityRef} />
       </div>
       <ChatPanel
-        id={id}
         input={input}
         setInput={setInput}
         isAtBottom={isAtBottom}
         scrollToBottom={scrollToBottom}
         session={session}
-        mockups={mockups}
         setIsCarouselOpen={setIsCarouselOpen}
-        setMockups={setMockups}
       />
     </div>
   )

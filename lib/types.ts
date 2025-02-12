@@ -1,9 +1,16 @@
 import { CoreMessage } from 'ai'
-import { ChatMessage } from './redux/slice/chat.slice'
 
 export type Message = CoreMessage & {
   id: string
 }
+
+export interface ChatMessage {
+  id: string;
+  message: string;
+  role?: string;
+  files?: string
+}
+
 
 export interface Chat extends Record<string, any> {
   id: string
@@ -57,6 +64,19 @@ export interface TentColorRegions {
     walls_tertiary: string
 }
 
+export interface TentMockUpPrompt {
+  companyName: string
+  isPatterned: boolean
+  tentColors: TentColorRegions
+  text: string
+  userName: string
+  email: string
+  phoneNumber: string
+  logo: FileData | null
+  font: string
+  fontColor: string
+}
+
 export type RegionsType = 'slope' | 'canopy' | 'walls_primary' | 'walls_secondary' | 'walls_tertiary'
 
 
@@ -69,3 +89,23 @@ export enum Regions {
 }
 
 export type ChatResponse = Chat | null | { error: string }
+
+export enum Roles {
+  "user" = "user",
+  "assistant" = "assistant"
+}
+
+export type TentColorConfig = {
+  patterned: boolean,
+  isMonochrome: boolean,
+  awaitingColorPick: boolean,
+  currentRegion: string,
+  awaitingFileUpload: boolean
+}
+
+export enum StreamEvent {
+  DELTA = 'thread.message.delta',
+  REQUIRES_ACTION = 'thread.run.requires_action',
+  COMPLETED = 'thread.message.completed',
+  ERROR = 'error'
+}
