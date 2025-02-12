@@ -10,7 +10,7 @@ import { auth } from '@/auth'
      const chatId = searchParams.get('chatId')
      const filename = searchParams.get('filename')
      const userId = searchParams.get('userId')
-     const file = await request.body
+     const file = request.body
      const currentUser = session?.user?.id
 
      if (chatId && filename && userId && file && userId) {

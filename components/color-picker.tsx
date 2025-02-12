@@ -4,6 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Button } from '@/components/ui/button'
 import { getColorName } from '@/lib/utils'
 import { IconColorPicker } from './ui/icons'
+import { COLORS } from '@/app/constants'
 
 interface ColorPickerPopoverProps {
   onColorSelect: (color: string, colorName: string, fontColor: string) => void
@@ -34,9 +35,9 @@ export default function ColorPickerPopover({
     const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
 
     if (luminance > 128) {
-      return `[0, 0, 0]`
+      return COLORS.BLACK_COLOR
     } else {
-      return `[255, 255, 255]`
+      return COLORS.WHITE_COLOR
     }
   }
 

@@ -1,39 +1,26 @@
 import * as React from 'react'
 
-import { Button } from '@/components/ui/button'
 import { PromptForm } from '@/components/prompt-form'
 import { ButtonScrollToBottom } from '@/components/button-scroll-to-bottom'
-import { IconShare } from '@/components/ui/icons'
 import { FooterText } from '@/components/footer'
-import { useActions, useUIState } from 'ai/rsc'
-import { nanoid } from 'nanoid'
-import { UserMessage } from './stocks/message'
 import { Session } from '@/lib/types'
 
 export interface ChatPanelProps {
-  id?: string
-  title?: string
   input: string
   setInput: (value: string) => void
   isAtBottom: boolean
   scrollToBottom: () => void
   session?: Session
-  mockups: any
   setIsCarouselOpen: (value: boolean) => void
-  setMockups: (value: any) => void
 }
 
 export function ChatPanel({
-  id,
-  title,
   input,
   setInput,
   isAtBottom,
   scrollToBottom,
   session,
-  mockups,
   setIsCarouselOpen,
-  setMockups
 }: ChatPanelProps) {
   return (
     <div className="fixed inset-x-0 bottom-0 w-full bg-gradient-to-b from-muted/30 from-0% to-muted/30 to-50% duration-300 ease-in-out animate-in dark:from-background/10 dark:from-10% dark:to-background/80 peer-[[data-state=open]]:group-[]:lg:pl-[250px] peer-[[data-state=open]]:group-[]:xl:pl-[300px]">
@@ -101,10 +88,7 @@ export function ChatPanel({
             input={input}
             setInput={setInput}
             session={session}
-            mockups={mockups}
             setIsCarouselOpen={setIsCarouselOpen}
-            setMockups={setMockups}
-            id={id}
           />
           <FooterText className="hidden sm:block" />
         </div>

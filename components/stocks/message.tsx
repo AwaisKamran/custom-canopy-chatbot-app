@@ -10,7 +10,7 @@ import remarkMath from 'remark-math'
 import rehypeRaw from 'rehype-raw'
 import { StreamableValue } from 'ai/rsc'
 import { useStreamableText } from '@/lib/hooks/use-streamable-text'
-import { ChatMessage } from '@/lib/redux/slice/chat.slice'
+import { ChatMessage } from '@/lib/types'
 
 // Different types of message bubbles.
 
