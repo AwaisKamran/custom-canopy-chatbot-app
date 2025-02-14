@@ -1,7 +1,6 @@
 'use client'
 
 import * as React from 'react'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
 import { ServerActionResult } from '@/lib/types'
@@ -19,9 +18,6 @@ import {
 } from '@/components/ui/alert-dialog'
 import { IconSpinner } from '@/components/ui/icons'
 import { ErrorMessage } from '@/app/constants'
-import { useDispatch } from 'react-redux'
-import { AppDispatch } from '@/lib/redux/store'
-import { initiateChat } from '@/lib/redux/slice/chat'
 
 interface ClearHistoryProps {
   isEnabled: boolean
@@ -34,7 +30,6 @@ export function ClearHistory({
 }: ClearHistoryProps) {
   const [open, setOpen] = React.useState(false)
   const [isPending, startTransition] = React.useTransition()
-  const dispatch: AppDispatch = useDispatch()
 
 
   return (
@@ -65,7 +60,6 @@ export function ClearHistory({
                   toast.error(result.error)
                   return
                 }
-                dispatch(initiateChat(null))
                 setOpen(false)
               })
             }}

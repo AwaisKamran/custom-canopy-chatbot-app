@@ -36,11 +36,10 @@ export function Chat({ className, session, missingKeys, chat }: ChatProps) {
   const [isCarouselOpen, setIsCarouselOpen] = useState(false)
   const dispatch: AppDispatch = useDispatch()
   const [_, setNewChatId] = useLocalStorage('newChatId', id)
+  
   useEffect(() => {
-    if (!id) {
-      dispatch(initiateChat(chat))
-    }
-  }, [id])
+    dispatch(initiateChat(chat))
+  }, [])
 
   useEffect(() => {
     if (session?.user) {

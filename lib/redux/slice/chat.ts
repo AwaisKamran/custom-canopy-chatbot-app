@@ -21,6 +21,7 @@ import { nanoid } from '@/lib/utils'
 interface ChatState extends Chat {
   loading: boolean
   error: string | null | undefined
+  version: number
 }
 
 const initialState: ChatState = {
@@ -37,7 +38,8 @@ const initialState: ChatState = {
   threadId: '',
   loading: false,
   error: null,
-  createdAt: new Date()
+  createdAt: new Date(),
+  version: 0,
 }
 
 export const createThread = createAsyncThunk<
@@ -149,7 +151,7 @@ const chatSlice = createSlice({
       if (existingMessageIndex !== -1) {
         state.messages = [
           ...state.messages.slice(0, existingMessageIndex),
-          { ...state.messages[existingMessageIndex], message },
+          { ...state.messages[existingMessageIndex], ...action.payload },
           ...state.messages.slice(existingMessageIndex + 1)
         ]
       } else {
@@ -209,7 +211,8 @@ const chatSlice = createSlice({
           path: `/chat/${action.payload?.id}`,
           threadId: action.payload?.threadId || '',
           createdAt: action.payload?.createdAt ?? new Date(),
-          error: null
+          error: null,
+          version: state.version + 1
         }
       })
       .addCase(getChat.rejected, (state, action) => {
@@ -235,7 +238,8 @@ const chatSlice = createSlice({
               role: action.payload.role
             }
           ],
-          error: null
+          error: null,
+          version: state.version + 1
         }
       })
       .addCase(addChatMessage.rejected, (state, action) => {

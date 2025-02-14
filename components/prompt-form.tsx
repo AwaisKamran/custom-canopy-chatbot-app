@@ -49,7 +49,7 @@ export function PromptForm({
   const dispatch: AppDispatch = useDispatch()
   const [selectedFiles, setSelectedFiles] = React.useState<FileData[]>([])
   const chat = useSelector((state: RootState) => state.chatReducer)
-  const { threadId, loading } = chat
+  const { threadId, loading, version } = chat
   const { tentColors, generatedMockups } = useSelector(
     (state: RootState) => state.tentMockUpPromptReducer
   )
@@ -62,27 +62,41 @@ export function PromptForm({
       awaitingFileUpload: false
     }
   )
-  const { processStream, assistantResponse, isStreaming } = useStreamEvents()
+  const { processStream, isStreaming } = useStreamEvents()
+
   React.useEffect(() => {
-    if (assistantResponse?.message && !isStreaming) {
-      const actions = processAssistantResponse(assistantResponse.message)
-      if (actions) {
-        setTentColorConfig(prev => ({ ...prev, ...actions }))
+    const handleStreaming = async () => {
+      const lastMessage = chat.messages.at(-1)
+      if (!isStreaming) {
+        if (version !== 0) {
+          const { loading, error, version, ...rest} = chat
+          saveChat(rest)
+        }
+        if (lastMessage?.role === Roles.assistant) {
+          const actions = processAssistantResponse(lastMessage.message)
+          if (actions) {
+            setTentColorConfig(prev => ({ ...prev, ...actions }))
+          }
+        }
       }
-      saveChat(chat)
     }
-  }, [assistantResponse?.message, isStreaming, chat.messages])
+    handleStreaming()
+  }, [isStreaming, chat.messages, version])
 
   React.useEffect(() => {
     inputRef.current?.focus()
   }, [])
 
-  const addAssistantResponse = (messageId: string, message: string) => {
+  const addResponse = (
+    messageId: string,
+    message: string,
+    role = Roles.assistant
+  ) => {
     dispatch(
       addMessage({
-        id: messageId,
+        id: messageId || nanoid(),
         message,
-        role: Roles.assistant,
+        role: role
       })
     )
   }
@@ -105,24 +119,23 @@ export function PromptForm({
             files: JSON.stringify(selectedFiles)
           })
         )
+        setSelectedFiles([])
+        setTentColorConfig(prev => ({ ...prev, awaitingFileUpload: false }))
       }
     } else {
       thread = await dispatch(
         createThread({ messages: [userMessage] })
       ).unwrap()
-      dispatch(
-        addMessage({
-          ...userMessage,
-          id: nanoid(),
-          message: content,
-          files: JSON.stringify(selectedFiles)
-        })
-      )
+      addResponse(content, Roles.user)
     }
-    const stream = streamThread(threadId || thread?.id || '')
+    return threadId || thread?.id
+  }
+
+  const streamChat = async (thread: string) => {
+    const stream = streamThread(thread)
     if (!stream) return
     await processStream(stream, {
-      onDelta: addAssistantResponse,
+      onDelta: addResponse,
       onToolCall: async (messageId, toolCallId, payload) => {
         try {
           const mockups = await dispatch(generateTentMockups(payload)).unwrap()
@@ -132,7 +145,6 @@ export function PromptForm({
           console.error('Error during tool call:', error)
         }
       },
-      onComplete: addAssistantResponse
     })
   }
 
@@ -148,8 +160,8 @@ export function PromptForm({
       ]
     })
     await processStream(stream, {
-      onDelta: addAssistantResponse,
-      onComplete: addAssistantResponse
+      onDelta: addResponse,
+      onComplete: addResponse
     })
   }
 
@@ -210,7 +222,7 @@ export function PromptForm({
       ;(e.target as HTMLFormElement)['message']?.blur()
     }
 
-    const value = input.trim()
+    let value = input.trim()
     setInput('')
     if (selectedFiles.length) {
       const files = await dispatch(
@@ -221,11 +233,10 @@ export function PromptForm({
           userId: session?.user?.id || ''
         })
       ).unwrap()
-      setSelectedFiles([])
-      await submitUserMessage(JSON.stringify(files[0]))
-    } else {
-      await submitUserMessage(value)
+      value = JSON.stringify(files?.[0])
     }
+    const thread = await submitUserMessage(value)
+    await streamChat(thread || '')
   }
 
   return (
@@ -267,12 +278,14 @@ export function PromptForm({
                 ))}
               </div>
               <div className="flex space-between items-center mt-auto">
-                <div className="left-0 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4">
-                  <FileUploadPopover
-                    onFileSelect={handleFileSelect}
-                    disabled={loading}
-                  />
-                </div>
+                {tentColorConfig.awaitingFileUpload && (
+                  <div className="left-0 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4">
+                    <FileUploadPopover
+                      onFileSelect={handleFileSelect}
+                      disabled={loading}
+                    />
+                  </div>
+                )}
                 <Textarea
                   ref={inputRef}
                   tabIndex={0}
@@ -287,7 +300,7 @@ export function PromptForm({
                   rows={1}
                   value={input}
                   onChange={e => setInput(e.target.value)}
-                  disabled={loading}
+                  disabled={loading || tentColorConfig.awaitingFileUpload}
                 />
                 <div className="right-0 top-[13px] sm:right-4">
                   <Tooltip>

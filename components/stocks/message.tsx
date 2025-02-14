@@ -25,12 +25,12 @@ export function UserMessage({ content }: { content: ChatMessage }) {
         <IconUser />
       </div>
       <div className="flex flex-col flex-1">
-        {files && (
+        {files ? (
           <div className="flex flex-wrap gap-4 mx-4 mb-2">
             {files.map((file: any, index: any) => {
               return (
                 <div key={index} className="flex items-start gap-4">
-                  {file.type && file.type.startsWith('image') && (
+                  {file.fileType && file.fileType.startsWith('image') && (
                     <img
                       src={file.previewUrl}
                       alt={file.name}
@@ -41,10 +41,11 @@ export function UserMessage({ content }: { content: ChatMessage }) {
               )
             })}
           </div>
-        )}
+        ) : (
         <div className="ml-4 flex-1 space-y-2 overflow-hidden pl-2">
           {content.message}
         </div>
+        )}
       </div>
     </div>
   )

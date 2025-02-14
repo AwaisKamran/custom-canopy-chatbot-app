@@ -12,7 +12,7 @@ export interface ChatList {
 }
 
 export function ChatList({ session, isShared }: ChatList) {
-  const { messages } = useSelector((state: any) => state.chatReducer)
+  const { messages, loading } = useSelector((state: any) => state.chatReducer)
 
   // if (!messages?.length) {
   //   return null
@@ -51,7 +51,7 @@ export function ChatList({ session, isShared }: ChatList) {
           {item.role === Roles.user ? (
             <div className="flex flex-col items-start">
               <UserMessage content={item} />
-              {isLastMessageFromUser && index === messages.length - 1 && (
+              {(isLastMessageFromUser || loading) && index === messages.length - 1 && (
                 <div className="mt-4">
                   <IconSpinner></IconSpinner>
                 </div>

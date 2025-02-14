@@ -101,9 +101,9 @@ export const ASSISTANT_RESPONSE_CONFIG = [{
   },
   {
     conditions: ["logo"],
-    excludes: ["color"],
+    excludes: ["uploading", "color"],
     actions: {
-      awaiting_file_upload: true
+      awaitingFileUpload: true
     },
   },
   {
