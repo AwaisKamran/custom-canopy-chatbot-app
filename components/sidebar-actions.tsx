@@ -23,6 +23,7 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import { ErrorMessage } from '@/app/constants'
+import { AppDispatch } from '@/lib/redux/store'
 
 interface SidebarActionsProps {
   chat: Chat
@@ -80,7 +81,6 @@ export function SidebarActions({ chat, removeChat }: SidebarActionsProps) {
                     toast.error(result.error)
                     return
                   }
-
                   setDeleteDialogOpen(false)
                   router.refresh()
                   router.push('/')

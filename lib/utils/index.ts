@@ -7,10 +7,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export const nanoid = customAlphabet(
-  '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
-  7
-) // 7-character random string
+const ALPHABET =
+  '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+const NANO_ID_LENGTH = 7
+
+export const nanoid = customAlphabet(ALPHABET, NANO_ID_LENGTH)
 
 export async function fetcher<JSON = any>(
   input: RequestInfo,
@@ -133,8 +134,12 @@ export function subMonths(date: Date, amount: number) {
   newDate.setMonth(newDate.getMonth() - amount)
   return newDate
 }
-
 export function getColorName(hexColor: string): string | null {
   const namedColor = namer(hexColor).basic[0]
   return namedColor ? namedColor.name : null
+}
+
+export const convertToBGR = (rgb: string) => {
+  const [r, g, b] = JSON.parse(rgb)
+  return `[${b}, ${g}, ${r}]`
 }
