@@ -34,17 +34,14 @@ import { processAssistantResponse } from '@/lib/utils/tent-mockup'
 import { streamThread, submitToolOutputsStream } from '@/lib/redux/apis/chat'
 
 export function PromptForm({
-  input,
-  setInput,
   session,
   setIsCarouselOpen
 }: {
-  input: string
-  setInput: (value: string) => void
   session?: Session
   setIsCarouselOpen: (value: boolean) => void
 }) {
   const { formRef, onKeyDown } = useEnterSubmit()
+  const [input, setInput] = React.useState<string>('')
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
   const dispatch: AppDispatch = useDispatch()
   const [selectedFiles, setSelectedFiles] = React.useState<FileData[]>([])

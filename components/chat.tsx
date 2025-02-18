@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import PreviewCarousel from './preview-carousel'
 import { initiateChat } from '@/lib/redux/slice/chat'
 import { AppDispatch, RootState } from '@/lib/redux/store'
+import { CHAT } from '@/app/constants'
 
 export interface ChatProps extends React.ComponentProps<'div'> {
   className?: string
@@ -24,7 +25,6 @@ export interface ChatProps extends React.ComponentProps<'div'> {
 
 export function Chat({ className, session, missingKeys, chat }: ChatProps) {
   const path = usePathname()
-  const [input, setInput] = useState('')
   const {
     id,
     messages,
@@ -43,7 +43,7 @@ export function Chat({ className, session, missingKeys, chat }: ChatProps) {
 
   useEffect(() => {
     if (session?.user) {
-      if (!path.includes('chat')) {
+      if (!path.includes(CHAT)) {
         window.history.replaceState({}, '', chatPath)
       }
     }
@@ -85,8 +85,6 @@ export function Chat({ className, session, missingKeys, chat }: ChatProps) {
         <div className="w-full h-px" ref={visibilityRef} />
       </div>
       <ChatPanel
-        input={input}
-        setInput={setInput}
         isAtBottom={isAtBottom}
         scrollToBottom={scrollToBottom}
         session={session}

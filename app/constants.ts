@@ -29,6 +29,13 @@ export const BlobAccess = {
     public: 'public' as AccessType
 }
 
+export const CHAT = 'chat'
+export const IMAGE = 'image'
+
+export const TENT_MOCKUP_VALIDATIONS = {
+  logoRequired: 'Logo is required',
+}
+
 export const COLORS = {
   WHITE_COLOR: '[255, 255, 255]',
   BLACK_COLOR: '[0, 0, 0]',
@@ -87,7 +94,7 @@ export const ASSISTANT_RESPONSE_CONFIG = [{
     },
   },
   {
-    conditions: ["text"],
+    conditions: ['text'],
     actions: {
       awaitingColorPick: false
     },

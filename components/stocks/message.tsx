@@ -1,6 +1,6 @@
 'use client'
 
-import { IconOpenAI, IconPDF, IconUser } from '@/components/ui/icons'
+import { IconOpenAI, IconUser } from '@/components/ui/icons'
 import { cn } from '@/lib/utils'
 import { spinner } from './spinner'
 import { CodeBlock } from '../ui/codeblock'
@@ -11,6 +11,7 @@ import rehypeRaw from 'rehype-raw'
 import { StreamableValue } from 'ai/rsc'
 import { useStreamableText } from '@/lib/hooks/use-streamable-text'
 import { ChatMessage } from '@/lib/types'
+import { IMAGE } from '@/app/constants'
 
 // Different types of message bubbles.
 
@@ -30,7 +31,7 @@ export function UserMessage({ content }: { content: ChatMessage }) {
             {files.map((file: any, index: any) => {
               return (
                 <div key={index} className="flex items-start gap-4">
-                  {file.fileType && file.fileType.startsWith('image') && (
+                  {file.fileType && file.fileType.startsWith(IMAGE) && (
                     <img
                       src={file.previewUrl}
                       alt={file.name}

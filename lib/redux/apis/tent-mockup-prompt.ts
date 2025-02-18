@@ -1,3 +1,4 @@
+import { TENT_MOCKUP_VALIDATIONS } from '@/app/constants'
 import { TentMockUpPrompt } from '@/lib/types'
 import { createFormData } from '@/lib/utils/tent-mockup'
 
@@ -6,7 +7,7 @@ export const generateTentMockupsApi = async (
 ): Promise<Blob> => {
   try {
     if (!tentMockupPrompt.logo) {
-      throw new Error('Logo is required')
+      throw new Error(TENT_MOCKUP_VALIDATIONS.logoRequired)
     }
     const logoResponse = await fetch(tentMockupPrompt.logo.previewUrl)
     const blob = await logoResponse.blob()
