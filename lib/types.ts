@@ -69,9 +69,6 @@ export interface TentMockUpPrompt {
   isPatterned: boolean
   tentColors: TentColorRegions
   text: string
-  userName: string
-  email: string
-  phoneNumber: string
   logo: FileData | null
   font: string
   fontColor: string
@@ -108,4 +105,30 @@ export enum StreamEvent {
   REQUIRES_ACTION = 'thread.run.requires_action',
   COMPLETED = 'thread.message.completed',
   ERROR = 'error'
+}
+
+export enum ResultCode {
+  InvalidCredentials = 'INVALID_CREDENTIALS',
+  InvalidSubmission = 'INVALID_SUBMISSION',
+  UserAlreadyExists = 'USER_ALREADY_EXISTS',
+  UnknownError = 'UNKNOWN_ERROR',
+  UserCreated = 'USER_CREATED',
+  UserLoggedIn = 'USER_LOGGED_IN'
+}
+
+export type ActionResult = {
+  type: string
+  resultCode: ResultCode
+  errors?: ActionErrors
+}
+
+export type ActionErrors = {
+  fieldErrors?: FieldErrors
+  formErrors?: string[]
+}
+
+export type FieldErrors = {
+  [x: string]: string | undefined
+  [x: number]: string | undefined
+  [x: symbol]: string | undefined
 }

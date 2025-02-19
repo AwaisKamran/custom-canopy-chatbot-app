@@ -31,7 +31,7 @@ export function UserMessage({ content }: { content: ChatMessage }) {
             {files.map((file: any, index: any) => {
               return (
                 <div key={index} className="flex items-start gap-4">
-                  {file.fileType && file.fileType.startsWith(IMAGE) && (
+                  {file.contentType && file.contentType.startsWith(IMAGE) && (
                     <img
                       src={file.previewUrl}
                       alt={file.name}

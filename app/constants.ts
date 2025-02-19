@@ -31,6 +31,7 @@ export const BlobAccess = {
 
 export const CHAT = 'chat'
 export const IMAGE = 'image'
+export const PHONE_REGEX = /^\+?[1-9]\d{7,14}$/
 
 export const TENT_MOCKUP_VALIDATIONS = {
   logoRequired: 'Logo is required',

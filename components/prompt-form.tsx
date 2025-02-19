@@ -66,7 +66,7 @@ export function PromptForm({
       const lastMessage = chat.messages.at(-1)
       if (!isStreaming) {
         if (version !== 0) {
-          const { loading, error, version, ...rest} = chat
+          const { loading, error, version, ...rest } = chat
           saveChat(rest)
         }
         if (lastMessage?.role === Roles.assistant) {
@@ -113,7 +113,7 @@ export function PromptForm({
           addMessage({
             ...userMessage,
             id: message.id,
-            files: JSON.stringify(selectedFiles)
+            files: JSON.stringify([JSON.parse(content)]),
           })
         )
         setSelectedFiles([])
@@ -123,9 +123,9 @@ export function PromptForm({
       thread = await dispatch(
         createThread({ messages: [userMessage] })
       ).unwrap()
-      addResponse(content, Roles.user)
+      addResponse('', content, Roles.user)
     }
-    return threadId || thread?.id
+    await streamChat(threadId || thread?.id || '')
   }
 
   const streamChat = async (thread: string) => {
@@ -232,8 +232,7 @@ export function PromptForm({
       ).unwrap()
       value = JSON.stringify(files?.[0])
     }
-    const thread = await submitUserMessage(value)
-    await streamChat(thread || '')
+   await submitUserMessage(value)
   }
 
   return (
