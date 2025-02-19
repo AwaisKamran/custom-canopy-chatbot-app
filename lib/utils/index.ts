@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from 'clsx'
 import { customAlphabet } from 'nanoid'
 import { twMerge } from 'tailwind-merge'
 import namer from 'color-namer'
+import { ResultCode } from '../types'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -63,15 +64,6 @@ export const getStringFromBuffer = (buffer: ArrayBuffer) =>
   Array.from(new Uint8Array(buffer))
     .map(b => b.toString(16).padStart(2, '0'))
     .join('')
-
-export enum ResultCode {
-  InvalidCredentials = 'INVALID_CREDENTIALS',
-  InvalidSubmission = 'INVALID_SUBMISSION',
-  UserAlreadyExists = 'USER_ALREADY_EXISTS',
-  UnknownError = 'UNKNOWN_ERROR',
-  UserCreated = 'USER_CREATED',
-  UserLoggedIn = 'USER_LOGGED_IN'
-}
 
 export const getMessageFromCode = (resultCode: string) => {
   switch (resultCode) {

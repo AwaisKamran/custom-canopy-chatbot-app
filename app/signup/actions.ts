@@ -1,16 +1,20 @@
 'use server'
 
 import { signIn } from '@/auth'
-import { ResultCode, getStringFromBuffer } from '@/lib/utils'
-import { z } from 'zod'
+import { getStringFromBuffer } from '@/lib/utils'
 import { kv } from '@vercel/kv'
 import { getUser } from '../login/actions'
 import { AuthError } from 'next-auth'
 import { ErrorMessage, SuccessMessage } from '../constants'
+import { SignupSchema } from '@/lib/schemas/signupSchema'
+import { ActionResult, ResultCode } from '@/lib/types'
+import { formatError } from '@/lib/utils/format-errors'
 
 export async function createUser(
   email: string,
   hashedPassword: string,
+  username: string,
+  phoneNumber: string,
   salt: string
 ) {
   const existingUser = await getUser(email)
@@ -25,6 +29,8 @@ export async function createUser(
       id: crypto.randomUUID(),
       email,
       password: hashedPassword,
+      username,
+      phoneNumber,
       salt
     }
 
@@ -45,19 +51,18 @@ interface Result {
 export async function signup(
   _prevState: Result | undefined,
   formData: FormData
-): Promise<Result | undefined> {
+): Promise<ActionResult | undefined> {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
+  const username = formData.get('username') as string
+  const phoneNumber = formData.get('phoneNumber') as string
 
-  const parsedCredentials = z
-    .object({
-      email: z.string().email(),
-      password: z.string().min(6)
-    })
-    .safeParse({
-      email,
-      password
-    })
+  const parsedCredentials = SignupSchema.safeParse({
+    email,
+    password,
+    username,
+    phoneNumber
+  })
 
   if (parsedCredentials.success) {
     const salt = crypto.randomUUID()
@@ -71,7 +76,13 @@ export async function signup(
     const hashedPassword = getStringFromBuffer(hashedPasswordBuffer)
 
     try {
-      const result = await createUser(email, hashedPassword, salt)
+      const result = await createUser(
+        email,
+        hashedPassword,
+        username,
+        phoneNumber,
+        salt
+      )
 
       if (result.resultCode === ResultCode.UserCreated) {
         await signIn('credentials', {
@@ -83,30 +94,35 @@ export async function signup(
 
       return result
     } catch (error) {
+      const formattedErrors = formatError(error)
       if (error instanceof AuthError) {
         switch (error.type) {
           case 'CredentialsSignin':
             return {
               type: ErrorMessage.message,
-              resultCode: ResultCode.InvalidCredentials
+              resultCode: ResultCode.InvalidCredentials,
+              errors: formattedErrors
             }
           default:
             return {
               type: ErrorMessage.message,
-              resultCode: ResultCode.UnknownError
+              resultCode: ResultCode.UnknownError,
+              errors: formattedErrors
             }
         }
       } else {
         return {
           type: ErrorMessage.message,
-          resultCode: ResultCode.UnknownError
+          resultCode: ResultCode.UnknownError,
+          errors: formattedErrors
         }
       }
     }
   } else {
     return {
       type: ErrorMessage.message,
-      resultCode: ResultCode.InvalidCredentials
+      resultCode: ResultCode.InvalidCredentials,
+      errors: formatError(parsedCredentials.error)
     }
   }
 }

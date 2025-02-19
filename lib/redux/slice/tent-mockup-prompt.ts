@@ -20,9 +20,6 @@ const initialState: TentMockUpPromptState = {
     walls_tertiary: ''
   },
   text: '',
-  userName: '',
-  email: '',
-  phoneNumber: '',
   logo: null,
   fontColor: '',
   font: '',
