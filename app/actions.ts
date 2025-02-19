@@ -101,7 +101,7 @@ export async function clearChats() {
   const pipeline = kv.pipeline()
 
   for (const chat of chats) {
-    const chatId = chat.split(":")[1];
+    const chatId = chat.split(':')[1]
     await deleteSavedFiles(chatId, session.user.id)
     pipeline.del(chat)
     pipeline.zrem(`user:chat:${session.user.id}`, chat)
@@ -113,36 +113,40 @@ export async function clearChats() {
   return redirect('/')
 }
 
-export async function deleteSavedFiles(chatId: string, userId: string, path?: string) {
-   const session = await auth()
+export async function deleteSavedFiles(
+  chatId: string,
+  userId: string,
+  path?: string
+) {
+  const session = await auth()
 
-   if (session?.user?.id !== userId) {
-     return {
-       error: Error401Response.message
-     }
-   }
-   const chat = await getChat(chatId, userId) as Chat
-   if (!chat || Error401Response.message in chat) {
-     return redirect('/')
-   }
+  if (session?.user?.id !== userId) {
+    return {
+      error: Error401Response.message
+    }
+  }
+  const chat = (await getChat(chatId, userId)) as Chat
+  if (!chat || Error401Response.message in chat) {
+    return redirect('/')
+  }
 
-   const deleteFileUrls = []
-   for (const message of chat.messages) {
-     if (message.files) {
-       const files = JSON.parse(message.files)
-       for (const file of files) {
-         deleteFileUrls.push(file.previewUrl)
-       }
-     } else {
-       const error = `No files to be deleted for message ${message.id}`
-       console.log(error)
-     }
-   }
+  const deleteFileUrls = []
+  for (const message of chat.messages) {
+    if (message.files) {
+      const files = JSON.parse(message.files)
+      for (const file of files) {
+        deleteFileUrls.push(file.previewUrl)
+      }
+    } else {
+      const error = `No files to be deleted for message ${message.id}`
+      console.log(error)
+    }
+  }
 
-   if (deleteFileUrls && deleteFileUrls.length > 0) {
-     await del(deleteFileUrls)
-   }
- }
+  if (deleteFileUrls && deleteFileUrls.length > 0) {
+    await del(deleteFileUrls)
+  }
+}
 
 export async function getSharedChat(id: string) {
   const chat = await kv.hgetall<Chat>(`chat:${id}`)
@@ -177,7 +181,11 @@ export async function refreshHistory(path: string) {
 }
 
 export async function getMissingKeys() {
-  const keysRequired = ['OPENAI_API_KEY', 'NEXT_PUBLIC_ASSISTANT_ID', 'NEXT_PUBLIC_CUSTOM_CANOPY_SERVER_URL']
+  const keysRequired = [
+    'OPENAI_API_KEY',
+    'NEXT_PUBLIC_ASSISTANT_ID',
+    'NEXT_PUBLIC_CUSTOM_CANOPY_SERVER_URL'
+  ]
   return keysRequired
     .map(key => (process.env[key] ? '' : key))
     .filter(key => key !== '')

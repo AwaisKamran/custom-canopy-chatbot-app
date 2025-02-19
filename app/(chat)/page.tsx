@@ -16,10 +16,5 @@ export default async function IndexPage() {
     redirect('/login')
   }
 
-  return (
-    <Chat
-      session={session}
-      missingKeys={missingKeys}
-    />
-  )
+  return <Chat session={session} missingKeys={missingKeys} />
 }

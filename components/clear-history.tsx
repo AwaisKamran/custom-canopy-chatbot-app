@@ -31,7 +31,6 @@ export function ClearHistory({
   const [open, setOpen] = React.useState(false)
   const [isPending, startTransition] = React.useTransition()
 
-
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>

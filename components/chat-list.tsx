@@ -51,11 +51,12 @@ export function ChatList({ session, isShared }: ChatList) {
           {item.role === Roles.user ? (
             <div className="flex flex-col items-start">
               <UserMessage content={item} />
-              {(isLastMessageFromUser || loading) && index === messages.length - 1 && (
-                <div className="mt-4">
-                  <IconSpinner></IconSpinner>
-                </div>
-              )}
+              {(isLastMessageFromUser || loading) &&
+                index === messages.length - 1 && (
+                  <div className="mt-4">
+                    <IconSpinner></IconSpinner>
+                  </div>
+                )}
             </div>
           ) : (
             <BotMessage content={item.message}></BotMessage>

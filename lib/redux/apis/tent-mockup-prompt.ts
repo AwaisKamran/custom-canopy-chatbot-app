@@ -11,13 +11,15 @@ export const generateTentMockupsApi = async (
     }
     const logoResponse = await fetch(tentMockupPrompt.logo.previewUrl)
     const blob = await logoResponse.blob()
-    const logoFile = new File([blob], tentMockupPrompt.logo.name || '', { type: tentMockupPrompt.logo.fileType })
+    const logoFile = new File([blob], tentMockupPrompt.logo.name || '', {
+      type: tentMockupPrompt.logo.fileType
+    })
 
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_CUSTOM_CANOPY_SERVER_URL}/create-mockups`,
       {
         method: 'POST',
-        body: createFormData({...tentMockupPrompt, logoFile: logoFile}),
+        body: createFormData({ ...tentMockupPrompt, logoFile: logoFile }),
         headers: {
           Connection: 'keep-alive'
         }

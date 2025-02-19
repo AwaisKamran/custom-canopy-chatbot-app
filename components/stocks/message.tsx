@@ -43,9 +43,9 @@ export function UserMessage({ content }: { content: ChatMessage }) {
             })}
           </div>
         ) : (
-        <div className="ml-4 flex-1 space-y-2 overflow-hidden pl-2">
-          {content.message}
-        </div>
+          <div className="ml-4 flex-1 space-y-2 overflow-hidden pl-2">
+            {content.message}
+          </div>
         )}
       </div>
     </div>

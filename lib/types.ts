@@ -5,12 +5,11 @@ export type Message = CoreMessage & {
 }
 
 export interface ChatMessage {
-  id: string;
-  message: string;
-  role?: string;
+  id: string
+  message: string
+  role?: string
   files?: string
 }
-
 
 export interface Chat extends Record<string, any> {
   id: string
@@ -50,18 +49,18 @@ export interface User extends Record<string, any> {
 }
 
 export interface FileData {
-  file: File,
+  file: File
   previewUrl: string
   name?: string
   fileType: string
 }
 
 export interface TentColorRegions {
-    slope: string
-    canopy: string
-    walls_primary: string
-    walls_secondary: string
-    walls_tertiary: string
+  slope: string
+  canopy: string
+  walls_primary: string
+  walls_secondary: string
+  walls_tertiary: string
 }
 
 export interface TentMockUpPrompt {
@@ -74,8 +73,12 @@ export interface TentMockUpPrompt {
   fontColor: string
 }
 
-export type RegionsType = 'slope' | 'canopy' | 'walls_primary' | 'walls_secondary' | 'walls_tertiary'
-
+export type RegionsType =
+  | 'slope'
+  | 'canopy'
+  | 'walls_primary'
+  | 'walls_secondary'
+  | 'walls_tertiary'
 
 export enum Regions {
   slope = 'slope',
@@ -88,15 +91,15 @@ export enum Regions {
 export type ChatResponse = Chat | null | { error: string }
 
 export enum Roles {
-  "user" = "user",
-  "assistant" = "assistant"
+  'user' = 'user',
+  'assistant' = 'assistant'
 }
 
 export type TentColorConfig = {
-  patterned: boolean,
-  isMonochrome: boolean,
-  awaitingColorPick: boolean,
-  currentRegion: string,
+  patterned: boolean
+  isMonochrome: boolean
+  awaitingColorPick: boolean
+  currentRegion: string
   awaitingFileUpload: boolean
 }
 

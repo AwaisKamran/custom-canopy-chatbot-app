@@ -39,7 +39,7 @@ const initialState: ChatState = {
   loading: false,
   error: null,
   createdAt: new Date(),
-  version: 0,
+  version: 0
 }
 
 export const createThread = createAsyncThunk<
