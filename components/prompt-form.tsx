@@ -113,7 +113,7 @@ export function PromptForm({
           addMessage({
             ...userMessage,
             id: message.id,
-            files: JSON.stringify([JSON.parse(content)]),
+            files: JSON.stringify([JSON.parse(content)])
           })
         )
         setSelectedFiles([])
@@ -141,7 +141,7 @@ export function PromptForm({
         } catch (error) {
           console.error('Error during tool call:', error)
         }
-      },
+      }
     })
   }
 
@@ -232,7 +232,7 @@ export function PromptForm({
       ).unwrap()
       value = JSON.stringify(files?.[0])
     }
-   await submitUserMessage(value)
+    await submitUserMessage(value)
   }
 
   return (

@@ -2,11 +2,13 @@ import { convertToBGR } from '.'
 import { TentMockUpPrompt } from '../types'
 import { ASSISTANT_RESPONSE_CONFIG, COLORS } from '@/app/constants'
 
-interface TentMockUpPromptFormData extends TentMockUpPrompt{
-  logoFile: File,
+interface TentMockUpPromptFormData extends TentMockUpPrompt {
+  logoFile: File
 }
 
-export const createFormData = (mockUpPrompt: TentMockUpPromptFormData): FormData => {
+export const createFormData = (
+  mockUpPrompt: TentMockUpPromptFormData
+): FormData => {
   const { logoFile, tentColors, text, fontColor, isPatterned } = mockUpPrompt
   const formRequestBody = new FormData()
 

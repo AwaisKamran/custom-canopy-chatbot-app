@@ -1,5 +1,3 @@
-
-
 import { nanoid } from 'nanoid'
 import { AssistantStreamEvent } from 'openai/resources/beta'
 import { TextDeltaBlock } from 'openai/resources/beta/threads'
@@ -78,6 +76,6 @@ export function useStreamEvents() {
     processStream,
     assistantResponse,
     isStreaming,
-    error,
+    error
   }
 }

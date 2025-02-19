@@ -65,7 +65,6 @@ export const processTentMockups = createAsyncThunk<
   }
 })
 
-
 const tentMockupSlice = createSlice({
   name: 'mockUpPrompt',
   initialState,

@@ -56,7 +56,7 @@ export default function SignupForm() {
             placeholder="Enter your email address"
             error={result?.errors?.fieldErrors?.email}
             type="email"
-            containerClassName='mt-2'
+            containerClassName="mt-2"
             required
           />
           <InputField
@@ -66,7 +66,7 @@ export default function SignupForm() {
             placeholder="Enter your phone number (+1234567890)"
             error={result?.errors?.fieldErrors?.phoneNumber}
             type="text"
-            containerClassName='mt-2'
+            containerClassName="mt-2"
             required
           />
           <InputField
@@ -76,7 +76,7 @@ export default function SignupForm() {
             placeholder="Enter password"
             error={result?.errors?.fieldErrors?.password}
             type="password"
-            containerClassName='mt-2'
+            containerClassName="mt-2"
             minLength={6}
             required
           />

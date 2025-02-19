@@ -6,7 +6,8 @@
     "start": "next start",
     "type-check": "tsc --noEmit",
     "format:write": "prettier --write \"{app,lib,components}/**/*.{ts,tsx,mdx}\" --cache",
-    "format:check": "prettier --check \"{app,lib,components}**/*.{ts,tsx,mdx}\" --cache"
+    "format:check": "prettier --check \"{app,lib,components}**/*.{ts,tsx,mdx}\" --cache",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@ai-sdk/openai": "^0.0.53",
@@ -61,6 +62,7 @@
     "@types/react-dom": "^18.3.0",
     "@types/react-syntax-highlighter": "^15.5.13",
     "autoprefixer": "^10.4.20",
+    "husky": "^8.0.0",
     "postcss": "^8.4.41",
     "prettier": "^3.3.3",
     "tailwind-merge": "^2.5.2",
