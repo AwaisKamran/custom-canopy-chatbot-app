@@ -31,7 +31,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       } else {
         return NextResponse.json({
           status: Error401Response.status,
-          message: Error401Response.message
+          error: Error401Response.message
         })
       }
     } else {
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   } catch (error) {
     return NextResponse.json({
       status: Error500Response.status,
-      message: error
+      error: error
     })
   }
 }

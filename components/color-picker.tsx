@@ -60,7 +60,7 @@ export default function ColorPickerPopover({
           onClick={() => setPickerOpen(false)}
         >
           <IconColorPicker />
-          <span>Pick a Color</span>
+          <span data-testid="color-picker-button">Pick a Color</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent align="center" side="top">

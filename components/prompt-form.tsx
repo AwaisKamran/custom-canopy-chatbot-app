@@ -254,7 +254,7 @@ export function PromptForm({
                     onClick={() => setIsCarouselOpen(true)}
                   >
                     <IconPicture />
-                    <span>View Mockups</span>
+                    <span data-testid="view-mockups-button">View Mockups</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>View Mockups</TooltipContent>
@@ -297,6 +297,7 @@ export function PromptForm({
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   disabled={loading || tentColorConfig.awaitingFileUpload}
+                  data-testid="prompt-message-input"
                 />
                 <div className="right-0 top-[13px] sm:right-4">
                   <Tooltip>
@@ -305,9 +306,11 @@ export function PromptForm({
                         type="submit"
                         size="icon"
                         disabled={
-                          tentColorConfig.awaitingFileUpload &&
-                          selectedFiles.length === 0
+                          loading ||
+                          (tentColorConfig.awaitingFileUpload &&
+                            selectedFiles.length === 0)
                         }
+                        data-testid="send-message-button"
                       >
                         <IconArrowElbow />
                         <span className="sr-only">Send message</span>

@@ -61,7 +61,9 @@ function FileUploadPopover({
           onClick={() => setIsPopoverOpen(false)}
         >
           <IconAttachment />
-          <span className="sr-only">Attach File</span>
+          <span className="sr-only" data-testid="attach-file-button">
+            Attach File
+          </span>
         </Button>
       </PopoverTrigger>
 
@@ -73,7 +75,7 @@ function FileUploadPopover({
           onClick={handleFileUpload}
         >
           <IconAddFile />
-          <span>Upload from computer</span>
+          <span data-testid="upload-button">Upload from computer</span>
         </Button>
 
         <input
@@ -82,6 +84,7 @@ function FileUploadPopover({
           style={{ display: 'none' }}
           onChange={handleFileChange}
           accept="image/*"
+          data-testid="file-input"
           multiple
         />
       </PopoverContent>
