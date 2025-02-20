@@ -37,7 +37,9 @@ export default function LoginForm() {
           alt="logo"
           className="invert dark:invert-0 mx-auto h-21 w-auto mb-5"
         />
-        <h1 className="mb-3 text-2xl font-bold">Please log in to continue.</h1>
+        <h1 className="mb-3 text-2xl font-bold" data-testid="login-header">
+          Please log in to continue.
+        </h1>
         <div className="w-full">
           <div>
             <label
@@ -53,6 +55,7 @@ export default function LoginForm() {
                 type="email"
                 name="email"
                 placeholder="Enter your email address"
+                data-testid="email-input"
                 required
               />
             </div>
@@ -71,6 +74,7 @@ export default function LoginForm() {
                 type="password"
                 name="password"
                 placeholder="Enter password"
+                data-testid="password-input"
                 required
                 minLength={6}
               />
@@ -83,6 +87,7 @@ export default function LoginForm() {
       <Link
         href="/signup"
         className="flex flex-row gap-1 text-sm text-zinc-400"
+        data-testid="signup-link"
       >
         No account yet? <div className="font-semibold underline">Sign up</div>
       </Link>
@@ -96,6 +101,8 @@ function LoginButton() {
   return (
     <button
       className="my-4 flex h-10 w-full flex-row items-center justify-center rounded-md bg-zinc-900 p-2 text-sm font-semibold text-zinc-100 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+      data-testid="login-button"
+      disabled={pending}
       aria-disabled={pending}
     >
       {pending ? <IconSpinner /> : 'Log in'}
