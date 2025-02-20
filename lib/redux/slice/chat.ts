@@ -190,6 +190,7 @@ const chatSlice = createSlice({
           ...state,
           loading: false,
           threadId: action.payload.id,
+          version: state.version + 1,
           error: null
         }
       })
