@@ -31,6 +31,7 @@ export function PromptForm({ session }: { session?: Session }) {
   const [aiState, _setAIState] = useAIState()
   const lastMessage = aiState?.messages?.at(-1)
   const lastFileUploadMessage = isLastFileUploadMessage(lastMessage)
+  const [loading, setLoading] = React.useState(false)
 
   React.useEffect(() => {
     inputRef.current?.focus()
@@ -56,7 +57,7 @@ export function PromptForm({ session }: { session?: Session }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
+    setLoading(true)
     if (window.innerWidth < 600) {
       ;(e.target as HTMLFormElement)['message']?.blur()
     }
@@ -93,6 +94,7 @@ export function PromptForm({ session }: { session?: Session }) {
       ...currentConversation,
       assistantResponse
     ])
+    setLoading(false)
   }
 
   return (
@@ -112,7 +114,7 @@ export function PromptForm({ session }: { session?: Session }) {
           <div className="left-0 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4">
             <FileUploadPopover
               onFileSelect={handleFileSelect}
-              disabled={!lastFileUploadMessage}
+              disabled={!lastFileUploadMessage || loading}
             />
           </div>
           <Textarea
@@ -129,6 +131,7 @@ export function PromptForm({ session }: { session?: Session }) {
             rows={1}
             value={input}
             onChange={e => setInput(e.target.value)}
+            disabled={loading || lastFileUploadMessage}
           />
           <div className="right-0 top-[13px] sm:right-4">
             <Tooltip>
@@ -137,7 +140,7 @@ export function PromptForm({ session }: { session?: Session }) {
                   type="submit"
                   size="icon"
                   disabled={
-                    aiState.loading ||
+                    loading ||
                     (lastFileUploadMessage && selectedFiles.length === 0)
                   }
                 >

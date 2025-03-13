@@ -41,6 +41,7 @@ export const generateTentMockupsApi = async (
     }
     const logoFile = await fetchLogoFile(tentMockupPrompt.logo)
     const formData = createFormData({ ...tentMockupPrompt, logoFile, userId })
+    console.log('formData', formData)
     return await fetchMockups(formData)
   } catch (error) {
     throw new Error((error as Error).message || 'Something went wrong!')

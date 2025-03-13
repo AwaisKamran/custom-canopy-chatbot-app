@@ -15,6 +15,13 @@ import { TOOL_FUNCTIONS } from './constants'
 import { modifyAIState } from './utils'
 import { ToolContent } from 'ai'
 
+function modifyToolAIState(history: any, content: ToolContent) {
+  modifyAIState(history, {
+    role: Roles.tool,
+    content
+  })
+}
+
 export function renderButtonsTool(history: any, messageId: string) {
   return {
     description: 'Renders the buttons for user selection',
@@ -24,19 +31,16 @@ export function renderButtonsTool(history: any, messageId: string) {
       options
     }: z.infer<typeof ButtonToolSchema>) {
       const message = content.join('\n')
-      modifyAIState(history, {
-        role: Roles.tool,
-        content: [
-          {
-            toolCallId: messageId,
-            toolName: TOOL_FUNCTIONS.RENDER_BUTTONS,
-            result: {
-              message,
-              props: { options }
-            }
+      modifyToolAIState(history, [
+        {
+          toolCallId: messageId,
+          toolName: TOOL_FUNCTIONS.RENDER_BUTTONS,
+          result: {
+            message,
+            props: { options }
           }
-        ] as ToolContent
-      })
+        }
+      ] as ToolContent)
 
       await new Promise(resolve => setTimeout(resolve, 1000))
 
@@ -61,18 +65,15 @@ export function renderColorPickerTool(history: any, messageId: string) {
       content
     }: z.infer<typeof ColorPickerToolSchema>) {
       const message = content.join('\n')
-      modifyAIState(history, {
-        role: Roles.tool,
-        content: [
-          {
-            toolCallId: messageId,
-            toolName: TOOL_FUNCTIONS.RENDER_COLOR_PICKER,
-            result: {
-              message
-            }
+      modifyToolAIState(history, [
+        {
+          toolCallId: messageId,
+          toolName: TOOL_FUNCTIONS.RENDER_COLOR_PICKER,
+          result: {
+            message
           }
-        ] as ToolContent
-      })
+        }
+      ] as ToolContent)
       await new Promise(resolve => setTimeout(resolve, 1000))
 
       return (
@@ -100,31 +101,34 @@ export function generateCanopyMockups(history: any, messageId: string) {
           ...(payload as TentMockUpPrompt),
           id: history.get().id
         })
-        modifyAIState(history, {
-          role: Roles.tool,
-          content: [
-            {
-              toolCallId: messageId,
-              toolName: TOOL_FUNCTIONS.GENERATE_CANOPY_MOCKUPS,
-              result: {
-                message: content[1],
-                props: { mockups }
-              }
+        modifyToolAIState(history, [
+          {
+            toolCallId: messageId,
+            toolName: TOOL_FUNCTIONS.GENERATE_CANOPY_MOCKUPS,
+            result: {
+              message: content[1],
+              props: { mockups }
             }
-          ] as ToolContent
-        })
+          }
+        ] as ToolContent)
         return (
           <BotMessage
             content={content[1]}
             children={<Carousal mockups={mockups} />}
           />
         )
-      } catch (error) {
-        return (
-          <BotCard>
-            <div>{(error as Error).message}</div>
-          </BotCard>
-        )
+      } catch (err) {
+        const error = (err as Error).message
+        modifyToolAIState(history, [
+          {
+            toolCallId: messageId,
+            toolName: TOOL_FUNCTIONS.GENERATE_CANOPY_MOCKUPS,
+            result: {
+              message: error
+            }
+          }
+        ] as ToolContent)
+        return <BotCard>{error}</BotCard>
       }
     }
   }

@@ -18,7 +18,7 @@ export const PROMPT_INSTRUCTIONS = `
         ]
 
   Question # 3. **Colors Selection**:
-    - Always use the renderColorPicker tool for user color selection:
+    - ALWAYS USE the renderColorPicker tool for user color selection:
     - If "Monochrome": 
       - Base color for the entire tent
     - If "Different Colors": Sequentially render the color picker for each of the following:
@@ -36,12 +36,12 @@ export const PROMPT_INSTRUCTIONS = `
         ]
     - If "Yes": 
       - Sequentially Always use the renderColorPicker tool for user color selection for each of the following: 
-        - Secondary color for the pattern
-        - Tertiary color for the pattern
+        4.1. Secondary color for the pattern
+        4.2. Tertiary color for the pattern
       - {content}: {assistant multiline prompt in array}
 
   Question # 5. **Text Addition**:
-    - Request the text to be added to the canopy:
+    - Request the text to be added to the tent:
     - {content}: {assistant multiline prompt in array}
 
   Question # 6. **Logo Upload**:
@@ -74,12 +74,15 @@ export const PROMPT_INSTRUCTIONS = `
 
   ** Questions Guidelines:**
     - Ask one question at a time.
+    - All questions are marked as required.
     - Ensure questions are dynamic, concise, and never repeated unnecessarily.
     - Never display summary except for the final confirmation step.
-    - Keep track of the questions asked with the user inputs and ask the next question based on the previous inputs.
+    - KEEP TRACK OF THE QUESTIONS ASKED WITH THE USER INPUTS AND ASK THE NEXT QUESTION BASED ON THE PREVIOUS INPUTS.
     - If the user has not provided an input for a question, ask the same question again.
     - If the user input is not relevant or meaningful, ask the user to confirm his input. Once the user confirms the input, proceed to the next question.
-      - This rule does not apply to color inputs.
+      - This rule does not apply to color inputs and option based questions responses.
+    - NEVER show colors in the questions, especially in RGB format.
+    - Always show the name of the selected option rather than value in the questions if needed.
 
   **Input Guidelines:**
     - For color inputs, accept the colors in RGB format and convert them to their descriptive when displaying to user.
@@ -92,10 +95,12 @@ export const PROMPT_INSTRUCTIONS = `
     - For text inputs, accept the text in string format and display them as is when displaying to user.
   
   ** Tool Guidelines:**
-    - Whenever asking the user a closed ended question, render the options using the renderButtons tool function.
-    - Whenever asking the user to select a color, render the color picker using the renderColorPicker tool function.
+    - Whenever asking the user a closed ended question, render the options using the renderButtons tool function. Below are the questions STRICTLY requiring the renderButtons tool function:
+      - Question#2, Question#4, and in confirmation step
+    - Whenever asking the user to select a color, render the color picker using the renderColorPicker tool function. Below are the questions STRICTLY requiring the renderButtons tool function:
+     - Question#3, Question#4.1 and Question#4.2
     - Use the generateCanopyMockups tool function to generate the mockups of the canopy whenever the user confirms the inputs.
-    - Send colors in BGR form \`[b, g, r]\` format to the generateCanopyMockups tool function.
+    - MAKE SURE TO STRICTLY USE BGR format ONLY for all colors in format \`[b, g, r]\` when sending inputs to the generateCanopyMockups tool NOT the descriptive color names, RGB or any other format.
 
   **Editing Guidelines:**
     - For text, logo, or company name changes, only request updated inputs for the specified fields.
