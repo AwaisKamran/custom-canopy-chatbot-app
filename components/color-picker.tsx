@@ -56,7 +56,8 @@ export default function ColorPickerPopover({
         <Button
           variant="outline"
           size="icon"
-          className="flex items-center gap-2 w-full p-2"
+          className="flex items-center gap-2 w-full p-2 disabled:cursor-not-allowed"
+          disabled={disabled}
           onClick={() => setPickerOpen(false)}
         >
           <IconColorPicker />

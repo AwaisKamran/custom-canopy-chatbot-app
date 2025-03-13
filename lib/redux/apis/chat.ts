@@ -6,6 +6,7 @@ import {
   AssistantStream,
   RunSubmitToolOutputsParamsStream
 } from 'openai/lib/AssistantStream'
+import { PutBlobResult } from '@vercel/blob'
 
 export const openai = new OpenAI({
   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
@@ -52,15 +53,15 @@ export function cancelRunApi(
 
 export async function saveFilesApi(
   files: FileData[],
-  threadId: string,
+  chatId: string,
   messageId: string,
   userId: string
-): Promise<Array<FileData>> {
+): Promise<Array<PutBlobResult>> {
   try {
     const fileBlobs = await Promise.all(
       files.map(async file => {
         const response = await fetch(
-          `/api/save-files?chatId=${threadId}&filename=${file.file.name}&userId=${userId}&messageId=${messageId}`,
+          `/api/save-files?chatId=${chatId}&filename=${file.file.name}&userId=${userId}&messageId=${messageId}`,
           {
             method: 'POST',
             body: file.file

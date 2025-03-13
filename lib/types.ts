@@ -1,25 +1,29 @@
-import { CoreMessage } from 'ai'
+import { PutBlobResult } from '@vercel/blob'
+import { CoreMessage, ImagePart } from 'ai'
 
 export type Message = CoreMessage & {
   id: string
 }
 
-export interface ChatMessage {
+export interface ClientMessage {
   id: string
+  role: Roles
+  display: React.ReactNode
+  selectedOption?: string
+}
+
+export interface ToolCallResult {
   message: string
-  role?: string
-  files?: string
+  props: any
 }
 
 export interface Chat extends Record<string, any> {
   id: string
   title: string
-  createdAt: Date
+  messages: CoreMessage[]
   userId?: string
   path: string
-  messages: ChatMessage[]
-  sharePath?: string
-  threadId: string
+  createdAt: Date
 }
 
 export type ServerActionResult<Result> = Promise<
@@ -64,35 +68,23 @@ export interface TentColorRegions {
 }
 
 export interface TentMockUpPrompt {
+  id: string
   companyName: string
   isPatterned: boolean
   tentColors: TentColorRegions
   text: string
-  logo: FileData | null
+  logo: ImagePart
   font: string
   fontColor: string
-}
-
-export type RegionsType =
-  | 'slope'
-  | 'canopy'
-  | 'walls_primary'
-  | 'walls_secondary'
-  | 'walls_tertiary'
-
-export enum Regions {
-  slope = 'slope',
-  canopy = 'canopy',
-  walls_primary = 'walls_primary',
-  walls_secondary = 'walls_secondary',
-  walls_tertiary = 'walls_tertiary'
 }
 
 export type ChatResponse = Chat | null | { error: string }
 
 export enum Roles {
   'user' = 'user',
-  'assistant' = 'assistant'
+  'assistant' = 'assistant',
+  'system' = 'system',
+  'tool' = 'tool'
 }
 
 export type TentColorConfig = {
@@ -103,13 +95,6 @@ export type TentColorConfig = {
   awaitingFileUpload: boolean
 }
 
-export enum StreamEvent {
-  DELTA = 'thread.message.delta',
-  REQUIRES_ACTION = 'thread.run.requires_action',
-  COMPLETED = 'thread.message.completed',
-  ERROR = 'error'
-}
-
 export enum ResultCode {
   InvalidCredentials = 'INVALID_CREDENTIALS',
   InvalidSubmission = 'INVALID_SUBMISSION',
@@ -117,6 +102,12 @@ export enum ResultCode {
   UnknownError = 'UNKNOWN_ERROR',
   UserCreated = 'USER_CREATED',
   UserLoggedIn = 'USER_LOGGED_IN'
+}
+
+export type MockupResponse = {
+  front: PutBlobResult
+  'half-wall': PutBlobResult
+  'top-view': PutBlobResult
 }
 
 export type ActionResult = {

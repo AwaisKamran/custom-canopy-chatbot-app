@@ -59,6 +59,7 @@ function FileUploadPopover({
           size="icon"
           className="size-8 sm:rounded-full bg-background p-0 sm:left-4"
           onClick={() => setIsPopoverOpen(false)}
+          disabled={disabled}
         >
           <IconAttachment />
           <span className="sr-only">Attach File</span>

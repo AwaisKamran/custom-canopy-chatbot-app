@@ -23,7 +23,6 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import { ErrorMessage } from '@/app/constants'
-import { AppDispatch } from '@/lib/redux/store'
 
 interface SidebarActionsProps {
   chat: Chat
