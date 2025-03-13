@@ -22,7 +22,8 @@ const fetchMockups = async (formData: FormData): Promise<MockupResponse> => {
     }
   )
   if (!response.ok) {
-    throw new Error('Failed to generate custom canopy')
+    const errorDetails = await response.json()
+    throw new Error(`API Error: ${JSON.stringify(errorDetails)}`)
   }
 
   const mockups = await response.json()
@@ -44,6 +45,7 @@ export const generateTentMockupsApi = async (
     console.log('formData', formData)
     return await fetchMockups(formData)
   } catch (error) {
+    console.log('error,', error)
     throw new Error((error as Error).message || 'Something went wrong!')
   }
 }
