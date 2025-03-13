@@ -5,6 +5,7 @@ import { getChat, getMissingKeys } from '@/app/actions'
 import { Chat as UserChatMessage, Session, ChatResponse } from '@/lib/types'
 import { Error401Response } from '@/app/constants'
 import { Chat } from '@/components/chat'
+import { AI } from '@/app/(chat)/ai'
 
 export interface ChatPageProps {
   params: {
@@ -30,7 +31,9 @@ export default async function ChatPage({ params }: ChatPageProps) {
       notFound()
     }
     return (
-      <Chat session={session} missingKeys={missingKeys} chat={existingChat} />
+      <AI initialAIState={existingChat}>
+        <Chat session={session} missingKeys={missingKeys} />
+      </AI>
     )
   }
 }

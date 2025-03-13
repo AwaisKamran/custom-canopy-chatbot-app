@@ -3,6 +3,7 @@ import { auth } from '@/auth'
 import { Session } from '@/lib/types'
 import { getMissingKeys } from '@/app/actions'
 import { redirect } from 'next/navigation'
+import { AI } from '@/app/(chat)/ai'
 
 export const metadata = {
   title: 'Conrad Labs AI Chatbot'
@@ -16,5 +17,9 @@ export default async function IndexPage() {
     redirect('/login')
   }
 
-  return <Chat session={session} missingKeys={missingKeys} />
+  return (
+    <AI>
+      <Chat session={session} missingKeys={missingKeys} />
+    </AI>
+  )
 }

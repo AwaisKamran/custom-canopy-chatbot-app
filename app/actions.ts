@@ -5,9 +5,11 @@ import { redirect } from 'next/navigation'
 import { kv } from '@vercel/kv'
 
 import { auth } from '@/auth'
-import { type Chat } from '@/lib/types'
+import { MockupResponse, ToolCallResult, type Chat } from '@/lib/types'
 import { del } from '@vercel/blob'
 import { Error401Response } from './constants'
+import { ImagePart, ToolContent } from 'ai'
+import { TOOL_FUNCTIONS } from '@/lib/ai-tools/constants'
 
 export async function getChats(userId?: string | null) {
   const session = await auth()
@@ -130,21 +132,45 @@ export async function deleteSavedFiles(
     return redirect('/')
   }
 
-  const deleteFileUrls = []
-  for (const message of chat.messages) {
-    if (message.files) {
-      const files = JSON.parse(message.files)
-      for (const file of files) {
-        deleteFileUrls.push(file.previewUrl)
-      }
-    } else {
-      const error = `No files to be deleted for message ${message.id}`
-      console.log(error)
-    }
-  }
+  const deleteFileUrls: string[] = []
 
-  if (deleteFileUrls && deleteFileUrls.length > 0) {
-    await del(deleteFileUrls)
+  chat.messages?.forEach(message => {
+    try {
+      if (message.role === 'tool' && message.content) {
+        ;(message.content as ToolContent)?.forEach(contentItem => {
+          if (contentItem.toolName === TOOL_FUNCTIONS.GENERATE_CANOPY_MOCKUPS) {
+            const mockups = (contentItem.result as ToolCallResult)?.props
+              ?.mockups as MockupResponse
+            if (mockups) {
+              deleteFileUrls.push(
+                ...Object.values(mockups).map(({ url }) => url)
+              )
+            }
+          }
+        })
+      } else if (message.role === 'user' && message.content) {
+        const parsedContent =
+          typeof message.content === 'string'
+            ? (JSON.parse(message.content) as ImagePart[])
+            : (message.content as ImagePart[])
+
+        parsedContent?.forEach(({ type, image }) => {
+          if (type === 'image' && image) {
+            deleteFileUrls.push(image as string)
+          }
+        })
+      }
+    } catch {
+      return
+    }
+  })
+
+  if (deleteFileUrls.length > 0) {
+    try {
+      await del(deleteFileUrls)
+    } catch (e) {
+      console.error('Error deleting files:', e)
+    }
   }
 }
 

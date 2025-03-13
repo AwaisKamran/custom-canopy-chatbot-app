@@ -3,194 +3,38 @@
 import * as React from 'react'
 import Textarea from 'react-textarea-autosize'
 import { Button } from '@/components/ui/button'
-import { IconArrowElbow, IconPicture } from '@/components/ui/icons'
+import { IconArrowElbow } from '@/components/ui/icons'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
-import { nanoid } from 'nanoid'
-import { FileData, Roles, Session, Regions, TentColorConfig } from '@/lib/types'
-import { saveChat } from '@/app/actions'
-import {
-  addChatMessage,
-  addMessage,
-  createThread,
-  saveFiles
-} from '@/lib/redux/slice/chat'
-import { useDispatch, useSelector } from 'react-redux'
+import { FileData, Roles, Session } from '@/lib/types'
 import FileUploadPopover from './file-upload-popover'
 import FilePreview from './file-preview'
-import ColorPicker from './color-picker'
-import {
-  generateTentMockups,
-  processTentMockups,
-  setMockUpPrompt
-} from '@/lib/redux/slice/tent-mockup-prompt'
-import { AppDispatch, RootState } from '@/lib/redux/store'
-import { useStreamEvents } from '@/lib/hooks/use-stream-processor'
-import { processAssistantResponse } from '@/lib/utils/tent-mockup'
-import { streamThread, submitToolOutputsStream } from '@/lib/redux/apis/chat'
+import { useActions, useAIState, useUIState } from 'ai/rsc'
+import { UserMessage } from './stocks/message'
+import { nanoid } from '@/lib/utils'
+import { saveFilesApi } from '@/lib/redux/apis/chat'
+import { ImagePart, UserContent } from 'ai'
+import { isLastFileUploadMessage } from '@/lib/ai-tools/utils'
+import { IMAGE } from '@/app/constants'
 
-export function PromptForm({
-  session,
-  setIsCarouselOpen
-}: {
-  session?: Session
-  setIsCarouselOpen: (value: boolean) => void
-}) {
+export function PromptForm({ session }: { session?: Session }) {
   const { formRef, onKeyDown } = useEnterSubmit()
   const [input, setInput] = React.useState<string>('')
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
-  const dispatch: AppDispatch = useDispatch()
   const [selectedFiles, setSelectedFiles] = React.useState<FileData[]>([])
-  const chat = useSelector((state: RootState) => state.chatReducer)
-  const { threadId, loading, version } = chat
-  const { tentColors, generatedMockups } = useSelector(
-    (state: RootState) => state.tentMockUpPromptReducer
-  )
-  const [tentColorConfig, setTentColorConfig] = React.useState<TentColorConfig>(
-    {
-      patterned: false,
-      awaitingColorPick: false,
-      isMonochrome: false,
-      currentRegion: '',
-      awaitingFileUpload: false
-    }
-  )
-  const { processStream, isStreaming } = useStreamEvents()
-
-  React.useEffect(() => {
-    const handleStreaming = async () => {
-      const lastMessage = chat.messages.at(-1)
-      if (!isStreaming) {
-        if (version !== 0) {
-          const { loading, error, version, ...rest } = chat
-          saveChat(rest)
-        }
-        if (lastMessage?.role === Roles.assistant) {
-          const actions = processAssistantResponse(lastMessage.message)
-          if (actions) {
-            setTentColorConfig(prev => ({ ...prev, ...actions }))
-          }
-        }
-      }
-    }
-    handleStreaming()
-  }, [isStreaming, chat.messages, version])
+  const { submitUserMessage } = useActions()
+  const [_, setMessages] = useUIState()
+  const [aiState, _setAIState] = useAIState()
+  const lastMessage = aiState?.messages?.at(-1)
+  const lastFileUploadMessage = isLastFileUploadMessage(lastMessage)
 
   React.useEffect(() => {
     inputRef.current?.focus()
   }, [])
-
-  const addResponse = (
-    messageId: string,
-    message: string,
-    role = Roles.assistant
-  ) => {
-    dispatch(
-      addMessage({
-        id: messageId || nanoid(),
-        message,
-        role: role
-      })
-    )
-  }
-
-  async function submitUserMessage(content: string) {
-    const userMessage = {
-      content,
-      role: Roles.user
-    }
-    let thread
-    if (threadId) {
-      const message = await dispatch(
-        addChatMessage({ threadId, payload: userMessage })
-      ).unwrap()
-      if (selectedFiles.length) {
-        dispatch(
-          addMessage({
-            ...userMessage,
-            id: message.id,
-            files: JSON.stringify([JSON.parse(content)])
-          })
-        )
-        setSelectedFiles([])
-        setTentColorConfig(prev => ({ ...prev, awaitingFileUpload: false }))
-      }
-    } else {
-      thread = await dispatch(
-        createThread({ messages: [userMessage] })
-      ).unwrap()
-      addResponse('', content, Roles.user)
-    }
-    await streamChat(threadId || thread?.id || '')
-  }
-
-  const streamChat = async (thread: string) => {
-    const stream = streamThread(thread)
-    if (!stream) return
-    await processStream(stream, {
-      onDelta: addResponse,
-      onToolCall: async (messageId, toolCallId, payload) => {
-        try {
-          const mockups = await dispatch(generateTentMockups(payload)).unwrap()
-          await dispatch(processTentMockups(mockups)).unwrap()
-          await submitToolOutput(messageId, toolCallId)
-        } catch (error) {
-          console.error('Error during tool call:', error)
-        }
-      }
-    })
-  }
-
-  async function submitToolOutput(finalRun: string, toolCallId: string) {
-    const stream = submitToolOutputsStream(threadId, finalRun, {
-      tool_outputs: [
-        {
-          output: generatedMockups.length
-            ? JSON.stringify(generatedMockups[0])
-            : 'Failed to generate Custom Canopy mockups.',
-          tool_call_id: toolCallId
-        }
-      ]
-    })
-    await processStream(stream, {
-      onDelta: addResponse,
-      onComplete: addResponse
-    })
-  }
-
-  async function handleColorPick(color: string, colorName: string) {
-    dispatch(addMessage({ id: nanoid(), message: colorName, role: Roles.user }))
-    const tentColorsObject =
-      tentColorConfig.isMonochrome &&
-      tentColorConfig.currentRegion === Regions.walls_primary &&
-      !tentColorConfig.patterned
-        ? {
-            slope: color,
-            canopy: color,
-            walls_primary: color,
-            walls_secondary: color,
-            walls_tertiary: color
-          }
-        : { ...tentColors, [tentColorConfig.currentRegion]: color }
-    dispatch(
-      setMockUpPrompt({
-        tentColors: tentColorsObject
-      })
-    )
-
-    setTentColorConfig(prev => ({
-      ...prev,
-      awaitingColorPick: false
-    }))
-
-    await submitUserMessage(
-      `Tent colors are: ${JSON.stringify(tentColorsObject)}`
-    )
-  }
 
   const handleFileSelect = (files: FileData[]) => {
     const newFiles: FileData[] = files.map(fileData => {
@@ -213,114 +57,99 @@ export function PromptForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const messageId = nanoid()
-
     if (window.innerWidth < 600) {
       ;(e.target as HTMLFormElement)['message']?.blur()
     }
 
-    let value = input.trim()
+    let value: UserContent = input.trim()
     setInput('')
+    const messageId = nanoid()
     if (selectedFiles.length) {
-      const files = await dispatch(
-        saveFiles({
-          files: selectedFiles,
-          threadId: threadId,
-          messageId: messageId,
-          userId: session?.user?.id || ''
-        })
-      ).unwrap()
-      value = JSON.stringify(files?.[0])
+      const files = await saveFilesApi(
+        selectedFiles,
+        aiState.id,
+        messageId,
+        session?.user?.id || ''
+      )
+      value = [
+        {
+          type: IMAGE,
+          image: new URL(files[0].url),
+          mimeType: files[0].contentType
+        } as ImagePart
+      ]
+      setSelectedFiles([])
     }
-    await submitUserMessage(value)
+    setMessages((currentConversation: any) => [
+      ...currentConversation,
+      {
+        id: messageId,
+        role: Roles.user,
+        display: <UserMessage content={value} />
+      }
+    ])
+    const assistantResponse = await submitUserMessage(value)
+    setMessages((currentConversation: any) => [
+      ...currentConversation,
+      assistantResponse
+    ])
   }
 
   return (
-    <>
-      {tentColorConfig.awaitingColorPick ? (
-        <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:px-4">
-          <ColorPicker onColorSelect={handleColorPick} disabled={loading} />
+    <form ref={formRef} onSubmit={handleSubmit}>
+      <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:px-4">
+        <div className="flex flex-wrap gap-4 mb-2">
+          {selectedFiles.map((fileData, index) => (
+            <FilePreview
+              key={index}
+              file={fileData.file}
+              previewUrl={fileData.previewUrl}
+              onRemove={() => handleRemoveFile(index)}
+            />
+          ))}
         </div>
-      ) : (
-        <div>
-          {generatedMockups.length ? (
-            <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:px-4">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="flex items-center gap-2 w-full p-2"
-                    onClick={() => setIsCarouselOpen(true)}
-                  >
-                    <IconPicture />
-                    <span>View Mockups</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>View Mockups</TooltipContent>
-              </Tooltip>
-            </div>
-          ) : null}
-          <form ref={formRef} onSubmit={handleSubmit}>
-            <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:px-4">
-              <div className="flex flex-wrap gap-4 mb-2">
-                {selectedFiles.map((fileData, index) => (
-                  <FilePreview
-                    key={index}
-                    file={fileData.file}
-                    previewUrl={fileData.previewUrl}
-                    onRemove={() => handleRemoveFile(index)}
-                  />
-                ))}
-              </div>
-              <div className="flex space-between items-center mt-auto">
-                {tentColorConfig.awaitingFileUpload && (
-                  <div className="left-0 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4">
-                    <FileUploadPopover
-                      onFileSelect={handleFileSelect}
-                      disabled={loading}
-                    />
-                  </div>
-                )}
-                <Textarea
-                  ref={inputRef}
-                  tabIndex={0}
-                  onKeyDown={onKeyDown}
-                  placeholder="Send a message."
-                  className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
-                  autoFocus
-                  spellCheck={false}
-                  autoComplete="off"
-                  autoCorrect="off"
-                  name="message"
-                  rows={1}
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  disabled={loading || tentColorConfig.awaitingFileUpload}
-                />
-                <div className="right-0 top-[13px] sm:right-4">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type="submit"
-                        size="icon"
-                        disabled={
-                          tentColorConfig.awaitingFileUpload &&
-                          selectedFiles.length === 0
-                        }
-                      >
-                        <IconArrowElbow />
-                        <span className="sr-only">Send message</span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Send message</TooltipContent>
-                  </Tooltip>
-                </div>
-              </div>
-            </div>
-          </form>
+        <div className="flex space-between items-center mt-auto">
+          <div className="left-0 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4">
+            <FileUploadPopover
+              onFileSelect={handleFileSelect}
+              disabled={!lastFileUploadMessage}
+            />
+          </div>
+          <Textarea
+            ref={inputRef}
+            tabIndex={0}
+            onKeyDown={onKeyDown}
+            placeholder="Send a message."
+            className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
+            autoFocus
+            spellCheck={false}
+            autoComplete="off"
+            autoCorrect="off"
+            name="message"
+            rows={1}
+            value={input}
+            onChange={e => setInput(e.target.value)}
+          />
+          <div className="right-0 top-[13px] sm:right-4">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="submit"
+                  size="icon"
+                  disabled={
+                    aiState.loading ||
+                    (lastFileUploadMessage && selectedFiles.length === 0)
+                  }
+                >
+                  <IconArrowElbow />
+                  <span className="sr-only">Send message</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Send message</TooltipContent>
+            </Tooltip>
+          </div>
         </div>
-      )}
-    </>
+      </div>
+    </form>
   )
 }
