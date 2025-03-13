@@ -1,11 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit'
 import chatReducer from './slice/chat'
-import tentMockupPromptReducer from './slice/tent-mockup-prompt'
 
 export const store = configureStore({
   reducer: {
-    chatReducer: chatReducer,
-    tentMockUpPromptReducer: tentMockupPromptReducer
+    chatReducer: chatReducer
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
