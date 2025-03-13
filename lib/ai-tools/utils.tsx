@@ -82,7 +82,10 @@ const getToolMessage = (
         return <ChatColorPickerWrapper messageId={toolCallId} />
 
       default:
-        return <Carousal {...props} />
+        if (props) {
+          return <Carousal {...props} />
+        }
+        return null
     }
   })()
 

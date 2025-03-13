@@ -143,17 +143,20 @@ export function BotCard({
   showAvatar?: boolean
 }) {
   return (
-    <div className="group relative flex items-start md:-ml-12 my-4">
-      <div
-        className={cn(
-          'flex size-[24px] shrink-0 select-none items-center justify-center rounded-md border bg-primary text-primary-foreground shadow-sm',
-          !showAvatar && 'invisible'
-        )}
-      >
-        <IconOpenAI />
+    <>
+      <div className="group relative flex items-start md:-ml-12 my-4">
+        <div
+          className={cn(
+            'flex size-[24px] shrink-0 select-none items-center justify-center rounded-md border bg-primary text-primary-foreground shadow-sm',
+            !showAvatar && 'invisible'
+          )}
+        >
+          <IconOpenAI />
+        </div>
+        <div className="ml-4 flex-1 pl-2">{children}</div>
       </div>
-      <div className="ml-4 flex-1 pl-2">{children}</div>
-    </div>
+      <Separator />
+    </>
   )
 }
 
