@@ -83,6 +83,8 @@ export const PROMPT_INSTRUCTIONS = `
       - This rule does not apply to color inputs and option based questions responses.
     - NEVER show colors in the questions, especially in RGB format.
     - Always show the name of the selected option rather than value in the questions if needed.
+    - For sequential questions, ask one question at a time and wait for the user response before asking the next question.
+    - For sequential color inputs, ask one color input at a time and wait for the user response before asking the next color input.
 
   **Input Guidelines:**
     - For color inputs, accept the colors in RGB format and convert them to their descriptive when displaying to user.
