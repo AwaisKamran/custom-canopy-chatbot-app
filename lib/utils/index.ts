@@ -152,3 +152,12 @@ export const convertToBGR = (rgb: string) => {
   const [r, g, b] = JSON.parse(rgb)
   return `[${b}, ${g}, ${r}]`
 }
+
+export const isValidJson = (jsonString: string) => {
+  try {
+    JSON.parse(jsonString)
+    return true
+  } catch (e) {
+    return false
+  }
+}

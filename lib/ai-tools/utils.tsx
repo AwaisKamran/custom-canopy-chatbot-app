@@ -4,7 +4,7 @@ import { ChatRadioButtonWrapper } from '@/components/chat-radio-buttons-wrapper'
 import { ChatColorPickerWrapper } from '@/components/chat-color-picker-wrapper'
 import { Chat, ClientMessage, Roles, ToolCallResult } from '@/lib/types'
 import { CHAT, IMAGE } from '@/app/constants'
-import { getRGBColorName, nanoid } from '@/lib/utils'
+import { getRGBColorName, isValidJson, nanoid } from '@/lib/utils'
 import {
   INITIAL_CHAT_MESSAGE,
   LOGO_MSG_REGEX,
@@ -149,7 +149,8 @@ const getClientMessages = (messages: CoreMessage[]): ClientMessage[] => {
       currentMessage.role === Roles.user &&
       i - 1 >= 0 &&
       (previousMessage.content as ToolContent)[0]?.toolName ===
-        TOOL_FUNCTIONS.RENDER_COLOR_PICKER
+        TOOL_FUNCTIONS.RENDER_COLOR_PICKER &&
+      isValidJson(currentMessage.content as string)
     ) {
       currentMessage.content = getRGBColorName(
         currentMessage.content as string

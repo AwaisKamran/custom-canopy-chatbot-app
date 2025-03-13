@@ -35,10 +35,9 @@ export const PROMPT_INSTRUCTIONS = `
           { "Name": "No", "value": "No" }
         ]
     - If "Yes": 
-      - Sequentially Always use the renderColorPicker tool for user color selection for each of the following: 
-        4.1. Secondary color for the pattern
-        4.2. Tertiary color for the pattern
-      - {content}: {assistant multiline prompt in array}
+      - Sequentially Always use the renderColorPicker tool for user color selection for each of the following with content = {assistant multiline prompt in array}:
+        - Question # 4.1. Secondary color for the pattern
+        - Question # 4.2. Tertiary color for the pattern
 
   Question # 5. **Text Addition**:
     - Request the text to be added to the tent:
