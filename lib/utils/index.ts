@@ -2,15 +2,17 @@ import { clsx, type ClassValue } from 'clsx'
 import { customAlphabet } from 'nanoid'
 import { twMerge } from 'tailwind-merge'
 import namer from 'color-namer'
+import { ResultCode } from '../types'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export const nanoid = customAlphabet(
-  '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
-  7
-) // 7-character random string
+const ALPHABET =
+  '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+const NANO_ID_LENGTH = 7
+
+export const nanoid = customAlphabet(ALPHABET, NANO_ID_LENGTH)
 
 export async function fetcher<JSON = any>(
   input: RequestInfo,
@@ -62,15 +64,6 @@ export const getStringFromBuffer = (buffer: ArrayBuffer) =>
   Array.from(new Uint8Array(buffer))
     .map(b => b.toString(16).padStart(2, '0'))
     .join('')
-
-export enum ResultCode {
-  InvalidCredentials = 'INVALID_CREDENTIALS',
-  InvalidSubmission = 'INVALID_SUBMISSION',
-  UserAlreadyExists = 'USER_ALREADY_EXISTS',
-  UnknownError = 'UNKNOWN_ERROR',
-  UserCreated = 'USER_CREATED',
-  UserLoggedIn = 'USER_LOGGED_IN'
-}
 
 export const getMessageFromCode = (resultCode: string) => {
   switch (resultCode) {
@@ -133,8 +126,29 @@ export function subMonths(date: Date, amount: number) {
   newDate.setMonth(newDate.getMonth() - amount)
   return newDate
 }
-
 export function getColorName(hexColor: string): string | null {
   const namedColor = namer(hexColor).basic[0]
   return namedColor ? namedColor.name : null
+}
+
+function rgbToHex(rgbColor: string) {
+  const rgb = JSON.parse(rgbColor)
+  const [r, g, b] = rgb
+  if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
+    throw new Error('RGB values must be between 0 and 255.')
+  }
+
+  const toHex = (value: number) =>
+    value.toString(16).padStart(2, '0').toUpperCase()
+
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`
+}
+
+export function getRGBColorName(rgbColor: string): string | null {
+  const hexColor = rgbToHex(rgbColor)
+  return getColorName(hexColor)
+}
+export const convertToBGR = (rgb: string) => {
+  const [r, g, b] = JSON.parse(rgb)
+  return `[${b}, ${g}, ${r}]`
 }

@@ -80,7 +80,6 @@ export function SidebarActions({ chat, removeChat }: SidebarActionsProps) {
                     toast.error(result.error)
                     return
                   }
-
                   setDeleteDialogOpen(false)
                   router.refresh()
                   router.push('/')
