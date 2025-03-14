@@ -105,10 +105,10 @@ export const PROMPT_INSTRUCTIONS = `
     - **generateCanopyMockups tool function**
       - Use the generateCanopyMockups tool function to generate the mockups of the canopy whenever the user confirms the inputs.
       - Always use the BGR format for all color inputs.
-      - The format must strictly be: [b, g, r] (e.g., [255, 0, 0] for blue).
+      - The format MUST STRICTLY be: \'[b, g, r]\' (e.g., [255, 0, 0] for blue).
       - Do not use descriptive color names, RGB format, or any other format.
       - Correct: [255, 0, 0]
-      - Incorrect: "blue", "rgb(0,0,255)", or [r, g, b].
+      - Incorrect: "blue", "rgb(0,0,255)", b,g,r or [r, g, b].
 
   **Editing Guidelines:**
     - For text, logo, or company name changes, only request updated inputs for the specified fields.
