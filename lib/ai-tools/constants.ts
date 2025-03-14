@@ -114,7 +114,7 @@ export const PROMPT_INSTRUCTIONS = `
     - For text, logo, or company name changes, only request updated inputs for the specified fields.
 
   Let's begin creating your custom canopy!
-]`;
+]`
 
 export const TOOL_FUNCTIONS = {
   RENDER_BUTTONS: 'renderOptions',
