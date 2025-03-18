@@ -9,11 +9,9 @@ import {
 import { Button } from './ui/button'
 import { IconClose } from './ui/icons'
 import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip'
-import { MockupResponse } from '@/lib/types'
-import { PutBlobResult } from '@vercel/blob'
 
 export interface PreviewCarousel {
-  mockups: MockupResponse
+  mockups: any
   isOpen: boolean
   onClose: () => void
 }
@@ -44,19 +42,22 @@ export default function PreviewCarousel({
         </Tooltip>
         <Carousel className="w-full">
           <CarouselContent>
-            {Object.values(mockups).map((mockup: PutBlobResult, index) => {
-              return (
+            {mockups.map(
+              (image: { filename: string; data: string }, index: number) => (
                 <CarouselItem key={index}>
-                  <div className="flex justify-center items-center sm:rounded-md">
+                  <div
+                    key={index}
+                    className="flex justify-center items-center sm:rounded-md"
+                  >
                     <img
-                      src={mockup.url}
-                      alt={`Mockup ${index} (${mockup.pathname})`}
+                      src={image.data}
+                      alt={`Mockup ${index} (${image.filename})`}
                       className="w-[600px] h-[600px] overflow-hidden sm:rounded-md"
                     />
                   </div>
                 </CarouselItem>
               )
-            })}
+            )}
           </CarouselContent>
           <CarouselPrevious />
           <CarouselNext />

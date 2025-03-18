@@ -15,7 +15,7 @@ export const ButtonToolSchema = z.object({
 })
 
 export const ColorPickerToolSchema = z.object({
-  content: z.array(z.string()).describe('The prompt for the button group'),
+  content: z.array(z.string()).describe('The prompt for the button group')
 })
 
 export const CustomCanopyToolSchema = z.object({

@@ -3,13 +3,12 @@ import { COLORS } from '@/app/constants'
 
 interface TentMockUpPromptFormData extends TentMockUpPrompt {
   logoFile: File
-  userId: string
 }
 
 export const createFormData = (
   mockUpPrompt: TentMockUpPromptFormData
 ): FormData => {
-  const { id, logoFile, tentColors, text, isPatterned, userId } = mockUpPrompt
+  const { logoFile, tentColors, text, isPatterned } = mockUpPrompt
   const formRequestBody = new FormData()
 
   formRequestBody.append(
@@ -36,7 +35,6 @@ export const createFormData = (
   formRequestBody.append('logo', logoFile)
   formRequestBody.append('text_color', COLORS.BLACK_COLOR)
   formRequestBody.append('patterned', `${isPatterned}`)
-  formRequestBody.append('output_dir', `user:${userId}/chat:${id}/mockups`)
 
   return formRequestBody
 }

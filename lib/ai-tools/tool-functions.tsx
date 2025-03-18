@@ -97,10 +97,11 @@ export function generateCanopyMockups(history: any, messageId: string) {
     }: z.infer<typeof CustomCanopyToolSchema>) {
       yield <BotCard>{content[0]}</BotCard>
       try {
-        const mockups = await generateTentMockupsApi({
-          ...(payload as TentMockUpPrompt),
-          id: history.get().id
-        })
+        const mockups: { fileName: string; data: string }[] =
+          await generateTentMockupsApi({
+            ...(payload as TentMockUpPrompt),
+            id: history.get().id
+          })
         modifyToolAIState(history, [
           {
             toolCallId: messageId,

@@ -1,8 +1,8 @@
 import { TENT_MOCKUP_VALIDATIONS } from '@/app/constants'
-import { auth } from '@/auth'
-import { MockupResponse, Session, TentMockUpPrompt } from '@/lib/types'
+import { TentMockUpPrompt } from '@/lib/types'
 import { createFormData } from '@/lib/utils/tent-mockup'
 import { ImagePart } from 'ai'
+import JSZip from 'jszip'
 
 const fetchLogoFile = async (logo: ImagePart): Promise<File> => {
   const response = await fetch(logo.image as string)
@@ -10,7 +10,7 @@ const fetchLogoFile = async (logo: ImagePart): Promise<File> => {
   return new File([blob], logo.type, { type: logo.mimeType })
 }
 
-const fetchMockups = async (formData: FormData): Promise<MockupResponse> => {
+const fetchMockupZip = async (formData: FormData): Promise<Blob> => {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_CUSTOM_CANOPY_SERVER_URL}/create-mockups`,
     {
@@ -22,30 +22,43 @@ const fetchMockups = async (formData: FormData): Promise<MockupResponse> => {
     }
   )
   if (!response.ok) {
-    const errorDetails = await response.json()
-    throw new Error(`API Error: ${JSON.stringify(errorDetails)}`)
+    throw new Error('Failed to generate custom canopy')
   }
 
-  const mockups = await response.json()
-  return mockups as MockupResponse
+  return response.blob()
+}
+
+const extractImagesFromZip = async (
+  zipBlob: Blob
+): Promise<{ fileName: string; data: string }[]> => {
+  const jszip = new JSZip()
+  const zip = await jszip.loadAsync(zipBlob.arrayBuffer())
+  const extractedImages: { fileName: string; data: string }[] = []
+
+  const filePromises = Object.keys(zip.files).map(async relativePath => {
+    const fileData = await zip.files[relativePath].async('base64')
+    extractedImages.push({
+      fileName: relativePath,
+      data: `data:image/jpeg;base64,${fileData}`
+    })
+  })
+
+  await Promise.all(filePromises)
+  return extractedImages
 }
 
 export const generateTentMockupsApi = async (
   tentMockupPrompt: TentMockUpPrompt
-): Promise<MockupResponse> => {
-  const session = (await auth()) as Session
-  if (!session) throw new Error('User not logged in')
-  const userId = session.user.id
+) => {
   try {
     if (!tentMockupPrompt?.logo) {
       throw new Error(TENT_MOCKUP_VALIDATIONS.logoRequired)
     }
     const logoFile = await fetchLogoFile(tentMockupPrompt.logo)
-    const formData = createFormData({ ...tentMockupPrompt, logoFile, userId })
-    console.log('formData', formData)
-    return await fetchMockups(formData)
+    const formData = createFormData({ ...tentMockupPrompt, logoFile })
+    const zipBlob = await fetchMockupZip(formData)
+    return await extractImagesFromZip(zipBlob)
   } catch (error) {
-    console.log('error,', error)
     throw new Error((error as Error).message || 'Something went wrong!')
   }
 }
