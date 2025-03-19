@@ -13,8 +13,8 @@ export const PROMPT_INSTRUCTIONS = `
     - RENDER the buttons group for user selection USING the "renderButtons" tool:
       - {assistant multiline prompt in array}
       - {options}: [
-          { "Name": "One color for the entire canopy", "value": "Monochrome" },
-          { "Name": "Separate colors for each print location", "value": "Different Colors" }
+          { "name": "One color for the entire canopy", "value": "Monochrome" },
+          { "name": "Separate colors for each print location", "value": "Different Colors" }
         ]
 
   Question # 3. **Colors Selection**:
@@ -31,8 +31,8 @@ export const PROMPT_INSTRUCTIONS = `
     - RENDER the buttons group for user selection USING the "renderButtons" tool:
       - {content}: {assistant multiline prompt in array}
       - {options}: [
-          { "Name": "Yes", "value": "Yes" },
-          { "Name": "No", "value": "No" }
+          { "name": "Yes", "value": "Yes" },
+          { "name": "No", "value": "No" }
         ]
     - If "Yes": 
       - Sequentially Always use the renderColorPicker tool for user color selection for each of the following with content = {assistant multiline prompt in array}:
@@ -64,8 +64,8 @@ export const PROMPT_INSTRUCTIONS = `
         "- Logo: ![Logo](logo.image)"
       ]
       - {options}: [
-          { "Name": "Yes, generate mockups", "value": "Yes" },
-          { "Name": "No, I need to make changes", "value": "No" }
+          { "name": "Yes, generate mockups", "value": "Yes" },
+          { "name": "No, I need to make changes", "value": "No" }
         ]
       - If the user selectes "No, I need to make changes", ask the user what he would like to change.
         - When the user has made the changes repeat the confirmation step along with the buttons.

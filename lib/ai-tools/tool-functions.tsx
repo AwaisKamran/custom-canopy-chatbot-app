@@ -102,16 +102,16 @@ export function generateCanopyMockups(history: any, messageId: string) {
             ...(payload as TentMockUpPrompt),
             id: history.get().id
           })
-        modifyToolAIState(history, [
-          {
-            toolCallId: messageId,
-            toolName: TOOL_FUNCTIONS.GENERATE_CANOPY_MOCKUPS,
-            result: {
-              message: content[1],
-              props: { mockups }
-            }
-          }
-        ] as ToolContent)
+        // modifyToolAIState(history, [
+        //   {
+        //     toolCallId: messageId,
+        //     toolName: TOOL_FUNCTIONS.GENERATE_CANOPY_MOCKUPS,
+        //     result: {
+        //       message: content[1],
+        //       props: { mockups }
+        //     }
+        //   }
+        // ] as ToolContent)
         return (
           <BotMessage
             content={content[1]}
