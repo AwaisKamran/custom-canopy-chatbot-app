@@ -38,14 +38,16 @@ const extractImagesFromZip = async (
 
   const extractedImages: { fileName: string; data: string }[] = []
   console.log('initialize extractedImages')
-  const filePromises = Object.keys(zip.files).map(async relativePath => {
-    const fileData = await zip.files[relativePath].async('base64')
-    extractedImages.push({
-      fileName: relativePath,
-      data: `data:image/jpeg;base64,${fileData}`
-    })
-  })
+  const filePromises: Promise<void>[] = []
   console.log('initialize filePromises')
+  zip.forEach((relativePath, file) => {
+    const promise = file.async('base64').then(fileData => {
+      const imageSrc = `data:image/jpeg;base64,${fileData}`
+      extractedImages.push({ fileName: relativePath, data: imageSrc })
+    })
+    filePromises.push(promise)
+  })
+  console.log('add filePromises')
 
   await Promise.all(filePromises)
   console.log('add extractedImages', extractedImages)
