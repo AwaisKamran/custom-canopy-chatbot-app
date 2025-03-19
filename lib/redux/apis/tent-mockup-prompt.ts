@@ -44,6 +44,7 @@ const extractImagesFromZip = async (
   })
 
   await Promise.all(filePromises)
+  console.log('add extractedImages', extractedImages)
   return extractedImages
 }
 
@@ -56,7 +57,9 @@ export const generateTentMockupsApi = async (
     }
     const logoFile = await fetchLogoFile(tentMockupPrompt.logo)
     const formData = createFormData({ ...tentMockupPrompt, logoFile })
+    console.log('add formData', formData)
     const zipBlob = await fetchMockupZip(formData)
+    console.log('add zipBlob', zipBlob)
     return await extractImagesFromZip(zipBlob)
   } catch (error) {
     throw new Error((error as Error).message || 'Something went wrong!')

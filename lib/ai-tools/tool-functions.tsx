@@ -102,6 +102,7 @@ export function generateCanopyMockups(history: any, messageId: string) {
             ...(payload as TentMockUpPrompt),
             id: history.get().id
           })
+        console.log('add mockups', mockups)
         // modifyToolAIState(history, [
         //   {
         //     toolCallId: messageId,
