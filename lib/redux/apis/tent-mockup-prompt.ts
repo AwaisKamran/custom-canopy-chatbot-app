@@ -32,9 +32,12 @@ const extractImagesFromZip = async (
   zipBlob: Blob
 ): Promise<{ fileName: string; data: string }[]> => {
   const jszip = new JSZip()
+  console.log('initialize jszip')
   const zip = await jszip.loadAsync(zipBlob.arrayBuffer())
-  const extractedImages: { fileName: string; data: string }[] = []
+  console.log('load zip')
 
+  const extractedImages: { fileName: string; data: string }[] = []
+  console.log('initialize extractedImages')
   const filePromises = Object.keys(zip.files).map(async relativePath => {
     const fileData = await zip.files[relativePath].async('base64')
     extractedImages.push({
@@ -42,6 +45,7 @@ const extractImagesFromZip = async (
       data: `data:image/jpeg;base64,${fileData}`
     })
   })
+  console.log('initialize filePromises')
 
   await Promise.all(filePromises)
   console.log('add extractedImages', extractedImages)
