@@ -1,19 +1,19 @@
 import React from 'react'
-import { BotCard, BotMessage } from '@/components/stocks/message'
-import { ChatRadioButtonWrapper } from '@/components/chat-radio-buttons-wrapper'
-import { ChatColorPickerWrapper } from '@/components/chat-color-picker-wrapper'
 import { z } from 'zod'
+import { ToolContent } from 'ai'
 import {
   ButtonToolSchema,
   ColorPickerToolSchema,
   CustomCanopyToolSchema
 } from './schemas'
 import { Carousal } from '@/components/carousel'
+import { BotCard, BotMessage } from '@/components/stocks/message'
+import { ChatRadioButtonWrapper } from '@/components/chat-radio-buttons-wrapper'
+import { ChatColorPickerWrapper } from '@/components/chat-color-picker-wrapper'
 import { generateTentMockupsApi } from '../redux/apis/tent-mockup-prompt'
 import { Roles, TentMockUpPrompt } from '../types'
 import { TOOL_FUNCTIONS } from './constants'
 import { modifyAIState } from './utils'
-import { ToolContent } from 'ai'
 
 function modifyToolAIState(history: any, content: ToolContent) {
   modifyAIState(history, {
@@ -102,7 +102,6 @@ export function generateCanopyMockups(history: any, messageId: string) {
             ...(payload as TentMockUpPrompt),
             id: history.get().id
           })
-        console.log('add mockups', mockups)
         // modifyToolAIState(history, [
         //   {
         //     toolCallId: messageId,

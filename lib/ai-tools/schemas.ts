@@ -28,20 +28,50 @@ export const CustomCanopyToolSchema = z.object({
   payload: z
     .object({
       companyName: z.string().describe('Name of the company or organization'),
-      isPatterned: z
-        .boolean()
-        .describe('Will a pattern be included on the tent?'),
-      tentColors: z
+      tentType: z.string().describe('Type of Tent'),
+      peaks: z
         .object({
-          slope: z.string().describe('Color of the slope'),
-          canopy: z.string().describe('Color of the canopy'),
-          walls_primary: z.string().describe('Primary color of the walls'),
-          walls_secondary: z.string().describe('Secondary color of the walls'),
-          walls_tertiary: z.string().describe('Tertiary color of the walls')
+          front: z.string().describe('Color of peak front'),
+          back: z.string().describe('Color of peak back'),
+          left: z.string().describe('Color of peak left'),
+          right: z.string().describe('Color of peak right')
         })
-        .describe('Colors of the tent')
+        .describe('Colors of the peaks')
         .required(),
-      text: z.string().describe('Text to be displayed on the tent banner'),
+      valences: z
+        .object({
+          front: z.string().describe('Color of valence front'),
+          back: z.string().describe('Color of valence back'),
+          left: z.string().describe('Color of valence left'),
+          right: z.string().describe('Color of valence right')
+        })
+        .describe('Colors of the valences')
+        .required(),
+      panels: z
+        .object({
+          left: z.string().describe('Color of panel left'),
+          right: z.string().describe('Color of panel right'),
+          back: z.string().describe('Color of panel back')
+        })
+        .describe('Colors of the valences')
+        .required(),
+      valencesTexts: z
+        .object({
+          front: z
+            .string()
+            .describe('Text to be displayed on the front of the tent banner'),
+          back: z
+            .string()
+            .describe('Text to be displayed on the back of the tent banner'),
+          left: z
+            .string()
+            .describe('Text to be displayed on the left of the tent banner'),
+          right: z
+            .string()
+            .describe('Text to be displayed on the right of the tent banner')
+        })
+        .describe('Details of the text to be displayed on the tent banner')
+        .required(),
       logo: z
         .object({
           image: z.string().describe('The image file uploaded'),

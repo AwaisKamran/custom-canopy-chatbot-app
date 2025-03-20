@@ -66,13 +66,21 @@ export interface TentColorRegions {
   walls_secondary: string
   walls_tertiary: string
 }
+export interface TentSides {
+  left: string
+  right: string
+  back: string
+  front?: string
+}
 
 export interface TentMockUpPrompt {
   id: string
   companyName: string
-  isPatterned: boolean
-  tentColors: TentColorRegions
-  text: string
+  tentType: string
+  peaks: TentSides
+  valences: TentSides
+  panels: TentSides
+  valencesTexts: TentSides
   logo: ImagePart
   font: string
   fontColor: string
@@ -85,6 +93,12 @@ export enum Roles {
   'assistant' = 'assistant',
   'system' = 'system',
   'tool' = 'tool'
+}
+
+export enum Types {
+  'full-walls' = 'full-walls',
+  'half-walls' = 'half-walls',
+  'no-walls' = 'no-walls'
 }
 
 export type TentColorConfig = {
@@ -130,4 +144,10 @@ export type FieldErrors = {
 export interface GuidanceImage {
   filename: string
   data: string
+}
+
+export type Color = {
+  name: string
+  rgb: string
+  tailwind: string
 }

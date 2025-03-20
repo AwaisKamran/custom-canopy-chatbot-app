@@ -127,7 +127,7 @@ export function subMonths(date: Date, amount: number) {
   return newDate
 }
 export function getColorName(hexColor: string): string | null {
-  const namedColor = namer(hexColor).basic[0]
+  const namedColor = namer(hexColor).pantone[0]
   return namedColor ? namedColor.name : null
 }
 

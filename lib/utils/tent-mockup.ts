@@ -8,33 +8,29 @@ interface TentMockUpPromptFormData extends TentMockUpPrompt {
 export const createFormData = (
   mockUpPrompt: TentMockUpPromptFormData
 ): FormData => {
-  const { logoFile, tentColors, text, isPatterned } = mockUpPrompt
+  const { logoFile, tentType, peaks, panels, valences, valencesTexts } =
+    mockUpPrompt
   const formRequestBody = new FormData()
 
-  formRequestBody.append(
-    'slope_color',
-    tentColors.slope || COLORS.LIGHT_GREY_COLOR
-  )
-  formRequestBody.append(
-    'canopy_color',
-    tentColors.canopy || COLORS.LIGHT_GREY_COLOR
-  )
-  formRequestBody.append(
-    'walls_primary_color',
-    tentColors.walls_primary || COLORS.LIGHT_GREY_COLOR
-  )
-  formRequestBody.append(
-    'walls_secondary_color',
-    tentColors.walls_secondary || COLORS.LIGHT_GREY_COLOR
-  )
-  formRequestBody.append(
-    'walls_tertiary_color',
-    tentColors.walls_tertiary || COLORS.LIGHT_GREY_COLOR
-  )
-  formRequestBody.append('text', text)
+  Object.entries(peaks).forEach(([key, value]) => {
+    formRequestBody.append(`peaks_${key}`, value)
+  })
+
+  if (tentType !== 'no-walls') {
+    Object.entries(panels).forEach(([key, value]) => {
+      formRequestBody.append(`panels_${key}`, value)
+    })
+  }
+  Object.entries(valences).forEach(([key, value]) => {
+    formRequestBody.append(`valences_${key}`, value)
+  })
+
+  Object.entries(valencesTexts).forEach(([key, value]) => {
+    formRequestBody.append(`${key}_text`, value)
+  })
+
   formRequestBody.append('logo', logoFile)
   formRequestBody.append('text_color', COLORS.BLACK_COLOR)
-  formRequestBody.append('patterned', `${isPatterned}`)
 
   return formRequestBody
 }
