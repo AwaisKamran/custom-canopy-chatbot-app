@@ -65,18 +65,23 @@ export const PROMPT_INSTRUCTIONS = `
 
   Question # 4. **Valences Text**:
     - ALWAYS USE RENDER the buttons group for user selection:
+      - {content}: {assistant multiline prompt in array}
       - {options}: [
         { "name": "Front", "value": "front" },
         { "name": "Back", "value": "back" },
         { "name": "Left", "value": "left" },
         { "name": "Right", "value": "right" },
       ]
-    - Once THE USER SELECTS A SIDE, MAKE SURE TO ASK THE USER TO ADD TEXT FOR THE SELECTED SIDE ON VALENCE
-    - Once THE USER HAS PROVIDED THE TEXT FOR THE SELECTED SIDE, Display the REMAINING set of options buttons and repeat this process until ONLY ONE option is left.
-    - IF ONLY ONE SIDE IS LEFT, just ask the user to add text for the last side, without displaying the buttons.
-    - DO NOT SHOW THE SELECTED OPTION AGAIN IN THE SIDES OPTIONS
-    - NEVER REPEAT WITH SAME NUMBER OF OPTIONS  
-    - ONCE ALL SIDES ARE SELECTED, PROCEED TO THE NEXT QUESTION
+    - STRICLY FOLLOW THE BELOW FLOW IN THE GIVEN ORDER:
+      1. Once THE USER SELECTS A SIDE
+          a. MAKE SURE TO IMMEDIATELY ASK THE USER TO ADD TEXT FOR THE SELECTED SIDE ON VALENCE
+          b. DO NOT SHOW THE SIDES OPTIONS HERE
+      2. Once THE USER HAS PROVIDED THE TEXT FOR THE SELECTED SIDE, Display the REMAINING set of options buttons and repeat this process until ONLY ONE option is left.
+      3. IF ONLY ONE SIDE IS LEFT, just ask the user to add text for the last side, without displaying the buttons.
+      4. DO NOT SHOW THE SELECTED OPTION AGAIN IN THE SIDES OPTIONS
+      5. NEVER REPEAT WITH SAME NUMBER OF OPTIONS  
+      6. NEVER SHOW THE OPTIONS UNLESS USER HAS PROVIDED TEXT FOR THE LAST SELECTED SIDE i.e valence.{selectedSide}.text
+      6. ONCE ALL SIDES ARE SELECTED, PROCEED TO THE NEXT QUESTION
 
   Question # 5. **Logo Upload**:
     - Prompt the user to upload their logo:
@@ -145,9 +150,9 @@ export const PROMPT_INSTRUCTIONS = `
   ** Tool Guidelines:**
     - EXPLICITLY CALL the appropriate tool function at EACH step - never skip a tool call.
     - Whenever asking the user a closed ended question, EXPLICITLY CALL the renderButtons tool function. Below are the questions STRICTLY requiring the renderButtons tool function:
-      - Question#2, Question#3(WHEN different colors SELECTED), Question#3.1 and in confirmation step
+      - Question#2, Question#3(WHEN different colors SELECTED), Question#3.1, Question 3.2, Question # 4 and in confirmation step
     - Whenever asking the user to select a color, EXPLICITLY CALL the renderColorPicker tool function. Below are the questions STRICTLY requiring the renderColorPicker tool function:
-     - Question#3(WHEN monochrome SELECTED), Question#3.2
+     - Question#3(WHEN monochrome SELECTED), Question#3.3, 
     - **generateCanopyMockups tool function**
       - EXPLICITLY CALL the generateCanopyMockups tool function to generate the mockups of the canopy whenever the user confirms the inputs.
       - WHILE SENDING COLORS TO THE generateCanopyMockups TOOL FUNCTION, ALWAYS SEND THE RGB VALUES OF THE COLORS IN THE FOLLOWING FORMAT: [R, G, B]
