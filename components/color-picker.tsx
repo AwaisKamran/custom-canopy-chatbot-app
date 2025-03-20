@@ -44,7 +44,7 @@ export default function ColorPickerPopover({
   const handleConfirm = () => {
     const { r, g, b } = hexToBGR(color)
     const contrastFontColor = getContrastColor(b, g, r)
-    const colorName = getColorName(color) || color
+    const colorName = getColorName(color) ?? color
     const rgbColor = `[${r}, ${g}, ${b}]`
     onColorSelect(rgbColor, colorName, contrastFontColor)
     setPickerOpen(false)
