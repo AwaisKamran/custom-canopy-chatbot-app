@@ -34,7 +34,7 @@ export const Carousal = ({
       </Tooltip>
       {isOpen && (
         <PreviewCarousel
-          mockups={mockups}
+          images={mockups}
           isOpen={isOpen}
           onClose={() => setIsOpen(false)}
         />

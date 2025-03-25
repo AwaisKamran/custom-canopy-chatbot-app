@@ -1,6 +1,7 @@
 import * as React from 'react'
 import {
   Carousel,
+  CarouselApi,
   CarouselContent,
   CarouselItem,
   CarouselNext,
@@ -9,23 +10,41 @@ import {
 import { Button } from './ui/button'
 import { IconClose } from './ui/icons'
 import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip'
+import { cn } from '@/lib/utils'
 
 export interface PreviewCarousel {
-  mockups: any
+  images: any
   isOpen: boolean
   onClose: () => void
 }
 
 export default function PreviewCarousel({
-  mockups,
+  images,
   isOpen,
   onClose
 }: PreviewCarousel) {
+  const [api, setApi] = React.useState<CarouselApi>()
+  const [activeIndex, setActiveIndex] = React.useState(0)
+
+  React.useEffect(() => {
+    if (!api) return
+    setActiveIndex(api.selectedScrollSnap())
+    api.on('select', () => {
+      setActiveIndex(api.selectedScrollSnap())
+    })
+  }, [api])
+
   if (!isOpen) return null
 
   return (
-    <div className="flex flex-row items-center justify-center bg-opacity-80">
-      <div className="relative w-full max-w-2xl p-4 bg-muted-50 rounded-lg">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/10 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-2xl p-4 bg-muted-50 rounded-lg"
+        onClick={e => e.stopPropagation()}
+      >
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -40,9 +59,9 @@ export default function PreviewCarousel({
           </TooltipTrigger>
           <TooltipContent>Close Carousel</TooltipContent>
         </Tooltip>
-        <Carousel className="w-full">
+        <Carousel className="w-full" setApi={setApi}>
           <CarouselContent>
-            {mockups.map(
+            {images.map(
               (image: { filename: string; data: string }, index: number) => (
                 <CarouselItem key={index}>
                   <div
@@ -51,8 +70,8 @@ export default function PreviewCarousel({
                   >
                     <img
                       src={image.data}
-                      alt={`Mockup ${index} (${image.filename})`}
-                      className="w-[600px] h-[600px] overflow-hidden sm:rounded-md"
+                      alt={`Image ${index} (${image.filename})`}
+                      className="w-[400px] h-[400px] overflow-hidden sm:rounded-md"
                     />
                   </div>
                 </CarouselItem>
@@ -62,6 +81,24 @@ export default function PreviewCarousel({
           <CarouselPrevious />
           <CarouselNext />
         </Carousel>
+        <div className="mt-8 flex justify-center gap-2 overflow-x-auto">
+          {images.map(
+            (image: { filename: string; data: string }, index: number) => (
+              <img
+                key={index}
+                src={image.data}
+                alt={`Thumbnail ${index}`}
+                onClick={() => api?.scrollTo(index)}
+                className={cn(
+                  'w-20 h-20 object-contain rounded-md cursor-pointer border-2 transition bg-background p-1',
+                  activeIndex === index
+                    ? 'border-primary'
+                    : 'border-accent opacity-60 hover:opacity-100'
+                )}
+              />
+            )
+          )}
+        </div>
       </div>
     </div>
   )

@@ -126,3 +126,8 @@ export type FieldErrors = {
   [x: number]: string | undefined
   [x: symbol]: string | undefined
 }
+
+export interface GuidanceImage {
+  filename: string
+  data: string
+}

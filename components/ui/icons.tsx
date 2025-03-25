@@ -556,6 +556,22 @@ function IconPDF({ className, ...props }: React.ComponentProps<'svg'>) {
   )
 }
 
+function IconExpand({ className, ...props }: React.ComponentProps<'svg'>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="32"
+      height="32"
+      fill="currentColor"
+      className={cn('size-4', className)}
+      viewBox="0 0 256 256"
+      {...props}
+    >
+      <path d="M216,48V96a8,8,0,0,1-16,0V67.31l-50.34,50.35a8,8,0,0,1-11.32-11.32L188.69,56H160a8,8,0,0,1,0-16h48A8,8,0,0,1,216,48ZM106.34,138.34,56,188.69V160a8,8,0,0,0-16,0v48a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16H67.31l50.35-50.34a8,8,0,0,0-11.32-11.32Z"></path>
+    </svg>
+  )
+}
+
 export {
   IconEdit,
   IconNextChat,
@@ -588,5 +604,6 @@ export {
   IconAddFile,
   IconColorPicker,
   IconPicture,
-  IconPDF
+  IconPDF,
+  IconExpand
 }
