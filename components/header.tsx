@@ -23,7 +23,7 @@ async function UserOrLogin() {
       {session?.user ? (
         <>
           <Link href="/new" rel="nofollow">
-            <img src="./logo.png" className="invert dark:invert-0 h-6 w-auto" />
+            <img src="/logo.png" className="invert dark:invert-0 h-6 w-auto" />
           </Link>
 
           <div className="ml-2">
@@ -35,7 +35,7 @@ async function UserOrLogin() {
         </>
       ) : (
         <Link href="/new" rel="nofollow">
-          <img src="./logo.png" className="invert dark:invert-0 h-6 w-auto" />
+          <img src="/logo.png" className="invert dark:invert-0 h-6 w-auto" />
         </Link>
       )}
       <div className="flex items-center">

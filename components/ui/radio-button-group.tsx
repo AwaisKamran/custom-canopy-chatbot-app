@@ -23,13 +23,11 @@ export const RadioButtonGroup = ({
   )
 
   const handleSelect = (option: string) => {
-    const updatedSelections = selectedOptions.map(
-      (item: EditableOption) => {
-        return item.value === option
-          ? { ...item, selected: !item.selected }
-          : item
-      }
-    )
+    const updatedSelections = selectedOptions.map((item: EditableOption) => {
+      return item.value === option
+        ? { ...item, selected: !item.selected }
+        : item
+    })
     setSelectedOptions(updatedSelections)
     if (!isMultiSelect) {
       onSelect(updatedSelections)

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from './ui/button'
 import { IconPicture } from './ui/icons'
 import {
@@ -9,10 +9,20 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import PreviewCarousel from './preview-carousel'
-import { MockupResponse } from '@/lib/types'
+import { Image, MockupResponse } from '@/lib/types'
 
 export const Carousal = ({ mockups }: { mockups: MockupResponse }) => {
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, setIsOpen] = useState(false)
+  const [images, setImages] = useState<Image[]>([])
+
+  useEffect(() => {
+    const images: Image[] = Object.entries(mockups).map(([key, value]) => ({
+      url: value.url,
+      filename: key
+    }))
+    setImages(images)
+  }, [mockups])
+
   return (
     <>
       <Tooltip>
@@ -31,7 +41,7 @@ export const Carousal = ({ mockups }: { mockups: MockupResponse }) => {
       </Tooltip>
       {isOpen && (
         <PreviewCarousel
-          images={mockups}
+          images={images}
           isOpen={isOpen}
           onClose={() => setIsOpen(false)}
         />

@@ -1,9 +1,9 @@
-import { GuidanceImage } from '@/lib/types'
+import { Image } from '@/lib/types'
 import { IconExpand } from './ui/icons'
 import { Button } from './ui/button'
 
 interface GuidanceImageViewProps {
-  images: GuidanceImage[]
+  images: Image[]
   setIsCarouselOpen: (isOpen: boolean) => void
 }
 
@@ -31,7 +31,7 @@ export function GuidanceImageView({
               </Button>
 
               <img
-                src={image.data}
+                src={image.url}
                 alt={image.filename}
                 className="w-[300px] h-[200px] object-contain rounded"
               />

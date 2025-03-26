@@ -10,10 +10,11 @@ import {
 import { Button } from './ui/button'
 import { IconClose } from './ui/icons'
 import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip'
+import { Image } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 export interface PreviewCarousel {
-  images: any
+  images: Image[]
   isOpen: boolean
   onClose: () => void
 }
@@ -61,43 +62,39 @@ export default function PreviewCarousel({
         </Tooltip>
         <Carousel className="w-full" setApi={setApi}>
           <CarouselContent>
-            {images.map(
-              (image: { filename: string; data: string }, index: number) => (
-                <CarouselItem key={index}>
-                  <div
-                    key={index}
-                    className="flex justify-center items-center sm:rounded-md"
-                  >
-                    <img
-                      src={image.data}
-                      alt={`Image ${index} (${image.filename})`}
-                      className="w-[400px] h-[400px] overflow-hidden sm:rounded-md"
-                    />
-                  </div>
-                </CarouselItem>
-              )
-            )}
+            {images.map((image: Image, index: number) => (
+              <CarouselItem key={index}>
+                <div
+                  key={index}
+                  className="flex justify-center items-center sm:rounded-md"
+                >
+                  <img
+                    src={image.url}
+                    alt={`Image ${index} (${image.filename})`}
+                    className="w-[400px] h-[400px] overflow-hidden sm:rounded-md"
+                  />
+                </div>
+              </CarouselItem>
+            ))}
           </CarouselContent>
           <CarouselPrevious />
           <CarouselNext />
         </Carousel>
         <div className="mt-8 flex justify-center gap-2 overflow-x-auto">
-          {images.map(
-            (image: { filename: string; data: string }, index: number) => (
-              <img
-                key={index}
-                src={image.data}
-                alt={`Thumbnail ${index}`}
-                onClick={() => api?.scrollTo(index)}
-                className={cn(
-                  'w-20 h-20 object-contain rounded-md cursor-pointer border-2 transition bg-background p-1',
-                  activeIndex === index
-                    ? 'border-primary'
-                    : 'border-accent opacity-60 hover:opacity-100'
-                )}
-              />
-            )
-          )}
+          {images.map((image: Image, index: number) => (
+            <img
+              key={index}
+              src={image.url}
+              alt={`Thumbnail ${index}`}
+              onClick={() => api?.scrollTo(index)}
+              className={cn(
+                'w-20 h-20 object-contain rounded-md cursor-pointer border-2 transition bg-background p-1',
+                activeIndex === index
+                  ? 'border-primary'
+                  : 'border-accent opacity-60 hover:opacity-100'
+              )}
+            />
+          ))}
         </div>
       </div>
     </div>

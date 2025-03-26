@@ -143,9 +143,9 @@ export type FieldErrors = {
   [x: symbol]: string | undefined
 }
 
-export interface GuidanceImage {
+export interface Image {
   filename: string
-  data: string
+  url: string
 }
 
 export type EditableOption = {

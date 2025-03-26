@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { GuidanceImageView } from './guidance-image-view'
 import { ThemeToggle } from './theme-toggle'
-import { GuidanceImage } from '@/lib/types'
+import { Image } from '@/lib/types'
 
 interface GuidanceProps {
-  images: GuidanceImage[]
+  images: Image[]
   setIsCarouselOpen: (isOpen: boolean) => void
 }
 
