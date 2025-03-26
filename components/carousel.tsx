@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/tooltip'
 import PreviewCarousel from './preview-carousel'
 import { Image, MockupResponse } from '@/lib/types'
+import { TENT_TYPES } from '@/app/constants'
 
 export const Carousal = ({ mockups }: { mockups: MockupResponse }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -18,7 +19,8 @@ export const Carousal = ({ mockups }: { mockups: MockupResponse }) => {
   useEffect(() => {
     const images: Image[] = Object.entries(mockups).map(([key, value]) => ({
       url: value.url,
-      filename: key
+      filename:
+        key in TENT_TYPES ? TENT_TYPES[key as keyof typeof TENT_TYPES] : key
     }))
     setImages(images)
   }, [mockups])

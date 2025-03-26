@@ -40,3 +40,10 @@ export const COLORS = {
   BLACK_COLOR: '[0, 0, 0]',
   LIGHT_GREY_COLOR: '[250, 250, 250]'
 }
+
+export const TENT_TYPES = {
+  'front-wall': 'Front Wall',
+  'half-wall': 'Half Wall',
+  'top-view': 'Top View',
+  'no-walls': 'No Walls'
+}
