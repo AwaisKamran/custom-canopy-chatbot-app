@@ -41,9 +41,10 @@ export const COLORS = {
   LIGHT_GREY_COLOR: '[250, 250, 250]'
 }
 
-export const TENT_TYPES = {
+export const MOCKUP_TYPES = {
   'front-wall': 'Front Wall',
   'half-wall': 'Half Wall',
   'top-view': 'Top View',
-  'no-walls': 'No Walls'
+  'no-walls': 'No Walls',
+  table: 'Table'
 }
