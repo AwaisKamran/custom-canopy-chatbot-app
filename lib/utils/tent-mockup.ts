@@ -8,8 +8,16 @@ interface TentMockUpPromptFormData extends TentMockUpPrompt {
 export const createFormData = (
   mockUpPrompt: TentMockUpPromptFormData
 ): FormData => {
-  const { logoFile, tentType, peaks, panels, valences, valencesTexts } =
-    mockUpPrompt
+  const {
+    id,
+    logoFile,
+    tentType,
+    tableColor,
+    peaks,
+    walls,
+    valences,
+    valencesTexts
+  } = mockUpPrompt
   const formRequestBody = new FormData()
 
   Object.entries(peaks).forEach(([key, value]) => {
@@ -17,7 +25,7 @@ export const createFormData = (
   })
 
   if (tentType !== 'no-walls') {
-    Object.entries(panels).forEach(([key, value]) => {
+    Object.entries(walls).forEach(([key, value]) => {
       formRequestBody.append(`panels_${key}`, value)
     })
   }
@@ -31,6 +39,8 @@ export const createFormData = (
 
   formRequestBody.append('logo', logoFile)
   formRequestBody.append('text_color', COLORS.BLACK_COLOR)
+  if (tableColor) formRequestBody.append('table_color', tableColor)
+  formRequestBody.append('output_dir', `chat:${id}`)
 
   return formRequestBody
 }

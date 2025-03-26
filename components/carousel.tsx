@@ -9,12 +9,9 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import PreviewCarousel from './preview-carousel'
+import { MockupResponse } from '@/lib/types'
 
-export const Carousal = ({
-  mockups
-}: {
-  mockups: { fileName: string; data: string }[]
-}) => {
+export const Carousal = ({ mockups }: { mockups: MockupResponse }) => {
   const [isOpen, setIsOpen] = useState(true)
   return (
     <>

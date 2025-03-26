@@ -9,12 +9,14 @@ import { COLORS } from '@/app/constants'
 interface ColorPickerPopoverProps {
   onColorSelect: (color: string, colorName: string, fontColor: string) => void
   disabled: boolean
+  label?: string
 }
 
 export default function ColorPickerPopover({
   onColorSelect,
-  disabled
-}: ColorPickerPopoverProps) {
+  disabled,
+  label = 'Pick a color'
+}: Readonly<ColorPickerPopoverProps>) {
   const [color, setColor] = useState('#000000')
   const [isPickerOpen, setPickerOpen] = useState(false)
 
@@ -61,7 +63,7 @@ export default function ColorPickerPopover({
           onClick={() => setPickerOpen(false)}
         >
           <IconColorPicker />
-          <span>Pick a Color</span>
+          <span>{label}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent align="center" side="top">

@@ -2,12 +2,20 @@ import { TENT_MOCKUP_VALIDATIONS } from '@/app/constants'
 import { z } from 'zod'
 
 export const ButtonToolSchema = z.object({
-  content: z.array(z.string()).describe('The prompt for the button group'),
+  content: z.string().describe('Asking user to choose from the options'),
   options: z
     .array(
       z.object({
         name: z.string().describe('The name for the button'),
-        value: z.string().describe('The value for the button')
+        value: z.string().describe('The value for the button'),
+        selected: z
+          .boolean()
+          .describe('The selected state for the button')
+          .default(false),
+        edit: z
+          .boolean()
+          .describe('The edit state for the button')
+          .default(false)
       })
     )
     .describe('The options to display')
@@ -15,16 +23,63 @@ export const ButtonToolSchema = z.object({
 })
 
 export const ColorPickerToolSchema = z.object({
-  content: z.array(z.string()).describe('The prompt for the button group')
+  content: z.string().describe('Asking user to select color')
+})
+
+export const ChatTextInputGroupSchema = z.object({
+  content: z.string().describe('Asking user to input details'),
+  inputFields: z
+    .array(
+      z.object({
+        label: z.string().describe('The label for the input field'),
+        value: z.string().describe('The value for the input field')
+      })
+    )
+    .describe('The input fields to display')
+    .nonempty()
+})
+
+export const ColorLabelPickerSetSchema = z.object({
+  content: z.string().describe('Asking user to select multi color'),
+  fieldColors: z
+    .array(
+      z.object({
+        name: z.string().describe('The name for the color picker'),
+        label: z.string().describe('The label for the color picker'),
+        color: z.object({
+          name: z.string().describe('The color name'),
+          value: z.string().describe('The color value')
+        })
+      })
+    )
+    .describe('The color pickers to display')
+    .nonempty()
 })
 
 export const CustomCanopyToolSchema = z.object({
   content: z
     .array(z.string())
     .describe(
-      'The content to be displayed for the canopy tool while waiting and after the image is generated'
+      'The content to be displayed for the canopy tool while waiting, after the image and while displaying add-ons options.'
     )
-    .length(2),
+    .length(3),
+  options: z
+    .array(
+      z.object({
+        name: z.string().describe('The name for the button'),
+        value: z.string().describe('The value for the button'),
+        selected: z
+          .boolean()
+          .describe('Whether the button is selected')
+          .default(false),
+        edit: z
+          .boolean()
+          .describe('The edit state for the button')
+          .default(false)
+      })
+    )
+    .describe('The options to display')
+    .nonempty(),
   payload: z
     .object({
       companyName: z.string().describe('Name of the company or organization'),
@@ -47,11 +102,11 @@ export const CustomCanopyToolSchema = z.object({
         })
         .describe('Colors of the valences')
         .required(),
-      panels: z
+      walls: z
         .object({
-          left: z.string().describe('Color of panel left'),
-          right: z.string().describe('Color of panel right'),
-          back: z.string().describe('Color of panel back')
+          left: z.string().describe('Color of wall left'),
+          right: z.string().describe('Color of wall right'),
+          back: z.string().describe('Color of wall back')
         })
         .describe('Colors of the valences')
         .required(),
@@ -89,7 +144,10 @@ export const CustomCanopyToolSchema = z.object({
         .describe('Color of the text to be displayed on the tent banner'),
       font: z
         .string()
-        .describe('Font of the text to be displayed on the tent banner')
+        .describe('Font of the text to be displayed on the tent banner'),
+      tableColor: z
+        .string()
+        .describe('Color of the table to be displayed on the tent banner')
     })
     .describe('Details of the tent to be generated')
     .required()

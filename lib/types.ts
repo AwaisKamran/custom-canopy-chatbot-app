@@ -9,7 +9,6 @@ export interface ClientMessage {
   id: string
   role: Roles
   display: React.ReactNode
-  selectedOption?: string
 }
 
 export interface ToolCallResult {
@@ -79,11 +78,12 @@ export interface TentMockUpPrompt {
   tentType: string
   peaks: TentSides
   valences: TentSides
-  panels: TentSides
+  walls: TentSides
   valencesTexts: TentSides
   logo: ImagePart
   font: string
   fontColor: string
+  tableColor: string
 }
 
 export type ChatResponse = Chat | null | { error: string }
@@ -120,8 +120,10 @@ export enum ResultCode {
 
 export type MockupResponse = {
   front: PutBlobResult
+  table: PutBlobResult
   'half-wall': PutBlobResult
   'top-view': PutBlobResult
+  'no-walls': PutBlobResult
 }
 
 export type ActionResult = {
@@ -146,8 +148,9 @@ export interface GuidanceImage {
   data: string
 }
 
-export type Color = {
+export type EditableOption = {
   name: string
-  rgb: string
-  tailwind: string
+  value: string
+  selected: boolean
+  edit?: boolean
 }
