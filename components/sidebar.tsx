@@ -16,6 +16,7 @@ export function Sidebar({ className, children }: SidebarProps) {
   const { isSidebarOpen, isLoading } = useSidebar()
   const [images, setImages] = React.useState<Image[]>([])
   const [isCarouselOpen, setIsCarouselOpen] = React.useState(false)
+  const [initialIndex, setInitialIndex] = React.useState(0)
   const { theme } = useTheme()
 
   React.useEffect(() => {
@@ -68,7 +69,11 @@ export function Sidebar({ className, children }: SidebarProps) {
           {children}
         </TabsContent>
         <TabsContent value="guidance" className="h-full">
-          <Guidance images={images} setIsCarouselOpen={setIsCarouselOpen} />
+          <Guidance
+            images={images}
+            setIsCarouselOpen={setIsCarouselOpen}
+            setInitialIndex={setInitialIndex}
+          />
         </TabsContent>
       </Tabs>
 
@@ -76,6 +81,7 @@ export function Sidebar({ className, children }: SidebarProps) {
         images={images}
         isOpen={isCarouselOpen}
         onClose={() => setIsCarouselOpen(false)}
+        initialIndex={initialIndex}
       />
     </>
   )
