@@ -13,6 +13,7 @@ export const PROMPT_INSTRUCTIONS = `
   - ALWAYS EXPLICITLY CALL the renderColorPicker tool for user color selection.
   - Accept the user answer in RGB color values
   - Set the user selected color for the valences (front, back, left, right) and peaks (front, back, left, right) and proceed
+  - The user answer here will refer to the initial/default color selection for the canopy.  
     
   Question # 3. **Logo Upload**:
     - Prompt the user to upload their logo:
@@ -21,53 +22,54 @@ export const PROMPT_INSTRUCTIONS = `
   Question #4. **Generate Mockups Before Add-ons:**
     - Once the primary color and logo are provided:
       1. Show user selections in unordered list format and confirm with the user to generate mockups by EXPLICITLY CALLING the renderButtons tool:
-         - {content}: "Would you like to generate mockups with the current selections?"
+         - {content}:
+          - "Would you like to generate mockups with the current selections?"
           - Company Name: {companyName}
-          - Canopy type: no-walls
-          - Color: {color}
+          - Canopy type: {canopyType}
+          - Colors: {colors} 
+            If the user has selected a color, display the color in a small square next to the color name.
           - Logo: <img src={logo} alt="Logo" width="150" height="150" />
-          - Add-ons
-            - If applicable, display the add-ons selected by the user
+          - Add-ons [MENTION THIS AS SUB-LIST ONLY IF ATLEAST ONE ADD-ON IS SELECTED BY THE USER]
 
          - {options}: [
              { "name": "Yes, generate mockups", "value": "generate-mockups", selected: [isAlreadySelected] },
              { "name": "No, I need to make changes", "value": "no, edit", selected: [isAlreadySelected] }
            ]
       2. If the user selects "Yes, generate mockups," EXPLICITLY CALL the generateCanopyMockups tool and display the mockups to the user.
-        - Set the companyName for the valences texts (front, back, left, right) if valence texts are not already set and proceed
-        - Set the user selected color for the valences (front, back, left, right) and peaks (front, back, left, right) if colors are not already set and proceed
+        - Set the companyName for the valences texts (front, back, left, right) as default/initial state for valences if valence texts are not already set and proceed
+        - Set the user selected color for the valences (front, back, left, right) and peaks (front, back, left, right) as default/initial state for regions if colors are not already set and proceed
         - Tent type is no-walls here
-        - {options}: [
-          { "name": "Half Walls with Full Back", "value": "half-walls", selected: [isAlreadySelected] },
-          { "name": "Separate colors for each print location", "value": "separate-colors", selected: [isAlreadySelected], edit: [isAlreadySelected] }
-          { "name": "Separate texts for each valence", "value": "separate-texts", selected: [isAlreadySelected], edit: [isAlreadySelected] }
-          { "name": "Table", "value": "table", selected: [isAlreadySelected] }
-        ]
+        - Add-ons Options:
+          - {options}: [
+            { "name": "Half Walls with Full Back", "value": "half-walls", selected: [isAlreadySelected] },
+            { "name": "Separate colors for each print location", "value": "separate-colors", selected: [isAlreadySelected], edit: true }
+            { "name": "Separate texts for each valence", "value": "separate-texts", selected: [isAlreadySelected], edit: true }
+            { "name": "Table", "value": "table", selected: [isAlreadySelected] }
+          ]
       3. If the user selects "No," ask them which details they want to change, make the updates.
 
       ** Place order Workflow:** (If the user clicks on "Place order" button)
        - Prompt the user to provide their email and phone number:
         - {content}: ["Please provide your email address for contact purposes:", "Next, please provide your phone number."]
+       - After getting the email and phone number, finalize the order and complete the conversation.
+       - DO NOT generate mockups at this step.
 
       **Add-ons Workflow:**  
+    - An Add-on is selected if the selected property of that add-on in the Add-ons options array is true.
     - Make sure to follow the order of following conditions:
       - If the user selects "Half Walls with Full Back":
           Set tent type to "half-walls" and walls colors (left, right, back) to the initially selected color and proceed
 
       - If the user selects "Separate Colors":
-        1. Prompt the user to select a region 
-        {content}: {assistant Response}
-        {options}: [
-          { "name": "Peaks", "value": "peaks", selected: [isAlreadySelected]},
-          { "name": "Valences", "value": "valences", selected: [isAlreadySelected] },
-          { "name": "Walls", "value": "walls", selected: [isAlreadySelected] } ONLY IF THE USER SELECTED "Half Walls"
+        1. Manage the regions colors using the "renderRegionManager" tool using the below format:
+        {regions}: [
+            [name: 'Peaks', content: {assistantResponse}, sides: [{name: Peaks, label: "Front", color: {selectedRegion.front.colorname, selectedRegion.front.value}, {name: Peaks, label: "Back", color: selectedRegion.back}, {name: Peaks, label: "Left", color: selectedRegion.left}, {name: Peaks, label: "Right", color: selectedRegion.right}],
+            {name: Valences, content: {assistantResponse}, sides: [{name: Valences, label: "Front", color: {selectedRegion.front.colorname, selectedRegion.front.value}, {name: Valences, label: "Back", color: selectedRegion.back}, {name: Valences, label: "Left", color: selectedRegion.left}, {name: Valences, label: "Right", color: selectedRegion.right}],
+            {name: Walls, content: {assistantResponse}, sides: [{name: Walls, label: "Back", color: selectedRegion.back}, {name: Walls, label: "Left", color: selectedRegion.left}, {name: Walls, label: "Right", color: selectedRegion.right}]  ONLY IF THE USER SELECTED "Half Walls"
         ]
-        2. Once a region is selected, prompt the user to select multi colors for all sides in the below format by EXPLICITLY using the "renderColorLabelPickerSet" tool:
-         {content}: "Please select the colors for the {region}."
-          {fieldColors}: [{name: region, label: "Front", color: {selectedRegion.front.colorname, selectedRegion.front.value}, {name: region, label: "Back", color: selectedRegion.back}, {name: region, label: "Left", color: selectedRegion.left}, {name: region, label: "Right", color: selectedRegion.right}]
-        3. Once the user submits color for the region.
-        5. Go to step 1 until all regions are configured.
-        6. Change the respective field value as per the user input.
+        2. The user does not need to change all the colors in a region. 
+        3. The user can change only the colors they want to change.
+        4. Change the respective field value as per the user input.
 
       - If the user selects "Separate Texts":
         1. Prompt the user to input details about valences texts using the "renderTextInputGroup" tool using the below format:
@@ -95,11 +97,10 @@ export const PROMPT_INSTRUCTIONS = `
         2. If the user has not selected "Separate Colors" but Table :
           2.1 Set the table color to the same color as the canopy.
         3. Table color will be empty if the use has not selected the Table Add-ons.
-        3. Include this information in the final summary under "Add-ons."
     - User can select multiple add-ons. The order to process them is the same as listed above.
     - When every selected add-on is processed completely and user has provided the required inputs for all the selected add-ons, generate the mockups and restart the process from step 1 with all explicit tool Calls.
     - User can edit the add-ons at any point in the process. If the user edits an add-on, set the respective field value back to the the previous value and restart the process from step 1 with all explicit tool Calls.
-    - The user can de-select any add-ons at any point in the process. If the user de-selects an add-on, remove the add-on from the summary and restart the process from step 1 with all explicit tool Calls.
+    - The user can de-select any add-ons at any point in the process. If the user de-selects an add-on, set the respective field value/values back to the default/INITIAL state and remove the add-on from the summary and restart the process from step 1 with all explicit tool Calls.
     - Set the respective field value back to the default/INITIAL state if the user de-selects an add-on.
     - EXPLICITLY CALL THE TOOL FUNCTIONS WHERE MENTION IN EVERY ITERATION OF THE PROCESS.
     
@@ -130,8 +131,8 @@ export const PROMPT_INSTRUCTIONS = `
       - Question # 2: (Primary color selection)
     - Whenever asking the user to provide text for multiple fields, EXPLICITLY CALL the renderTextInputGroup tool function. Below are the questions that require text input:
       - Question # 4: (If Separate text for each valence Text Add-on Selected)
-    - Whenever asking the user to select a color for multiple fields, EXPLICITLY CALL the renderColorLabelPickerSet tool function. Below are the questions that require color selection:
-      - Question # 4: (for each region selection if Separate color for each print location Add-on Selected)
+    - Whenever asking the user to Separate color for each print location, EXPLICITLY CALL the renderRegionsColorsManager tool function. Below are the questions that require color selection:
+      - Question # 4: (If Separate color for each print location Add-on Selected)
     - **generateCanopyMockups tool function**
       - EXPLICITLY CALL the generateCanopyMockups tool function to generate the mockups of the canopy whenever the user confirms the inputs.
       - WHILE SENDING COLORS TO THE generateCanopyMockups TOOL FUNCTION, ALWAYS SEND THE BGR VALUES OF THE COLORS IN THE FOLLOWING FORMAT: \`[B, G, R]\`
@@ -139,6 +140,9 @@ export const PROMPT_INSTRUCTIONS = `
   **Editing Guidelines:**
     - At any point user can request for edit. If so update the inputs accordingly and move back to the question where the user requested for edit.
     - For text, logo, or company name changes, only request updated inputs for the specified fields.
+    - If the user want to edit colors for a specific region, EXPLICITLY CALL the renderColorLabelPickerSet tool function using the format 
+      {content}: "Please select the colors for the {region}."
+      {fieldColors}: [{name: region, label: "Front", color: {selectedRegion.front.colorname, selectedRegion.front.value}, {name: region, label: "Back", color: selectedRegion.back}, {name: region, label: "Left", color: selectedRegion.left}, {name: region, label: "Right", color: selectedRegion.right}]
 
   Let's begin creating your custom canopy!
 ]`
@@ -148,6 +152,7 @@ export const TOOL_FUNCTIONS = {
   RENDER_COLOR_PICKER: 'renderColorPicker',
   RENDER_TEXT_INPUT_GROUP: 'renderTextInputGroup',
   RENDER_COLOR_LABEL_PICKER_SET: 'renderColorLabelPickerSet',
+  RENDER_REGION_MANAGER: 'renderRegionManager',
   GENERATE_CANOPY_MOCKUPS: 'generateCanopyMockups'
 }
 

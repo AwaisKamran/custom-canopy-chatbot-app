@@ -27,12 +27,7 @@ export const ChatRadioButtonWrapper = ({
     setMessages((currentMessages: any) => [...currentMessages, message])
   }
 
-  const handleEdit = async (option: {
-    name: string
-    value: string
-    selected: boolean
-    edit: boolean
-  }) => {
+  const handleEdit = async (option: EditableOption) => {
     const message = await submitUserMessage(
       `Edit the values for ${option.name}`
     )
