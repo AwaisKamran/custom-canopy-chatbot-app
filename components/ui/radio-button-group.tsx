@@ -30,7 +30,11 @@ export const RadioButtonGroup = ({
           : item
       )
     } else {
-      return [...options, { ...option, selected: true }]
+      return options.map((item: EditableOption) =>
+        item.value === option.value
+          ? { ...item, selected: true }
+          : { ...item, selected: false }
+      )
     }
   }
 
