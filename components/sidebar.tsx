@@ -7,43 +7,44 @@ import { cn } from '@/lib/utils'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 import { Guidance } from './guidance'
 import PreviewCarousel from './preview-carousel'
-import { GuidanceImage } from '@/lib/types'
+import { Image } from '@/lib/types'
 import { useTheme } from 'next-themes'
 
 export interface SidebarProps extends React.ComponentProps<'div'> {}
 
 export function Sidebar({ className, children }: SidebarProps) {
   const { isSidebarOpen, isLoading } = useSidebar()
-  const [images, setImages] = React.useState<GuidanceImage[]>([])
+  const [images, setImages] = React.useState<Image[]>([])
   const [isCarouselOpen, setIsCarouselOpen] = React.useState(false)
+  const [initialIndex, setInitialIndex] = React.useState(0)
   const { theme } = useTheme()
 
   React.useEffect(() => {
-    const images: GuidanceImage[] = [
+    const images: Image[] = [
       {
         filename: 'Front View',
-        data:
+        url:
           theme === 'light'
             ? process.env.NEXT_PUBLIC_FRONT_GUIDANCE_IMAGE_URL || ''
             : process.env.NEXT_PUBLIC_FRONT_GUIDANCE_IMAGE_URL_DARK || ''
       },
       {
         filename: 'Side View',
-        data:
+        url:
           theme === 'light'
             ? process.env.NEXT_PUBLIC_SIDE_GUIDANCE_IMAGE_URL || ''
             : process.env.NEXT_PUBLIC_SIDE_GUIDANCE_IMAGE_URL_DARK || ''
       },
       {
         filename: 'Top View',
-        data:
+        url:
           theme === 'light'
             ? process.env.NEXT_PUBLIC_TOP_GUIDANCE_IMAGE_URL || ''
             : process.env.NEXT_PUBLIC_TOP_GUIDANCE_IMAGE_URL_DARK || ''
       },
       {
         filename: 'No Walls View',
-        data:
+        url:
           theme === 'light'
             ? process.env.NEXT_PUBLIC_NO_WALLS_GUIDANCE_IMAGE_URL || ''
             : process.env.NEXT_PUBLIC_NO_WALLS_GUIDANCE_IMAGE_URL_DARK || ''
@@ -68,7 +69,11 @@ export function Sidebar({ className, children }: SidebarProps) {
           {children}
         </TabsContent>
         <TabsContent value="guidance" className="h-full">
-          <Guidance images={images} setIsCarouselOpen={setIsCarouselOpen} />
+          <Guidance
+            images={images}
+            setIsCarouselOpen={setIsCarouselOpen}
+            setInitialIndex={setInitialIndex}
+          />
         </TabsContent>
       </Tabs>
 
@@ -76,6 +81,7 @@ export function Sidebar({ className, children }: SidebarProps) {
         images={images}
         isOpen={isCarouselOpen}
         onClose={() => setIsCarouselOpen(false)}
+        initialIndex={initialIndex}
       />
     </>
   )

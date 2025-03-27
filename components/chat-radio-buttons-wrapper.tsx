@@ -1,50 +1,46 @@
 'use client'
 
+import { EditableOption } from '@/lib/types'
 import { RadioButtonGroup } from './ui/radio-button-group'
 import { useActions, useUIState, useAIState } from 'ai/rsc'
-import { ClientMessage } from '@/lib/types'
 
 interface ChatWrapperProps {
-  options: { name: string; value: string }[]
-  selectedOption?: string
+  options: EditableOption[]
   messageId?: string
+  isMultiSelect?: boolean
 }
 
 export const ChatRadioButtonWrapper = ({
   options,
-  selectedOption,
-  messageId
+  messageId,
+  isMultiSelect = false
 }: ChatWrapperProps) => {
   const { submitUserMessage } = useActions()
   const [messages, setMessages] = useUIState()
-  const [aiState, _setAIState] = useAIState()
-
-  const handleSelect = async (option: string) => {
-    setMessages((currentMessages: any) =>
-      currentMessages.length > 0
-        ? [
-            ...currentMessages.slice(0, -1),
-            {
-              ...currentMessages[currentMessages.length - 1],
-              selectedOption: option
-            }
-          ]
-        : currentMessages
+  const [_, _setAIState] = useAIState()
+  const handleSelect = async (options: EditableOption[]) => {
+    const message = await submitUserMessage(
+      JSON.stringify({
+        options: options
+      })
     )
-    const message = await submitUserMessage(option)
     setMessages((currentMessages: any) => [...currentMessages, message])
   }
 
-  const message: ClientMessage = messages.find(
-    (message: ClientMessage) => message.id === messageId
-  )
+  const handleEdit = async (option: EditableOption) => {
+    const message = await submitUserMessage(
+      `Edit the values for ${option.name}`
+    )
+    setMessages((currentMessages: any) => [...currentMessages, message])
+  }
 
   return (
     <RadioButtonGroup
       options={options}
-      selectedOption={message.selectedOption || selectedOption || ''}
       onSelect={handleSelect}
-      disabled={messageId !== messages.at(-1)?.id || aiState.loading}
+      onEdit={handleEdit}
+      isMultiSelect={isMultiSelect}
+      disabled={messageId !== messages.at(-1)?.id}
     />
   )
 }

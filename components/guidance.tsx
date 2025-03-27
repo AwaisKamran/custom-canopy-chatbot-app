@@ -1,14 +1,19 @@
 import * as React from 'react'
 import { GuidanceImageView } from './guidance-image-view'
 import { ThemeToggle } from './theme-toggle'
-import { GuidanceImage } from '@/lib/types'
+import { Image } from '@/lib/types'
 
 interface GuidanceProps {
-  images: GuidanceImage[]
+  images: Image[]
   setIsCarouselOpen: (isOpen: boolean) => void
+  setInitialIndex: (index: number) => void
 }
 
-export function Guidance({ images, setIsCarouselOpen }: GuidanceProps) {
+export function Guidance({
+  images,
+  setIsCarouselOpen,
+  setInitialIndex
+}: GuidanceProps) {
   return (
     <div className="flex flex-col h-full p-2 mt-2 overflow-auto pb-20">
       <div className="p-2">
@@ -29,6 +34,7 @@ export function Guidance({ images, setIsCarouselOpen }: GuidanceProps) {
         <GuidanceImageView
           images={images}
           setIsCarouselOpen={setIsCarouselOpen}
+          setInitialIndex={setInitialIndex}
         />
 
         <div className="flex justify-end">

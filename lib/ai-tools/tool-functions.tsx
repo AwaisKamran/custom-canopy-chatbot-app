@@ -1,19 +1,26 @@
 import React from 'react'
-import { BotCard, BotMessage } from '@/components/stocks/message'
-import { ChatRadioButtonWrapper } from '@/components/chat-radio-buttons-wrapper'
-import { ChatColorPickerWrapper } from '@/components/chat-color-picker-wrapper'
 import { z } from 'zod'
+import { ToolContent } from 'ai'
 import {
   ButtonToolSchema,
   ColorPickerToolSchema,
-  CustomCanopyToolSchema
+  CustomCanopyToolSchema,
+  ChatTextInputGroupSchema,
+  RegionsColorsManagerSchema,
+  ColorLabelPickerSetSchema
 } from './schemas'
 import { Carousal } from '@/components/carousel'
+import { BotCard, BotMessage } from '@/components/stocks/message'
+import { ChatRadioButtonWrapper } from '@/components/chat-radio-buttons-wrapper'
+import { ChatColorPickerWrapper } from '@/components/chat-color-picker-wrapper'
 import { generateTentMockupsApi } from '../redux/apis/tent-mockup-prompt'
-import { Roles, TentMockUpPrompt } from '../types'
+import { MockupResponse, Roles, TentMockUpPrompt } from '../types'
 import { TOOL_FUNCTIONS } from './constants'
 import { modifyAIState } from './utils'
-import { ToolContent } from 'ai'
+import { ChatTextInputGroup } from '@/components/chat-text-input-group'
+import ChatActionMultiSelector from '@/components/chat-action-multi-selector'
+import RegionsColorsManager from '@/components/regions_colors_manager'
+import { ColorLabelPickerSet } from '@/components/color-label-picker-set'
 
 function modifyToolAIState(history: any, content: ToolContent) {
   modifyAIState(history, {
@@ -30,28 +37,21 @@ export function renderButtonsTool(history: any, messageId: string) {
       content,
       options
     }: z.infer<typeof ButtonToolSchema>) {
-      const message = content.join('\n')
       modifyToolAIState(history, [
         {
           toolCallId: messageId,
           toolName: TOOL_FUNCTIONS.RENDER_BUTTONS,
           result: {
-            message,
+            message: content,
             props: { options }
           }
         }
       ] as ToolContent)
 
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
       return (
-        <BotMessage
-          key={messageId}
-          content={message}
-          children={
-            <ChatRadioButtonWrapper options={options} messageId={messageId} />
-          }
-        />
+        <BotMessage key={messageId} content={content}>
+          <ChatRadioButtonWrapper options={options} messageId={messageId} />
+        </BotMessage>
       )
     }
   }
@@ -64,60 +64,151 @@ export function renderColorPickerTool(history: any, messageId: string) {
     generate: async function ({
       content
     }: z.infer<typeof ColorPickerToolSchema>) {
-      const message = content.join('\n')
       modifyToolAIState(history, [
         {
           toolCallId: messageId,
           toolName: TOOL_FUNCTIONS.RENDER_COLOR_PICKER,
           result: {
-            message
+            message: content
           }
         }
       ] as ToolContent)
-      await new Promise(resolve => setTimeout(resolve, 1000))
 
       return (
-        <BotMessage
-          key={messageId}
-          content={message}
-          children={<ChatColorPickerWrapper messageId={messageId} />}
-        />
+        <BotMessage key={messageId} content={content}>
+          <ChatColorPickerWrapper messageId={messageId} />
+        </BotMessage>
       )
     }
   }
 }
 
+export function renderTextInputGroup(history: any, messageId: string) {
+  return {
+    description: 'Renders the text input with label for user input',
+    parameters: ChatTextInputGroupSchema,
+    generate: async function ({
+      content,
+      inputFields
+    }: z.infer<typeof ChatTextInputGroupSchema>) {
+      modifyToolAIState(history, [
+        {
+          toolCallId: messageId,
+          toolName: TOOL_FUNCTIONS.RENDER_TEXT_INPUT_GROUP,
+          result: {
+            message: content,
+            props: { inputFields }
+          }
+        }
+      ] as ToolContent)
+
+      return (
+        <BotMessage key={messageId} content={content}>
+          <ChatTextInputGroup inputFields={inputFields} messageId={messageId} />
+        </BotMessage>
+      )
+    }
+  }
+}
+
+export function renderColorLabelPickerSet(history: any, messageId: string) {
+  return {
+    description: 'Renders the multi color picker with label for user input',
+    parameters: ColorLabelPickerSetSchema,
+    generate: async function ({
+      content,
+      fieldColors
+    }: z.infer<typeof ColorLabelPickerSetSchema>) {
+      modifyToolAIState(history, [
+        {
+          toolCallId: messageId,
+          toolName: TOOL_FUNCTIONS.RENDER_COLOR_LABEL_PICKER_SET,
+          result: {
+            message: content,
+            props: { fieldColors }
+          }
+        }
+      ] as ToolContent)
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      return (
+        <BotMessage key={messageId} content={content}>
+          <ColorLabelPickerSet
+            fieldColors={fieldColors}
+            messageId={messageId}
+          />
+        </BotMessage>
+      )
+    }
+  }
+}
+
+export function renderRegionManager(history: any, messageId: string) {
+  return {
+    description: 'Renders the multi color picker with label for user input',
+    parameters: RegionsColorsManagerSchema,
+    generate: async function ({
+      content,
+      regions
+    }: z.infer<typeof RegionsColorsManagerSchema>) {
+      modifyToolAIState(history, [
+        {
+          toolCallId: messageId,
+          toolName: TOOL_FUNCTIONS.RENDER_REGION_MANAGER,
+          result: {
+            message: content,
+            props: { regions }
+          }
+        }
+      ] as ToolContent)
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      return (
+        <BotMessage key={messageId} content={content}>
+          <RegionsColorsManager regions={regions} messageId={messageId} />
+        </BotMessage>
+      )
+    }
+  }
+}
 export function generateCanopyMockups(history: any, messageId: string) {
   return {
     description: 'Generates the images for canopy tents based on user details',
     parameters: CustomCanopyToolSchema,
     generate: async function* ({
       content,
+      options,
       payload
     }: z.infer<typeof CustomCanopyToolSchema>) {
       yield <BotCard>{content[0]}</BotCard>
       try {
-        const mockups: { fileName: string; data: string }[] =
-          await generateTentMockupsApi({
-            ...(payload as TentMockUpPrompt),
-            id: history.get().id
-          })
-        console.log('add mockups', mockups)
-        // modifyToolAIState(history, [
-        //   {
-        //     toolCallId: messageId,
-        //     toolName: TOOL_FUNCTIONS.GENERATE_CANOPY_MOCKUPS,
-        //     result: {
-        //       message: content[1],
-        //       props: { mockups }
-        //     }
-        //   }
-        // ] as ToolContent)
+        const mockups: MockupResponse = await generateTentMockupsApi({
+          ...(payload as TentMockUpPrompt),
+          id: history.get().id
+        })
+        modifyToolAIState(history, [
+          {
+            toolCallId: messageId,
+            toolName: TOOL_FUNCTIONS.GENERATE_CANOPY_MOCKUPS,
+            result: {
+              message: content[1],
+              props: {
+                mockups,
+                options,
+                action: 'Place Order',
+                selectorName: 'Add-Ons'
+              }
+            }
+          }
+        ] as ToolContent)
         return (
-          <BotMessage
-            content={content[1]}
-            children={<Carousal mockups={mockups} />}
-          />
+          <BotMessage content={content[1]}>
+            <Carousal mockups={mockups} open={true} />
+            <ChatActionMultiSelector
+              action="Place Order"
+              selectorName="Add-Ons"
+              options={options}
+              messageId={messageId}
+            />
+          </BotMessage>
         )
       } catch (err) {
         const error = (err as Error).message
@@ -140,6 +231,9 @@ export const getToolFunctions = (history: any, messageId: string) => {
   return {
     renderButtons: renderButtonsTool(history, messageId),
     renderColorPicker: renderColorPickerTool(history, messageId),
+    renderColorLabelPickerSet: renderColorLabelPickerSet(history, messageId),
+    renderRegionManager: renderRegionManager(history, messageId),
+    renderTextInputGroup: renderTextInputGroup(history, messageId),
     generateCanopyMockups: generateCanopyMockups(history, messageId)
   }
 }

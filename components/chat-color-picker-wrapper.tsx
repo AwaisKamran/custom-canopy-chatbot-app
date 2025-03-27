@@ -25,7 +25,9 @@ export const ChatColorPickerWrapper = ({
         display: <UserMessage content={colorName} />
       }
     ])
-    const message = await submitUserMessage(color)
+    const message = await submitUserMessage(
+      JSON.stringify({ color, colorName })
+    )
     setMessages((currentMessages: any) => [...currentMessages, message])
   }
 

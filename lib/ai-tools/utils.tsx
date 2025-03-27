@@ -4,13 +4,17 @@ import { ChatRadioButtonWrapper } from '@/components/chat-radio-buttons-wrapper'
 import { ChatColorPickerWrapper } from '@/components/chat-color-picker-wrapper'
 import { Chat, ClientMessage, Roles, ToolCallResult } from '@/lib/types'
 import { CHAT, IMAGE } from '@/app/constants'
-import { getRGBColorName, isValidJson, nanoid } from '@/lib/utils'
+import { isValidJson, nanoid } from '@/lib/utils'
 import {
   INITIAL_CHAT_MESSAGE,
   LOGO_MSG_REGEX,
   TOOL_FUNCTIONS
 } from './constants'
 import { Carousal } from '@/components/carousel'
+import { ChatTextInputGroup } from '@/components/chat-text-input-group'
+import { ColorLabelPickerSet } from '@/components/color-label-picker-set'
+import ChatActionMultiSelector from '@/components/chat-action-multi-selector'
+import RegionsColorsManager from '@/components/regions_colors_manager'
 
 const createInitialAIState = (): Chat => {
   const chatId = nanoid()
@@ -61,30 +65,36 @@ const modifyAIState = (
   }
 }
 
-const getToolMessage = (
-  content: ToolContent,
-  selectedOption?: string
-): ClientMessage => {
+const getToolMessage = (content: ToolContent): ClientMessage => {
   const { toolCallId, toolName, result } = content[0]
   const { message, props } = result as ToolCallResult
+
   const toolComponent = (() => {
     switch (toolName) {
       case TOOL_FUNCTIONS.RENDER_BUTTONS:
-        return (
-          <ChatRadioButtonWrapper
-            selectedOption={selectedOption}
-            messageId={toolCallId}
-            {...props}
-          />
-        )
+        return <ChatRadioButtonWrapper messageId={toolCallId} {...props} />
 
       case TOOL_FUNCTIONS.RENDER_COLOR_PICKER:
         return <ChatColorPickerWrapper messageId={toolCallId} />
 
+      case TOOL_FUNCTIONS.RENDER_TEXT_INPUT_GROUP:
+        return <ChatTextInputGroup messageId={toolCallId} {...props} />
+
+      case TOOL_FUNCTIONS.RENDER_COLOR_LABEL_PICKER_SET:
+        return <ColorLabelPickerSet messageId={toolCallId} {...props} />
+
+      case TOOL_FUNCTIONS.RENDER_REGION_MANAGER:
+        return <RegionsColorsManager messageId={toolCallId} {...props} />
+
+      case TOOL_FUNCTIONS.GENERATE_CANOPY_MOCKUPS:
+        return (
+          <>
+            <Carousal {...props} />
+            <ChatActionMultiSelector {...props} messageId={toolCallId} />
+          </>
+        )
+
       default:
-        if (props) {
-          return <Carousal {...props} />
-        }
         return null
     }
   })()
@@ -93,26 +103,28 @@ const getToolMessage = (
     id: toolCallId,
     role: Roles.tool,
     display: (
-      <BotMessage key={toolCallId} content={message} children={toolComponent} />
+      <BotMessage key={toolCallId} content={message}>
+        {toolComponent}
+      </BotMessage>
     )
   }
 }
 
-const getClientMessage = (
-  message: CoreMessage,
-  selectedOption?: string
-): ClientMessage => {
+const getClientMessage = (message: CoreMessage): ClientMessage => {
   const { role, content } = message
   const id = nanoid()
+
   switch (role) {
     case Roles.tool:
-      return getToolMessage(content as ToolContent, selectedOption)
+      return getToolMessage(content)
+
     case Roles.assistant:
       return {
         id,
         role: Roles.assistant,
         display: <BotMessage key={id} content={content as string} />
       }
+
     default:
       return {
         id,
@@ -125,39 +137,44 @@ const getClientMessage = (
 const getClientMessages = (messages: CoreMessage[]): ClientMessage[] => {
   const clientMessages: ClientMessage[] = []
   let i = 0
-
   while (i < messages.length) {
     const currentMessage = messages[i]
     const nextMessage = messages[i + 1]
     const previousMessage = messages[i - 1]
-
-    if (
-      currentMessage.role === Roles.tool &&
-      nextMessage?.role === Roles.user
-    ) {
-      const toolContent = currentMessage.content as ToolContent
-      if (toolContent[0].toolName === TOOL_FUNCTIONS.RENDER_BUTTONS) {
-        clientMessages.push(
-          getClientMessage(currentMessage, nextMessage.content as string)
-        )
-        i += 2
-        continue
-      }
-    }
-
     if (
       currentMessage.role === Roles.user &&
-      i - 1 >= 0 &&
+      previousMessage &&
       (previousMessage.content as ToolContent)[0]?.toolName ===
         TOOL_FUNCTIONS.RENDER_COLOR_PICKER &&
       isValidJson(currentMessage.content as string)
     ) {
-      currentMessage.content = getRGBColorName(
+      currentMessage.content = JSON.parse(
         currentMessage.content as string
-      ) as string
+      ).colorName
+    } else if (
+      currentMessage.role === Roles.tool &&
+      nextMessage?.role === Roles.user &&
+      currentMessage.content[0].toolName !==
+        TOOL_FUNCTIONS.RENDER_COLOR_PICKER &&
+      isValidJson(nextMessage.content as string)
+    ) {
+      currentMessage.content = [
+        {
+          ...currentMessage.content[0],
+          result: {
+            ...(currentMessage.content[0].result as ToolCallResult),
+            props: {
+              ...(currentMessage.content[0].result as ToolCallResult).props,
+              ...JSON.parse(nextMessage.content as string)
+            }
+          }
+        }
+      ]
+
+      i = i + 1
     }
     clientMessages.push(getClientMessage(currentMessage))
-    i++
+    i = i + 1
   }
 
   return clientMessages
@@ -165,15 +182,18 @@ const getClientMessages = (messages: CoreMessage[]): ClientMessage[] => {
 
 export const isLastFileUploadMessage = (message: CoreMessage): boolean => {
   return (
-    message &&
-    message.role === Roles.assistant &&
+    message?.role === Roles.assistant &&
     LOGO_MSG_REGEX.test(message.content as string)
   )
 }
 
-export const customizeCoreMessages = (messages: any[]) => {
+export const customizeCoreMessages = (messages: any[]): CoreMessage[] => {
   const updatedMessages = messages.map(message => {
-    if (typeof message.content === 'object' && IMAGE in message.content[0]) {
+    if (
+      typeof message.content === 'object' &&
+      message.content[0] &&
+      IMAGE in message.content[0]
+    ) {
       message.content = JSON.stringify(message.content)
     }
     return message

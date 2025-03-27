@@ -9,7 +9,6 @@ export interface ClientMessage {
   id: string
   role: Roles
   display: React.ReactNode
-  selectedOption?: string
 }
 
 export interface ToolCallResult {
@@ -66,16 +65,25 @@ export interface TentColorRegions {
   walls_secondary: string
   walls_tertiary: string
 }
+export interface TentSides {
+  left: string
+  right: string
+  back: string
+  front?: string
+}
 
 export interface TentMockUpPrompt {
   id: string
   companyName: string
-  isPatterned: boolean
-  tentColors: TentColorRegions
-  text: string
+  tentType: string
+  peaks: TentSides
+  valences: TentSides
+  walls: TentSides
+  valencesTexts: TentSides
   logo: ImagePart
   font: string
   fontColor: string
+  tableColor: string
 }
 
 export type ChatResponse = Chat | null | { error: string }
@@ -85,6 +93,12 @@ export enum Roles {
   'assistant' = 'assistant',
   'system' = 'system',
   'tool' = 'tool'
+}
+
+export enum Types {
+  'full-walls' = 'full-walls',
+  'half-walls' = 'half-walls',
+  'no-walls' = 'no-walls'
 }
 
 export type TentColorConfig = {
@@ -106,8 +120,10 @@ export enum ResultCode {
 
 export type MockupResponse = {
   front: PutBlobResult
+  table: PutBlobResult
   'half-wall': PutBlobResult
   'top-view': PutBlobResult
+  'no-walls': PutBlobResult
 }
 
 export type ActionResult = {
@@ -127,7 +143,14 @@ export type FieldErrors = {
   [x: symbol]: string | undefined
 }
 
-export interface GuidanceImage {
+export interface Image {
   filename: string
-  data: string
+  url: string
+}
+
+export type EditableOption = {
+  name: string
+  value: string
+  selected: boolean
+  edit?: boolean
 }
