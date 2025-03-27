@@ -12,8 +12,14 @@ import PreviewCarousel from './preview-carousel'
 import { Image, MockupResponse } from '@/lib/types'
 import { MOCKUP_TYPES } from '@/app/constants'
 
-export const Carousal = ({ mockups }: { mockups: MockupResponse }) => {
-  const [isOpen, setIsOpen] = useState(false)
+export const Carousal = ({
+  mockups,
+  open = false
+}: {
+  open?: boolean
+  mockups: MockupResponse
+}) => {
+  const [isOpen, setIsOpen] = useState(open)
   const [images, setImages] = useState<Image[]>([])
 
   useEffect(() => {

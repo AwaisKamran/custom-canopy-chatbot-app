@@ -56,6 +56,28 @@ export const ColorLabelPickerSetSchema = z.object({
     .nonempty()
 })
 
+export const RegionsColorsManagerSchema = z.object({
+  content: z.string().describe('Asking user to select multi color'),
+  regions: z
+    .array(
+      z.object({
+        name: z.string().describe('The name for the button'),
+        sides: z.array(
+          z.object({
+            name: z.string().describe('The name for the button'),
+            label: z.string().describe('The value for the button'),
+            color: z.object({
+              name: z.string().describe('The name for the button'),
+              value: z.string().describe('The value for the button')
+            })
+          })
+        )
+      })
+    )
+    .describe('The options to display')
+    .nonempty()
+})
+
 export const CustomCanopyToolSchema = z.object({
   content: z
     .array(z.string())

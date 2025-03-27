@@ -40,16 +40,14 @@ const ChatActionMultiSelector: React.FC<ChatActionMultiSelectorProps> = ({
         <span className="px-4 text-gray-500 dark:text-gray-400">OR</span>
         <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
       </div>
-      <div>
-        <span className="text-zinc-600 dark:text-white text-2xl font-semibold mb-2">
-          Select {selectorName}
-        </span>
-        <ChatRadioButtonWrapper
-          isMultiSelect={true}
-          options={options}
-          messageId={messageId}
-        />
-      </div>
+      <span className="text-zinc-600 dark:text-white font-semibold">
+        Select {selectorName}
+      </span>
+      <ChatRadioButtonWrapper
+        isMultiSelect={true}
+        options={options}
+        messageId={messageId}
+      />
     </>
   )
 }

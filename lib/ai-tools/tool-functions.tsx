@@ -6,6 +6,7 @@ import {
   ColorPickerToolSchema,
   CustomCanopyToolSchema,
   ChatTextInputGroupSchema,
+  RegionsColorsManagerSchema,
   ColorLabelPickerSetSchema
 } from './schemas'
 import { Carousal } from '@/components/carousel'
@@ -17,8 +18,9 @@ import { MockupResponse, Roles, TentMockUpPrompt } from '../types'
 import { TOOL_FUNCTIONS } from './constants'
 import { modifyAIState } from './utils'
 import { ChatTextInputGroup } from '@/components/chat-text-input-group'
-import { ColorLabelPickerSet } from '@/components/color-label-picker-set'
 import ChatActionMultiSelector from '@/components/chat-action-multi-selector'
+import RegionsColorsManager from '@/components/regions_colors_manager'
+import { ColorLabelPickerSet } from '@/components/color-label-picker-set'
 
 function modifyToolAIState(history: any, content: ToolContent) {
   modifyAIState(history, {
@@ -139,6 +141,34 @@ export function renderColorLabelPickerSet(history: any, messageId: string) {
     }
   }
 }
+
+export function renderRegionManager(history: any, messageId: string) {
+  return {
+    description: 'Renders the multi color picker with label for user input',
+    parameters: RegionsColorsManagerSchema,
+    generate: async function ({
+      content,
+      regions
+    }: z.infer<typeof RegionsColorsManagerSchema>) {
+      modifyToolAIState(history, [
+        {
+          toolCallId: messageId,
+          toolName: TOOL_FUNCTIONS.RENDER_REGION_MANAGER,
+          result: {
+            message: content,
+            props: { regions }
+          }
+        }
+      ] as ToolContent)
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      return (
+        <BotMessage key={messageId} content={content}>
+          <RegionsColorsManager regions={regions} messageId={messageId} />
+        </BotMessage>
+      )
+    }
+  }
+}
 export function generateCanopyMockups(history: any, messageId: string) {
   return {
     description: 'Generates the images for canopy tents based on user details',
@@ -150,7 +180,6 @@ export function generateCanopyMockups(history: any, messageId: string) {
     }: z.infer<typeof CustomCanopyToolSchema>) {
       yield <BotCard>{content[0]}</BotCard>
       try {
-        console.log('payload', payload)
         const mockups: MockupResponse = await generateTentMockupsApi({
           ...(payload as TentMockUpPrompt),
           id: history.get().id
@@ -172,7 +201,7 @@ export function generateCanopyMockups(history: any, messageId: string) {
         ] as ToolContent)
         return (
           <BotMessage content={content[1]}>
-            <Carousal mockups={mockups} />
+            <Carousal mockups={mockups} open={true} />
             <ChatActionMultiSelector
               action="Place Order"
               selectorName="Add-Ons"
@@ -203,6 +232,7 @@ export const getToolFunctions = (history: any, messageId: string) => {
     renderButtons: renderButtonsTool(history, messageId),
     renderColorPicker: renderColorPickerTool(history, messageId),
     renderColorLabelPickerSet: renderColorLabelPickerSet(history, messageId),
+    renderRegionManager: renderRegionManager(history, messageId),
     renderTextInputGroup: renderTextInputGroup(history, messageId),
     generateCanopyMockups: generateCanopyMockups(history, messageId)
   }

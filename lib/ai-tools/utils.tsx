@@ -14,6 +14,7 @@ import { Carousal } from '@/components/carousel'
 import { ChatTextInputGroup } from '@/components/chat-text-input-group'
 import { ColorLabelPickerSet } from '@/components/color-label-picker-set'
 import ChatActionMultiSelector from '@/components/chat-action-multi-selector'
+import RegionsColorsManager from '@/components/regions_colors_manager'
 
 const createInitialAIState = (): Chat => {
   const chatId = nanoid()
@@ -81,6 +82,9 @@ const getToolMessage = (content: ToolContent): ClientMessage => {
 
       case TOOL_FUNCTIONS.RENDER_COLOR_LABEL_PICKER_SET:
         return <ColorLabelPickerSet messageId={toolCallId} {...props} />
+
+      case TOOL_FUNCTIONS.RENDER_REGION_MANAGER:
+        return <RegionsColorsManager messageId={toolCallId} {...props} />
 
       case TOOL_FUNCTIONS.GENERATE_CANOPY_MOCKUPS:
         return (

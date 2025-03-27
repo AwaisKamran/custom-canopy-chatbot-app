@@ -11,11 +11,13 @@ interface ColorLabelPickerSetProps {
     color: { name: string; value: string }
   }[]
   messageId?: string
+  setFieldColors?: (sides: any) => void
 }
 
 export const ColorLabelPickerSet = ({
   fieldColors,
-  messageId
+  messageId,
+  setFieldColors
 }: ColorLabelPickerSetProps) => {
   const { submitUserMessage } = useActions()
   const [messages, setMessages] = useUIState()
@@ -31,6 +33,7 @@ export const ColorLabelPickerSet = ({
       field.label === fieldName ? { ...field, color: colorObj } : field
     )
     setFields(updatedFields)
+    setFieldColors?.(updatedFields)
   }
   const onSubmit = async () => {
     const userMessage = JSON.stringify(
@@ -60,16 +63,18 @@ export const ColorLabelPickerSet = ({
           onColorSelect={handleColorPickerSelect}
         />
       ))}
-      <button
-        className="py-2 px-4 mb-2 rounded-md dark:text-white flex-auto whitespace-nowrap disabled:cursor-not-allowed border border-neutral-400 bg-slate-400 text-white dark:bg-cyan-800 disabled:opacity-50 disabled:pointer-events-none"
-        onClick={onSubmit}
-        disabled={
-          messageId !== messages.at(-1)?.id ||
-          fields.some(field => field.color.value === '')
-        }
-      >
-        Okay
-      </button>
+      {!setFieldColors && (
+        <button
+          className="py-2 px-4 mb-2 rounded-md dark:text-white flex-auto whitespace-nowrap disabled:cursor-not-allowed border border-neutral-400 bg-slate-400 text-white dark:bg-cyan-800 disabled:opacity-50 disabled:pointer-events-none"
+          onClick={onSubmit}
+          disabled={
+            messageId !== messages.at(-1)?.id ||
+            fields.some(field => field.color.value === '')
+          }
+        >
+          Okay
+        </button>
+      )}
     </div>
   )
 }
