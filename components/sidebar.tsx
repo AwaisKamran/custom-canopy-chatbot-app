@@ -9,6 +9,7 @@ import { Guidance } from './guidance'
 import PreviewCarousel from './preview-carousel'
 import { Image } from '@/lib/types'
 import { useTheme } from 'next-themes'
+import { GUIDANCE_IMAGE_URLS } from '@/app/constants'
 
 export interface SidebarProps extends React.ComponentProps<'div'> {}
 
@@ -25,29 +26,29 @@ export function Sidebar({ className, children }: SidebarProps) {
         filename: 'Front View',
         url:
           theme === 'light'
-            ? process.env.NEXT_PUBLIC_FRONT_GUIDANCE_IMAGE_URL || ''
-            : process.env.NEXT_PUBLIC_FRONT_GUIDANCE_IMAGE_URL_DARK || ''
+            ? GUIDANCE_IMAGE_URLS['front-light']
+            : GUIDANCE_IMAGE_URLS['front-dark']
       },
       {
         filename: 'Side View',
         url:
           theme === 'light'
-            ? process.env.NEXT_PUBLIC_SIDE_GUIDANCE_IMAGE_URL || ''
-            : process.env.NEXT_PUBLIC_SIDE_GUIDANCE_IMAGE_URL_DARK || ''
+            ? GUIDANCE_IMAGE_URLS['half-wall-light']
+            : GUIDANCE_IMAGE_URLS['half-wall-dark']
       },
       {
         filename: 'Top View',
         url:
           theme === 'light'
-            ? process.env.NEXT_PUBLIC_TOP_GUIDANCE_IMAGE_URL || ''
-            : process.env.NEXT_PUBLIC_TOP_GUIDANCE_IMAGE_URL_DARK || ''
+            ? GUIDANCE_IMAGE_URLS['top-view-light']
+            : GUIDANCE_IMAGE_URLS['top-view-dark']
       },
       {
         filename: 'No Walls View',
         url:
           theme === 'light'
-            ? process.env.NEXT_PUBLIC_NO_WALLS_GUIDANCE_IMAGE_URL || ''
-            : process.env.NEXT_PUBLIC_NO_WALLS_GUIDANCE_IMAGE_URL_DARK || ''
+            ? GUIDANCE_IMAGE_URLS['no-walls-light']
+            : GUIDANCE_IMAGE_URLS['no-walls-dark']
       }
     ]
 

@@ -48,3 +48,22 @@ export const MOCKUP_TYPES = {
   'no-walls': 'No Walls',
   table: 'Table'
 }
+
+export const GUIDANCE_IMAGE_URLS = {
+  'front-dark':
+    'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/front-labelled-dark-VzclXjdoIMmGF7N97rTtWO5CFx92mZ.png',
+  'front-light':
+    'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/front-labelled-kMelSxI1m9YFs20hfzW3qyfyWSNOpg.png',
+  'no-walls-dark':
+    'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/no-walls-labelled-dark-rr7cSQbPtKOml8DA32tLLMpi7rlhjV.png',
+  'no-walls-light':
+    'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/no-walls-labelled-UXrfUttKUDGdAZkzyC9cbbVLEve0Yg.png',
+  'half-wall-dark':
+    'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/side-labelled-dark-lokRZkxCDmacR00ZK7QSDm73Yj5Qui.png',
+  'half-wall-light':
+    'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/side-labelled-zBUEx9GMyq1rOp0MembizovFNwurbj.png',
+  'top-view-dark':
+    'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/top-labelled-dark-lsbx0BHr6fqEY93d1gsSCxXlO1qB49.png',
+  'top-view-light':
+    'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/top-labelled-uG0O3WNkHZb5wguwPjdrtbDcbc7MBW.png'
+}
