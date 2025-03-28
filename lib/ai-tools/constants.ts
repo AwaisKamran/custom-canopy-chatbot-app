@@ -49,7 +49,7 @@ export const PROMPT_INSTRUCTIONS = `
       3. If the user selects "No," ask them which details they want to change, make the updates.
 
       ** Place order Workflow:** (If the user clicks on "Place order" button)
-       - Prompt the user to provide their email and phone number:
+       - Prompt the user to provide their email and phone number one by one:
         - {content}: ["Please provide your email address for contact purposes:", "Next, please provide your phone number."]
        - After getting the email and phone number, finalize the order and complete the conversation.
        - DO NOT generate mockups at this step.

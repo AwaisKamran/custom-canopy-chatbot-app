@@ -12,6 +12,7 @@ import { StreamableValue } from 'ai/rsc'
 import { useStreamableText } from '@/lib/hooks/use-streamable-text'
 import { ImagePart, UserContent } from 'ai'
 import { Separator } from '../ui/separator'
+import { IMAGE } from '@/app/constants'
 
 // Different types of message bubbles.
 
@@ -20,6 +21,51 @@ export function UserMessage({ content }: { content: UserContent }) {
     try {
       content = JSON.parse(content)
     } catch (e) {}
+  }
+  const isStringContent = typeof content === 'string'
+  const isImageContent = Array.isArray(content)
+  const isColorContent = !isStringContent && !isImageContent
+  const renderContent = () => {
+    if (isStringContent) {
+      return <span>{content as string}</span>
+    } else if (isImageContent) {
+      return (
+        <div className="flex flex-wrap gap-4 mx-4 mb-2">
+          {(content as Array<ImagePart>).map(
+            (file: ImagePart, index: number) => (
+              <div key={`${IMAGE}-${index}`} className="flex items-start gap-4">
+                {file.mimeType?.startsWith('image') && (
+                  <img
+                    src={file.image as string}
+                    alt="Logo"
+                    className="w-32 h-32 sm:rounded-md sm:border sm:shadow-md"
+                  />
+                )}
+              </div>
+            )
+          )}
+        </div>
+      )
+    } else if (isColorContent) {
+      const colorContent = content as unknown as {
+        color: string
+        colorName: string
+      }
+      return (
+        <div className="flex items-center gap-2 w-1/2">
+          <span
+            className="w-10 h-5 border border-gray-300 dark:border-gray-700"
+            style={{
+              backgroundColor: `rgb(${JSON.parse(colorContent.color).join(',')})`
+            }}
+          ></span>
+          <span className="text-gray-700 dark:text-gray-300">
+            {colorContent.colorName}
+          </span>
+        </div>
+      )
+    }
+    return <></>
   }
 
   return (
@@ -30,27 +76,7 @@ export function UserMessage({ content }: { content: UserContent }) {
         </div>
         <div className="flex flex-col flex-1">
           <div className="ml-4 flex-1 space-y-2 overflow-hidden pl-2">
-            {typeof content === 'string' ? (
-              content
-            ) : (
-              <div className="flex flex-wrap gap-4 mx-4 mb-2">
-                {(content as Array<ImagePart>).map(
-                  (file: ImagePart, index: any) => {
-                    return (
-                      <div key={index} className="flex items-start gap-4">
-                        {file.mimeType?.startsWith('image') && (
-                          <img
-                            src={file.image as string}
-                            alt="Logo"
-                            className="w-32 h-32 sm:rounded-md sm:border sm:bg-background sm:shadow-md"
-                          />
-                        )}
-                      </div>
-                    )
-                  }
-                )}
-              </div>
-            )}
+            {renderContent()}
           </div>
         </div>
       </div>
@@ -77,7 +103,7 @@ export function BotMessage({
           className
         )}
       >
-        <div className="flex size-[24px] shrink-0 select-none items-center justify-center rounded-md border bg-primary text-primary-foreground shadow-sm">
+        <div className="flex size-[24px] shrink-0 select-none items-center justify-center rounded-md border bg-tab-button text-tab-button shadow-sm p-0.5">
           <IconOpenAI />
         </div>
         <div className="ml-4 flex flex-col gap-y-4 w-full">
@@ -147,7 +173,7 @@ export function BotCard({
       <div className="group relative flex items-start md:-ml-12 my-4">
         <div
           className={cn(
-            'flex size-[24px] shrink-0 select-none items-center justify-center rounded-md border bg-primary text-primary-foreground shadow-sm',
+            'flex size-[24px] shrink-0 select-none items-center justify-center rounded-md border bg-tab-button text-tab-button shadow-sm p-0.5',
             !showAvatar && 'invisible'
           )}
         >
@@ -175,7 +201,7 @@ export function SystemMessage({ children }: { children: React.ReactNode }) {
 export function SpinnerMessage() {
   return (
     <div className="group relative flex items-start md:-ml-12">
-      <div className="flex size-[24px] shrink-0 select-none items-center justify-center rounded-md border bg-primary text-primary-foreground shadow-sm">
+      <div className="flex size-[24px] shrink-0 select-none items-center justify-center rounded-md border bg-tab-button text-tab-button shadow-sm p-0.5">
         <IconOpenAI />
       </div>
       <div className="ml-4 h-[24px] flex flex-row items-center flex-1 space-y-2 overflow-hidden px-1">

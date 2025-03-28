@@ -65,7 +65,7 @@ export const ColorLabelPickerSet = ({
       ))}
       {!setFieldColors && (
         <button
-          className="py-2 px-4 mb-2 rounded-md dark:text-white flex-auto whitespace-nowrap disabled:cursor-not-allowed border border-neutral-400 bg-slate-400 text-white dark:bg-cyan-800 disabled:opacity-50 disabled:pointer-events-none"
+          className="chat-button"
           onClick={onSubmit}
           disabled={
             messageId !== messages.at(-1)?.id ||
