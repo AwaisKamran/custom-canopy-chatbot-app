@@ -146,6 +146,7 @@ export type FieldErrors = {
 export interface Image {
   filename: string
   url: string
+  contentType?: string
 }
 
 export type EditableOption = {
