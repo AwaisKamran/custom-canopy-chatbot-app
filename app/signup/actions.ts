@@ -1,7 +1,6 @@
 'use server'
 
 import { signIn } from '@/auth'
-import { getStringFromBuffer } from '@/lib/utils'
 import { kv } from '@vercel/kv'
 import { getUser } from '../login/actions'
 import { AuthError } from 'next-auth'
@@ -10,13 +9,7 @@ import { SignupSchema } from '@/lib/schemas/signupSchema'
 import { ActionResult, ResultCode } from '@/lib/types'
 import { formatError } from '@/lib/utils/format-errors'
 
-export async function createUser(
-  email: string,
-  hashedPassword: string,
-  username: string,
-  phoneNumber: string,
-  salt: string
-) {
+export async function createUser(email: string, phoneNumber: string) {
   const existingUser = await getUser(email)
 
   if (existingUser) {
@@ -28,10 +21,7 @@ export async function createUser(
     const user = {
       id: crypto.randomUUID(),
       email,
-      password: hashedPassword,
-      username,
-      phoneNumber,
-      salt
+      phoneNumber
     }
 
     await kv.hmset(`user:${email}`, user)
@@ -53,44 +43,21 @@ export async function signup(
   formData: FormData
 ): Promise<ActionResult | undefined> {
   const email = formData.get('email') as string
-  const password = formData.get('password') as string
-  const username = formData.get('username') as string
   const phoneNumber = formData.get('phoneNumber') as string
 
   const parsedCredentials = SignupSchema.safeParse({
     email,
-    password,
-    username,
     phoneNumber
   })
 
   if (parsedCredentials.success) {
-    const salt = crypto.randomUUID()
-
-    const encoder = new TextEncoder()
-    const saltedPassword = encoder.encode(password + salt)
-    const hashedPasswordBuffer = await crypto.subtle.digest(
-      'SHA-256',
-      saltedPassword
-    )
-    const hashedPassword = getStringFromBuffer(hashedPasswordBuffer)
-
     try {
-      const result = await createUser(
-        email,
-        hashedPassword,
-        username,
-        phoneNumber,
-        salt
-      )
+      const result = await createUser(email, phoneNumber)
 
-      if (result.resultCode === ResultCode.UserCreated) {
-        await signIn('credentials', {
-          email,
-          password,
-          redirect: false
-        })
-      }
+      await signIn('credentials', {
+        email,
+        redirect: false
+      })
 
       return result
     } catch (error) {

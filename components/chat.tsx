@@ -24,10 +24,8 @@ export function Chat({ className, session, missingKeys }: ChatProps) {
   const [aiState, _setAIState] = useAIState()
   const [_, setNewChatId] = useLocalStorage('newChatId', aiState.id)
   useEffect(() => {
-    if (session?.user) {
-      if (!path.includes(CHAT)) {
-        window.history.replaceState({}, '', aiState.path)
-      }
+    if (!path.includes(CHAT)) {
+      window.history.replaceState({}, '', aiState.path)
     }
   }, [aiState.id, path, session?.user])
 
@@ -53,11 +51,7 @@ export function Chat({ className, session, missingKeys }: ChatProps) {
         className={cn('pb-[200px] pt-4 md:pt-10', className)}
         ref={messagesRef}
       >
-        {aiState.messages.length ? (
-          <ChatList isShared={false} session={session} />
-        ) : (
-          <EmptyScreen />
-        )}
+        {aiState.messages.length ? <ChatList /> : <EmptyScreen />}
         <div className="w-full h-px" ref={visibilityRef} />
       </div>
       <ChatPanel

@@ -52,6 +52,7 @@ export const PROMPT_INSTRUCTIONS = `
        - Prompt the user to provide their email and phone number:
         - {content}: ["Please provide your email address for contact purposes:", "Next, please provide your phone number."]
        - After getting the email and phone number, finalize the order and complete the conversation.
+       - EXPLICITLY CALL the placeFinalOrder tool function with the user's email and phone number.
        - DO NOT generate mockups at this step.
 
       **Add-ons Workflow:**  
@@ -153,7 +154,8 @@ export const TOOL_FUNCTIONS = {
   RENDER_TEXT_INPUT_GROUP: 'renderTextInputGroup',
   RENDER_COLOR_LABEL_PICKER_SET: 'renderColorLabelPickerSet',
   RENDER_REGION_MANAGER: 'renderRegionManager',
-  GENERATE_CANOPY_MOCKUPS: 'generateCanopyMockups'
+  GENERATE_CANOPY_MOCKUPS: 'generateCanopyMockups',
+  PLACE_FINAL_ORDER: 'placeFinalOrder'
 }
 
 export const INITIAL_CHAT_MESSAGE =

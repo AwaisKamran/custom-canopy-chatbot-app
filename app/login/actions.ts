@@ -23,22 +23,18 @@ export async function authenticate(
 ): Promise<Result | undefined> {
   try {
     const email = formData.get('email')
-    const password = formData.get('password')
 
     const parsedCredentials = z
       .object({
-        email: z.string().email(),
-        password: z.string().min(6)
+        email: z.string().email()
       })
       .safeParse({
-        email,
-        password
+        email
       })
 
     if (parsedCredentials.success) {
       await signIn('credentials', {
         email,
-        password,
         redirect: false
       })
 

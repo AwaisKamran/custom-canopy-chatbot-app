@@ -45,6 +45,10 @@ export async function getChats(userId?: string | null) {
 export async function getChat(id: string, userId: string) {
   const session = await auth()
 
+  if (!session) {
+    return
+  }
+
   if (userId !== session?.user?.id) {
     return {
       error: Error401Response.message
@@ -184,11 +188,21 @@ export async function getSharedChat(id: string) {
   return chat
 }
 
-export async function saveChat(chat: Chat) {
+export async function saveChat(chat: Chat, userId?: string) {
   const session = await auth()
 
   if (session && session.user) {
     const userId = session.user.id as string
+    chat.userId = userId
+    const pipeline = kv.pipeline()
+    pipeline.hmset(`chat:${chat.id}`, chat)
+    pipeline.zadd(`user:chat:${chat.userId}`, {
+      score: Date.now(),
+      member: `chat:${chat.id}`
+    })
+    await pipeline.exec()
+  }
+  if (userId) {
     chat.userId = userId
     const pipeline = kv.pipeline()
     pipeline.hmset(`chat:${chat.id}`, chat)

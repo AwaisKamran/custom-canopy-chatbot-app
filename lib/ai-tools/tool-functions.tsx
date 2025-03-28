@@ -21,6 +21,10 @@ import { ChatTextInputGroup } from '@/components/chat-text-input-group'
 import ChatActionMultiSelector from '@/components/chat-action-multi-selector'
 import RegionsColorsManager from '@/components/regions_colors_manager'
 import { ColorLabelPickerSet } from '@/components/color-label-picker-set'
+import { auth } from '@/auth'
+import { loginOrCreateUser } from '../utils/authentication'
+import { saveChat } from '@/app/actions'
+import { put } from '@vercel/blob'
 
 function modifyToolAIState(history: any, content: ToolContent) {
   modifyAIState(history, {
@@ -227,6 +231,92 @@ export function generateCanopyMockups(history: any, messageId: string) {
   }
 }
 
+export function placeFinalOrder(history: any, messageId: string) {
+  return {
+    description:
+      'Finalizes the canopy order and creates user account if session is not established',
+    parameters: z.object({
+      email: z.string().email(),
+      phone: z.string()
+    }),
+    generate: async function ({
+      email,
+      phone
+    }: {
+      email: string
+      phone: string
+    }) {
+      const session = await auth()
+      console.log('😶 Pre-login session:', session)
+      const chat = history.get()
+
+      let userId = session?.user?.id
+      debugger
+      if (!userId) {
+        const user = await loginOrCreateUser(email, phone)
+        userId = user?.id
+        chat.userId = userId
+
+        // const updatedMessages = await Promise.all(
+        //   chat.messages.map(async (msg: { role: string; content: any[] }) => {
+        //     if (msg.role === 'user' && Array.isArray(msg.content)) {
+        //       const updatedContent = await Promise.all(
+        //         msg.content.map(async entry => {
+        //           if (
+        //             entry.type === 'image' &&
+        //             entry.image.startsWith('blob:temp/anon')
+        //           ) {
+        //             const res = await fetch(entry.image)
+        //             const blob = await res.blob()
+        //             const uploaded = await put(
+        //               `users/${userId}/chat:${chat.id}/${Date.now()}.png`,
+        //               blob,
+        //               { access: 'public' }
+        //             )
+        //             return {
+        //               ...entry,
+        //               image: uploaded.url
+        //             }
+        //           }
+        //           return entry
+        //         })
+        //       )
+        //       return { ...msg, content: updatedContent }
+        //     }
+        //     return msg
+        //   })
+        // )
+
+        // chat.messages = updatedMessages
+        await saveChat(chat, userId)
+      }
+
+      modifyToolAIState(history, [
+        {
+          toolCallId: messageId,
+          toolName: TOOL_FUNCTIONS.PLACE_FINAL_ORDER,
+          result: {
+            message: 'Thanks! Your order has been placed successfully 🎉',
+            props: { email, phone }
+          }
+        }
+      ] as ToolContent)
+
+      await new Promise(resolve => setTimeout(resolve, 5000))
+      const postLoginSession = await auth()
+      console.log('🧠 Post-login session:', postLoginSession)
+      return (
+        <>
+          <BotMessage
+            key={messageId}
+            content="Thanks! Your order has been placed successfully 🎉"
+          />
+        </>
+      )
+    }
+  }
+}
+
 export const getToolFunctions = (history: any, messageId: string) => {
   return {
     renderButtons: renderButtonsTool(history, messageId),
@@ -234,6 +324,7 @@ export const getToolFunctions = (history: any, messageId: string) => {
     renderColorLabelPickerSet: renderColorLabelPickerSet(history, messageId),
     renderRegionManager: renderRegionManager(history, messageId),
     renderTextInputGroup: renderTextInputGroup(history, messageId),
-    generateCanopyMockups: generateCanopyMockups(history, messageId)
+    generateCanopyMockups: generateCanopyMockups(history, messageId),
+    placeFinalOrder: placeFinalOrder(history, messageId)
   }
 }

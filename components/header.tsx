@@ -20,7 +20,7 @@ async function UserOrLogin() {
   const session = (await auth()) as Session
   return (
     <>
-      {session?.user ? (
+      {
         <>
           <Link href="/new" rel="nofollow">
             <img src="/logo.png" className="invert dark:invert-0 h-6 w-auto" />
@@ -28,24 +28,14 @@ async function UserOrLogin() {
 
           <div className="ml-2">
             <SidebarMobile>
-              <ChatHistory userId={session.user.id} />
+              <ChatHistory userId={session?.user?.id} />
             </SidebarMobile>
             <SidebarToggle />
           </div>
         </>
-      ) : (
-        <Link href="/new" rel="nofollow">
-          <img src="/logo.png" className="invert dark:invert-0 h-6 w-auto" />
-        </Link>
-      )}
+      }
       <div className="flex items-center">
-        {session?.user ? (
-          <UserMenu user={session.user} />
-        ) : (
-          <Button variant="link" asChild className="-ml-2">
-            <Link href="/login">Login</Link>
-          </Button>
-        )}
+        <UserMenu user={session?.user} />
       </div>
     </>
   )

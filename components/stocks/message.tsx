@@ -30,7 +30,7 @@ export function UserMessage({ content }: { content: UserContent }) {
         </div>
         <div className="flex flex-col flex-1">
           <div className="ml-4 flex-1 space-y-2 overflow-hidden pl-2">
-            {typeof content === 'string' ? (
+            {typeof content === 'string' || typeof content === 'number' ? (
               content
             ) : (
               <div className="flex flex-wrap gap-4 mx-4 mb-2">

@@ -34,6 +34,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           message: Error401Response.message
         })
       }
+    } else if (filename && file && chatId) {
+      const blob = await put(`temp/anon/chat:${chatId}/${filename}`, file, {
+        access: BlobAccess.public
+      })
+      return NextResponse.json(blob)
     } else {
       return NextResponse.json({
         status: Error400Response.status,

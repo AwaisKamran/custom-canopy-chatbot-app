@@ -18,7 +18,10 @@ import { UserMessage } from './stocks/message'
 import { nanoid } from '@/lib/utils'
 import { saveFilesApi } from '@/lib/redux/apis/chat'
 import { ImagePart, UserContent } from 'ai'
-import { isLastFileUploadMessage } from '@/lib/ai-tools/utils'
+import {
+  getClientMessages,
+  isLastFileUploadMessage
+} from '@/lib/ai-tools/utils'
 import { IMAGE } from '@/app/constants'
 
 export function PromptForm({ session }: { session?: Session }) {
@@ -36,6 +39,13 @@ export function PromptForm({ session }: { session?: Session }) {
   React.useEffect(() => {
     inputRef.current?.focus()
   }, [])
+
+  React.useEffect(() => {
+    if (aiState?.messages?.length) {
+      const updatedMessages = getClientMessages(aiState.messages)
+      setMessages(updatedMessages)
+    }
+  }, [aiState.messages])
 
   const handleFileSelect = (files: FileData[]) => {
     const newFiles: FileData[] = files.map(fileData => {
