@@ -29,7 +29,7 @@ const ChatActionMultiSelector: React.FC<ChatActionMultiSelectorProps> = ({
   return (
     <>
       <button
-        className="w-full py-2 mb-2 rounded-md text-zinc-600 dark:text-white flex-auto whitespace-nowrap disabled:cursor-not-allowed border border-neutral-400 bg-slate-400 dark:bg-cyan-800"
+        className="chat-button"
         onClick={handleActionClick}
         disabled={messageId !== messages.at(-1)?.id || aiState.loading}
       >

@@ -42,7 +42,7 @@ export function UserMessage({ content }: { content: UserContent }) {
                           <img
                             src={file.image as string}
                             alt="Logo"
-                            className="w-32 h-32 sm:rounded-md sm:border sm:bg-background sm:shadow-md"
+                            className="w-32 h-32 sm:rounded-md sm:border sm:shadow-md"
                           />
                         )}
                       </div>

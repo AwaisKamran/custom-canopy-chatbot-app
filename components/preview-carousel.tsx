@@ -49,20 +49,23 @@ export default function PreviewCarousel({
       onClick={onClose}
     >
       <div
-        className="relative w-[70vw] max-w-4xl bg-background rounded-none border shadow-lg"
+        className="relative w-[70vw] max-w-4xl bg-background rounded-none shadow-lg"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between w-full bg-foreground text-background py-2 px-4 border-b text-sm font-medium">
-          {images[activeIndex || 0]?.filename}
+        <div className="flex items-center justify-between w-full pl-4 bg-indigo-100 text-neutral-900 font-normal">
+          <div className="flex-1">{images[activeIndex || 0]?.filename}</div>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onClose}
-                className="text-background"
+                className={cn(
+                  'chat-button',
+                  'my-0 rounded-none bg-card border-none hover:bg-card text-card-foreground border-none'
+                )}
               >
-                <IconClose className="w-4 h-4 " />
+                <IconClose className="w-4 h-4 fill-card-foreground" />
                 <span className="sr-only">Close Carousel</span>
               </Button>
             </TooltipTrigger>

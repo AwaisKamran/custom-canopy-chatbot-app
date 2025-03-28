@@ -54,7 +54,23 @@ module.exports = {
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))'
-        }
+        },
+        'active-button': {
+          DEFAULT: 'hsl(var(--active-button))',
+          foreground: 'hsl(var(--active-button-foreground))'
+        },
+        button: {
+          DEFAULT: 'hsl(var(--button))',
+          foreground: 'hsl(var(--button-foreground))'
+        },
+        'tab-button': {
+          DEFAULT: 'hsl(var(--tab-button))',
+          foreground: 'hsl(var(--tab-button-foreground))'
+        },
+        'tab-active-button': {
+          DEFAULT: 'hsl(var(--tab-active-button))',
+          foreground: 'hsl(var(--tab-active-button-foreground))'
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',

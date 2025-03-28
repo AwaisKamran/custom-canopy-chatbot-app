@@ -62,7 +62,7 @@ export function Sidebar({ className, children }: SidebarProps) {
         data-state={isSidebarOpen && !isLoading ? 'open' : 'closed'}
         className={cn(className, 'h-full flex-col p-2')}
       >
-        <TabsList className="grid w-auto grid-cols-2 mb-2">
+        <TabsList className="grid w-auto grid-cols-2 mb-2 bg-transparent border-none p-0">
           <TabsTrigger value="guidance">Guidance</TabsTrigger>
           <TabsTrigger value="chat-history">Chat History</TabsTrigger>
         </TabsList>
