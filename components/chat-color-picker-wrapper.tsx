@@ -22,7 +22,7 @@ export const ChatColorPickerWrapper = ({
       {
         id: nanoid(),
         role: 'user',
-        display: <UserMessage content={colorName} />
+        display: <UserMessage content={JSON.stringify({ color, colorName })} />
       }
     ])
     const message = await submitUserMessage(

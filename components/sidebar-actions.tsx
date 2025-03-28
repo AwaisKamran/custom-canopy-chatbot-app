@@ -66,6 +66,7 @@ export function SidebarActions({ chat, removeChat }: SidebarActionsProps) {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
+              className="bg-action-button text-action-button-foreground hover:bg-tab-button"
               disabled={isRemovePending}
               onClick={event => {
                 event.preventDefault()

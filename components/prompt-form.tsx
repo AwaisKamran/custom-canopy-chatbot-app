@@ -143,6 +143,7 @@ export function PromptForm({ session }: { session?: Session }) {
                     loading ||
                     (lastFileUploadMessage && selectedFiles.length === 0)
                   }
+                  className="bg-action-button hover:bg-action-button text-action-button-foreground"
                 >
                   <IconArrowElbow />
                   <span className="sr-only">Send message</span>

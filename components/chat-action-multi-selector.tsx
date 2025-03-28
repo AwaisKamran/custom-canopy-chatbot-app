@@ -21,8 +21,8 @@ const ChatActionMultiSelector: React.FC<ChatActionMultiSelectorProps> = ({
   const [messages, setMessages] = useUIState()
   const [aiState, _setAIState] = useAIState()
 
-  const handleActionClick = () => {
-    const message = submitUserMessage(action)
+  const handleActionClick = async () => {
+    const message = await submitUserMessage(action)
     setMessages((currentMessages: any) => [...currentMessages, message])
   }
 
