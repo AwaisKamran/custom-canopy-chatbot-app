@@ -67,7 +67,12 @@ export const RadioButtonGroup = ({
             </button>
             {option.edit && options[index]?.selected && onEdit && (
               <button
-                className="absolute -top-1.5 -right-1.5 w-5 h-5 p-0.5 chat-button rounded-full"
+                className={clsx(
+                  'absolute -top-1.5 -right-1.5 w-5 h-5 p-0.5 chat-button rounded-full',
+                  selectedOptions[index]?.selected
+                    ? ''
+                    : 'bg-button text-button-foreground'
+                )}
                 onClick={e => {
                   e.stopPropagation()
                   onEdit(option)

@@ -71,6 +71,10 @@ module.exports = {
           DEFAULT: 'hsl(var(--tab-active-button))',
           foreground: 'hsl(var(--tab-active-button-foreground))'
         },
+        'action-button': {
+          DEFAULT: 'hsl(var(--action-button))',
+          foreground: 'hsl(var(--action-button-foreground))'
+        }
       },
       borderRadius: {
         lg: 'var(--radius)',

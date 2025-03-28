@@ -62,10 +62,10 @@ export default function PreviewCarousel({
                 onClick={onClose}
                 className={cn(
                   'chat-button',
-                  'my-0 rounded-none bg-card border-none hover:bg-card text-card-foreground border-none'
+                  'my-0 rounded-none bg-action-button border-none hover:bg-action-button text-action-button-foreground border-none'
                 )}
               >
-                <IconClose className="w-4 h-4 fill-card-foreground" />
+                <IconClose className="w-4 h-4 fill-action-button-foreground" />
                 <span className="sr-only">Close Carousel</span>
               </Button>
             </TooltipTrigger>

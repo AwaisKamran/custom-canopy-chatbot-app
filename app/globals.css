@@ -7,8 +7,8 @@
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
 
-    --card: 224, 47%, 89%;
-    --card-foreground: 0, 0%, 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
  
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
@@ -40,6 +40,9 @@
     --tab-button: 225, 92%, 95%;
     --tab-button-foreground: 225, 36%, 72%;
 
+    --action-button: 224, 47%, 89%;
+    --action-button-foreground: 0, 0%, 0%;
+
     --border: 0, 0%, 66%;
     --input: 240 5.9% 90%;
     --ring: 240 10% 3.9%;
@@ -51,8 +54,8 @@
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
  
-    --card: 225, 76%, 64%;
-    --card-foreground: 0, 0%, 100%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
  
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
@@ -83,6 +86,9 @@
 
     --tab-button: 226, 13%, 55%;
     --tab-button-foreground: 0, 0%, 100%;
+
+    --action-button: 225, 76%, 64%;
+    --action-button-foreground: 0, 0%, 100%;
  
     --border: 0, 0%, 66%;
     --input: 240 3.7% 15.9%;
