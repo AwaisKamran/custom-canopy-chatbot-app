@@ -50,6 +50,7 @@ export function ClearHistory({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
           <AlertDialogAction
+            className="bg-action-button text-action-button-foreground hover:bg-tab-button"
             disabled={isPending}
             onClick={event => {
               event.preventDefault()

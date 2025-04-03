@@ -55,10 +55,10 @@ export const RadioButtonGroup = ({
               key={option.value}
               type="button"
               className={clsx(
-                'py-2 px-4 mb-2 w-full rounded-md text-zinc-600 dark:text-white flex-auto whitespace-nowrap border-0.5 border-neutral-400 disabled:opacity-50 disabled:pointer-events-none',
+                'chat-button',
                 selectedOptions[index]?.selected
-                  ? 'bg-slate-400 dark:bg-cyan-800'
-                  : 'bg-slate-200 dark:bg-slate-400'
+                  ? ''
+                  : 'bg-button text-button-foreground'
               )}
               onClick={() => handleSelect(option)}
               disabled={disabled}
@@ -67,14 +67,22 @@ export const RadioButtonGroup = ({
             </button>
             {option.edit && options[index]?.selected && onEdit && (
               <button
-                className="absolute -top-1.5 -right-1.5 w-5 h-5 p-0.5 text text-slate-400 border-0.5 border-slate-400 bg-slate-400 dark:bg-cyan-800 rounded-full flex whitespace-nowrap items-center justify-center disabled:opacity-50 disabled:pointer-events-none"
+                className={clsx(
+                  'absolute -top-1.5 -right-1.5 w-5 h-5 p-0.5 chat-button rounded-full',
+                  selectedOptions[index]?.selected
+                    ? ''
+                    : 'bg-button text-button-foreground'
+                )}
                 onClick={e => {
                   e.stopPropagation()
                   onEdit(option)
                 }}
                 disabled={disabled}
               >
-                <Pencil1Icon fillOpacity={1} fill="#ffffff" />
+                <Pencil1Icon
+                  fillOpacity={1}
+                  className="fill-neutral-900 dark:fill-neutral-100"
+                />
               </button>
             )}
           </div>
@@ -82,7 +90,7 @@ export const RadioButtonGroup = ({
       </div>
       {isMultiSelect && (
         <button
-          className="w-full py-2 mb-2 rounded-md text-zinc-600 dark:text-white flex-auto whitespace-nowrap border-0.5 border-neutral-400 bg-slate-400 dark:bg-cyan-800 disabled:opacity-50 disabled:pointer-events-none"
+          className="chat-button"
           onClick={() => onSelect(selectedOptions)}
           disabled={
             disabled ||

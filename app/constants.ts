@@ -48,6 +48,7 @@ export const MOCKUP_TYPES = {
   'no-walls': 'No Walls',
   table: 'Table'
 }
+export const DOWNLOAD_ZIP_NAME = 'images'
 
 export const GUIDANCE_IMAGE_URLS = {
   'front-dark':

@@ -56,7 +56,7 @@ const RegionsColorsManager = ({
             <TabsTrigger
               key={`${region.name}-${messageId}`}
               value={region.name}
-              className="flex-auto whitespace-nowrap data-[state=active]:bg-cyan-800 data-[state=active]:text-foreground data-[state=active]:shadow"
+              className="flex-auto mx-0.5"
             >
               {region.name}
             </TabsTrigger>
@@ -75,7 +75,7 @@ const RegionsColorsManager = ({
         ))}
       </Tabs>
       <button
-        className="py-2 px-4 mb-2 rounded-md dark:text-white flex-auto whitespace-nowrap disabled:cursor-not-allowed border border-neutral-400 bg-slate-400 text-white dark:bg-cyan-800 disabled:opacity-50 disabled:pointer-events-none"
+        className="chat-button"
         onClick={submitRegionData}
         disabled={messageId !== messages.at(-1)?.id}
       >

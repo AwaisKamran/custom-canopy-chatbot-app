@@ -140,33 +140,26 @@ const getClientMessages = (messages: CoreMessage[]): ClientMessage[] => {
   while (i < messages.length) {
     const currentMessage = messages[i]
     const nextMessage = messages[i + 1]
-    const previousMessage = messages[i - 1]
     if (
-      currentMessage.role === Roles.user &&
-      previousMessage &&
-      (previousMessage.content as ToolContent)[0]?.toolName ===
-        TOOL_FUNCTIONS.RENDER_COLOR_PICKER &&
-      isValidJson(currentMessage.content as string)
-    ) {
-      currentMessage.content = JSON.parse(
-        currentMessage.content as string
-      ).colorName
-    } else if (
       currentMessage.role === Roles.tool &&
       nextMessage?.role === Roles.user &&
-      currentMessage.content[0].toolName !==
-        TOOL_FUNCTIONS.RENDER_COLOR_PICKER &&
-      isValidJson(nextMessage.content as string)
+      currentMessage.content[0].toolName !== TOOL_FUNCTIONS.RENDER_COLOR_PICKER
     ) {
+      let updatedProps = (currentMessage.content[0].result as ToolCallResult)
+        .props
+      if (isValidJson(nextMessage.content as string)) {
+        updatedProps = {
+          ...updatedProps,
+          ...JSON.parse(nextMessage.content as string)
+        }
+      }
+
       currentMessage.content = [
         {
           ...currentMessage.content[0],
           result: {
             ...(currentMessage.content[0].result as ToolCallResult),
-            props: {
-              ...(currentMessage.content[0].result as ToolCallResult).props,
-              ...JSON.parse(nextMessage.content as string)
-            }
+            props: updatedProps
           }
         }
       ]
