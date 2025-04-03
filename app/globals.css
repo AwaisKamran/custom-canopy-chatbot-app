@@ -28,20 +28,20 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --active-button: 225, 70%, 79%;
-    --active-button-foreground: 0 0% 9%;
+    --active-button: 191, 24%, 60%;
+    --active-button-foreground: 0 0% 100%;
 
-    --button: 225, 90%, 96%;
-    --button-foreground: 0 0% 9%;
+    --button: 199, 46%, 88%;
+    --button-foreground: 225, 4%, 36%;
 
-    --tab-active-button: 224, 47%, 89%;
-    --tab-active-button-foreground: 223, 4%, 36%;
+    --tab-active-button: 199, 18%, 58%;
+    --tab-active-button-foreground: 0, 0%, 98%, 1;
 
-    --tab-button: 225, 92%, 95%;
-    --tab-button-foreground: 225, 36%, 72%;
+    --tab-button: 200, 18%, 87%;
+    --tab-button-foreground: 225, 4%, 36%;
 
-    --action-button: 224, 47%, 89%;
-    --action-button-foreground: 0, 0%, 0%;
+    --action-button: 199, 47%, 88%;
+    --action-button-foreground: 223, 4%, 36%;
 
     --border: 0, 0%, 66%;
     --input: 240 5.9% 90%;
@@ -75,19 +75,19 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --button: 226, 13%, 55%;
+    --button: 191, 24%, 60%;
     --button-foreground: 0, 0%, 100%;
 
-    --active-button: 224, 14%, 39%;
+    --active-button: 199, 53%, 32%;
     --active-button-foreground: 0, 0%, 100%;
 
-    --tab-active-button: 224, 14%, 39%;
-    --tab-active-button-foreground: 0, 0%, 100%;
+    --tab-active-button: 199, 53%, 32%;
+    --tab-active-button-foreground: 0, 0%, 85%;
 
-    --tab-button: 226, 13%, 55%;
+    --tab-button: 199, 18%, 58%;
     --tab-button-foreground: 0, 0%, 100%;
 
-    --action-button: 225, 76%, 64%;
+    --action-button: 191, 38%, 48%;
     --action-button-foreground: 0, 0%, 100%;
  
     --border: 0, 0%, 66%;
@@ -104,6 +104,6 @@
     @apply bg-background text-foreground;
   }
   .chat-button {
-    @apply w-full py-2 my-1 rounded-md whitespace-nowrap border-0.5 border-border disabled:pointer-events-none font-normal bg-active-button text-active-button-foreground disabled:opacity-50 disabled:cursor-not-allowed
+    @apply w-full py-2 my-1 rounded-md whitespace-nowrap border-0.5 border-border disabled:pointer-events-none font-normal bg-active-button text-active-button-foreground disabled:opacity-65 disabled:dark:opacity-50 disabled:cursor-not-allowed
   }
 }
