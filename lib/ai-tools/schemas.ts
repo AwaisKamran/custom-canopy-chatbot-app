@@ -174,3 +174,9 @@ export const CustomCanopyToolSchema = z.object({
     .describe('Details of the tent to be generated')
     .required()
 })
+
+export const PlaceFinalOrderToolSchema = z.object({
+  content: z
+    .string()
+    .describe("The content to be displayed for the 'Place Final Order' tool")
+})

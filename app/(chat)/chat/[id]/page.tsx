@@ -16,12 +16,16 @@ export default async function ChatPage({ params }: ChatPageProps) {
   const session = (await auth()) as Session
   const missingKeys = await getMissingKeys()
 
-  if (!session?.user) {
-    redirect(`/login?next=/chat/${params.id}`)
-  }
+  const userId = session ? session.user.id : ''
 
-  const userId = session.user.id as string
-  let existingChat: ChatResponse = await getChat(params.id, userId)
+  if (!userId) {
+    return (
+      <AI>
+        <Chat missingKeys={missingKeys} />
+      </AI>
+    )
+  }
+  let existingChat = await getChat(params.id, userId)
 
   if (!existingChat || Error401Response.message in existingChat) {
     redirect('/')
@@ -32,7 +36,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
     }
     return (
       <AI initialAIState={existingChat}>
-        <Chat session={session} missingKeys={missingKeys} />
+        <Chat missingKeys={missingKeys} />
       </AI>
     )
   }

@@ -1,19 +1,29 @@
 import { authenticate, getUser } from '@/app/login/actions'
 import { signup } from '@/app/signup/actions'
+import { ResultCode } from '../types'
+import { redirect } from 'next/navigation'
 
-export async function loginOrCreateUser(email: string, phoneNumber: string) {
-  let user = await getUser(email)
+export async function authenticateOrSignup(formData: FormData) {
+  const email = formData.get('email') as string
+  const user = await getUser(email)
+  let result
 
-  if (!user) {
-    const formData = new FormData()
-    formData.append('email', email)
-    formData.append('phoneNumber', phoneNumber)
-
-    await signup(undefined, formData)
+  if (user) {
+    result = await authenticate(undefined, formData)
   } else {
-    const formData = new FormData()
-    formData.append('email', email)
-    await authenticate(undefined, formData)
+    result = await signup(undefined, formData)
   }
-  return await getUser(email)
+
+  return result
+}
+
+export async function authenticateAndSaveChat(formData: FormData) {
+  const result = await authenticateOrSignup(formData)
+  if (
+    result?.resultCode === ResultCode.UserLoggedIn ||
+    result?.resultCode === ResultCode.UserCreated
+  ) {
+    const chatId = formData.get('chatId')
+    redirect('/chat')
+  }
 }

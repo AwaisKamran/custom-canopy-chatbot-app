@@ -9,12 +9,11 @@ export const metadata = {
 }
 
 export default async function IndexPage() {
-  const session = (await auth()) as Session
   const missingKeys = await getMissingKeys()
 
   return (
     <AI>
-      <Chat session={session} missingKeys={missingKeys} />
+      <Chat missingKeys={missingKeys} />
     </AI>
   )
 }

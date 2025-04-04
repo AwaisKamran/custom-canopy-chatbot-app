@@ -7,7 +7,8 @@ import {
   CustomCanopyToolSchema,
   ChatTextInputGroupSchema,
   RegionsColorsManagerSchema,
-  ColorLabelPickerSetSchema
+  ColorLabelPickerSetSchema,
+  PlaceFinalOrderToolSchema
 } from './schemas'
 import { Carousal } from '@/components/carousel'
 import { BotCard, BotMessage } from '@/components/stocks/message'
@@ -22,9 +23,7 @@ import ChatActionMultiSelector from '@/components/chat-action-multi-selector'
 import RegionsColorsManager from '@/components/regions_colors_manager'
 import { ColorLabelPickerSet } from '@/components/color-label-picker-set'
 import { auth } from '@/auth'
-import { loginOrCreateUser } from '../utils/authentication'
-import { saveChat } from '@/app/actions'
-import { put } from '@vercel/blob'
+import { UserDetails } from '@/components/user-detail'
 
 function modifyToolAIState(history: any, content: ToolContent) {
   modifyAIState(history, {
@@ -235,60 +234,29 @@ export function placeFinalOrder(history: any, messageId: string) {
   return {
     description:
       'Finalizes the canopy order and creates user account if session is not established',
-    parameters: z.object({
-      email: z.string().email(),
-      phone: z.string()
-    }),
+    parameters: PlaceFinalOrderToolSchema,
     generate: async function ({
-      email,
-      phone
-    }: {
-      email: string
-      phone: string
-    }) {
+      content
+    }: z.infer<typeof PlaceFinalOrderToolSchema>) {
       const session = await auth()
-      console.log('😶 Pre-login session:', session)
-      const chat = history.get()
+      const userId = session?.user?.id
+      const chatId = history.get().id
 
-      let userId = session?.user?.id
-      debugger
       if (!userId) {
-        const user = await loginOrCreateUser(email, phone)
-        userId = user?.id
-        chat.userId = userId
+        modifyToolAIState(history, [
+          {
+            toolCallId: messageId,
+            toolName: TOOL_FUNCTIONS.PLACE_FINAL_ORDER,
+            result: {
+              message: content,
+              props: {
+                requireUserDetails: true
+              }
+            }
+          }
+        ] as ToolContent)
 
-        // const updatedMessages = await Promise.all(
-        //   chat.messages.map(async (msg: { role: string; content: any[] }) => {
-        //     if (msg.role === 'user' && Array.isArray(msg.content)) {
-        //       const updatedContent = await Promise.all(
-        //         msg.content.map(async entry => {
-        //           if (
-        //             entry.type === 'image' &&
-        //             entry.image.startsWith('blob:temp/anon')
-        //           ) {
-        //             const res = await fetch(entry.image)
-        //             const blob = await res.blob()
-        //             const uploaded = await put(
-        //               `users/${userId}/chat:${chat.id}/${Date.now()}.png`,
-        //               blob,
-        //               { access: 'public' }
-        //             )
-        //             return {
-        //               ...entry,
-        //               image: uploaded.url
-        //             }
-        //           }
-        //           return entry
-        //         })
-        //       )
-        //       return { ...msg, content: updatedContent }
-        //     }
-        //     return msg
-        //   })
-        // )
-
-        // chat.messages = updatedMessages
-        await saveChat(chat, userId)
+        return <UserDetails />
       }
 
       modifyToolAIState(history, [
@@ -296,23 +264,13 @@ export function placeFinalOrder(history: any, messageId: string) {
           toolCallId: messageId,
           toolName: TOOL_FUNCTIONS.PLACE_FINAL_ORDER,
           result: {
-            message: 'Thanks! Your order has been placed successfully 🎉',
-            props: { email, phone }
+            message: content,
+            props: {}
           }
         }
       ] as ToolContent)
 
-      await new Promise(resolve => setTimeout(resolve, 5000))
-      const postLoginSession = await auth()
-      console.log('🧠 Post-login session:', postLoginSession)
-      return (
-        <>
-          <BotMessage
-            key={messageId}
-            content="Thanks! Your order has been placed successfully 🎉"
-          />
-        </>
-      )
+      return <BotMessage key={messageId} content={content} />
     }
   }
 }

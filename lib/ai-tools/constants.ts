@@ -49,10 +49,7 @@ export const PROMPT_INSTRUCTIONS = `
       3. If the user selects "No," ask them which details they want to change, make the updates.
 
       ** Place order Workflow:** (If the user clicks on "Place order" button)
-       - Prompt the user to provide their email and phone number one by one:
-        - {content}: ["Please provide your email address for contact purposes:", "Next, please provide your phone number."]
-       - After getting the email and phone number, finalize the order and complete the conversation.
-       - EXPLICITLY CALL the placeFinalOrder tool function with the user's email and phone number.
+       - EXPLICITLY CALL the placeFinalOrder tool function to get the user's email and phone number.
        - DO NOT generate mockups at this step.
 
       **Add-ons Workflow:**  
