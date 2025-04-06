@@ -1,15 +1,8 @@
 import * as React from 'react'
 import Link from 'next/link'
 
-import { cn } from '@/lib/utils'
 import { auth } from '@/auth'
-import { Button, buttonVariants } from '@/components/ui/button'
-import {
-  IconGitHub,
-  IconNextChat,
-  IconSeparator,
-  IconVercel
-} from '@/components/ui/icons'
+import { Button } from '@/components/ui/button'
 import { UserMenu } from '@/components/user-menu'
 import { SidebarMobile } from './sidebar-mobile'
 import { SidebarToggle } from './sidebar-toggle'
@@ -20,32 +13,18 @@ async function UserOrLogin() {
   const session = (await auth()) as Session
   return (
     <>
-      {session?.user ? (
-        <>
-          <Link href="/new" rel="nofollow">
-            <img src="/logo.png" className="invert dark:invert-0 h-6 w-auto" />
-          </Link>
+      <Link href="/new" rel="nofollow">
+        <img src="/logo.png" className="invert dark:invert-0 h-6 w-auto" />
+      </Link>
 
-          <div className="ml-2">
-            <SidebarMobile>
-              <ChatHistory userId={session.user.id} />
-            </SidebarMobile>
-            <SidebarToggle />
-          </div>
-        </>
-      ) : (
-        <Link href="/new" rel="nofollow">
-          <img src="/logo.png" className="invert dark:invert-0 h-6 w-auto" />
-        </Link>
-      )}
+      <div className="ml-2">
+        <SidebarMobile>
+          <ChatHistory userId={session?.user.id} />
+        </SidebarMobile>
+        <SidebarToggle />
+      </div>
       <div className="flex items-center">
-        {session?.user ? (
-          <UserMenu user={session.user} />
-        ) : (
-          <Button variant="link" asChild className="-ml-2">
-            <Link href="/login">Login</Link>
-          </Button>
-        )}
+        <UserMenu user={session?.user} />
       </div>
     </>
   )

@@ -2,7 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 
 import { auth } from '@/auth'
 import { getChat, getMissingKeys } from '@/app/actions'
-import { Chat as UserChatMessage, Session, ChatResponse } from '@/lib/types'
+import { Chat as UserChatMessage, Session } from '@/lib/types'
 import { Error401Response } from '@/app/constants'
 import { Chat } from '@/components/chat'
 import { AI } from '@/app/(chat)/ai'
@@ -16,12 +16,11 @@ export default async function ChatPage({ params }: ChatPageProps) {
   const session = (await auth()) as Session
   const missingKeys = await getMissingKeys()
 
-  if (!session?.user) {
-    redirect(`/login?next=/chat/${params.id}`)
+  const userId = session?.user.id
+  if (!userId) {
+    redirect('/')
   }
-
-  const userId = session.user.id as string
-  let existingChat: ChatResponse = await getChat(params.id, userId)
+  let existingChat = await getChat(params.id, userId)
 
   if (!existingChat || Error401Response.message in existingChat) {
     redirect('/')

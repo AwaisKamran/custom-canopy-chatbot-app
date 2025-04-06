@@ -1,6 +1,11 @@
 'use client'
 
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger
+} from '@/components/ui/sheet'
 
 import { Sidebar } from '@/components/sidebar'
 import { Button } from '@/components/ui/button'
@@ -20,6 +25,7 @@ export function SidebarMobile({ children }: SidebarMobileProps) {
           <span className="sr-only">Toggle Sidebar</span>
         </Button>
       </SheetTrigger>
+      <SheetTitle className="hidden">Mobile Sidebar</SheetTitle>
       <SheetContent
         side="left"
         className="inset-y-0 flex h-auto w-[300px] flex-col p-0"

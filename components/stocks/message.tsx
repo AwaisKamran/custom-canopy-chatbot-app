@@ -23,11 +23,15 @@ export function UserMessage({ content }: { content: UserContent }) {
     } catch (e) {}
   }
   const isStringContent = typeof content === 'string'
+  const isNumberContent = typeof content === 'number'
   const isImageContent = Array.isArray(content)
   const isColorContent = !isStringContent && !isImageContent
   const renderContent = () => {
     if (isStringContent) {
       return <span>{content as string}</span>
+    } else if (isNumberContent) {
+      const numberContent = content.toString()
+      return <span>{numberContent as string}</span>
     } else if (isImageContent) {
       return (
         <div className="flex flex-wrap gap-4 mx-4 mb-2">

@@ -93,6 +93,8 @@ const getToolMessage = (content: ToolContent): ClientMessage => {
             <ChatActionMultiSelector {...props} messageId={toolCallId} />
           </>
         )
+      case TOOL_FUNCTIONS.PLACE_FINAL_ORDER:
+        return null
 
       default:
         return null
