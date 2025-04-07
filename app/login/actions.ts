@@ -6,6 +6,7 @@ import { AuthError } from 'next-auth'
 import { z } from 'zod'
 import { kv } from '@vercel/kv'
 import { ErrorMessage, SuccessMessage } from '../constants'
+import { signup } from '../signup/actions'
 
 export async function getUser(email: string) {
   const user = await kv.hgetall<User>(`user:${email}`)
@@ -64,4 +65,21 @@ export async function authenticate(
       }
     }
   }
+}
+
+export async function authenticateOrSignup(
+  prevState: Result | undefined,
+  formData: FormData
+): Promise<Result | undefined> {
+  const email = formData.get('email') as string
+  const user = await getUser(email)
+
+  let result: Result | undefined
+  if (!user) {
+    result = await signup(prevState, formData)
+  } else {
+    result = await authenticate(prevState, formData)
+  }
+
+  return result
 }

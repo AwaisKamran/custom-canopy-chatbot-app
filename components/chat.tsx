@@ -12,6 +12,7 @@ import { usePathname } from 'next/navigation'
 import { useScrollAnchor } from '@/lib/hooks/use-scroll-anchor'
 import { toast } from 'sonner'
 import { CHAT } from '@/app/constants'
+import { nanoid } from 'nanoid'
 
 export interface ChatProps extends React.ComponentProps<'div'> {
   className?: string
@@ -27,7 +28,7 @@ export function Chat({ className, session, missingKeys }: ChatProps) {
     if (!path.includes(CHAT)) {
       window.history.replaceState({}, '', aiState.path)
     }
-  }, [aiState.id, path, session?.user])
+  }, [aiState.id, path])
 
   useEffect(() => {
     setNewChatId(aiState.id)

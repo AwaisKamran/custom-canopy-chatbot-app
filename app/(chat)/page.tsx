@@ -2,7 +2,6 @@ import { Chat } from '@/components/chat'
 import { auth } from '@/auth'
 import { Session } from '@/lib/types'
 import { getMissingKeys } from '@/app/actions'
-import { redirect } from 'next/navigation'
 import { AI } from '@/app/(chat)/ai'
 
 export const metadata = {
