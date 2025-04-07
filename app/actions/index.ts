@@ -7,7 +7,7 @@ import { kv } from '@vercel/kv'
 import { auth } from '@/auth'
 import { MockupResponse, ToolCallResult, type Chat } from '@/lib/types'
 import { del } from '@vercel/blob'
-import { Error401Response } from './constants'
+import { Error401Response } from '../constants'
 import { ImagePart, ToolContent } from 'ai'
 import { TOOL_FUNCTIONS } from '@/lib/ai-tools/constants'
 

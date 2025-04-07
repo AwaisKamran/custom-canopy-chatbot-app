@@ -3,6 +3,7 @@
 import { getMutableAIState, streamUI } from 'ai/rsc'
 import { UserContent } from 'ai'
 import { openai } from '@ai-sdk/openai'
+import { auth } from '@/auth'
 import { BotMessage, SpinnerMessage } from '@/components/stocks/message'
 import { getToolFunctions } from '@/lib/ai-tools/tool-functions'
 import { ClientMessage, Roles } from '@/lib/types'
@@ -14,6 +15,7 @@ export async function submitUserMessage(
   content: UserContent
 ): Promise<ClientMessage> {
   'use server'
+  const session = await auth()
   const history = getMutableAIState()
   modifyAIState(
     history,
@@ -45,7 +47,7 @@ export async function submitUserMessage(
       }
       return <BotMessage key={messageId} content={content} />
     },
-    tools: getToolFunctions(history, messageId),
+    tools: getToolFunctions(history, messageId, session?.user?.id),
     onFinish: () => {
       history.done({ ...history.get() })
     }

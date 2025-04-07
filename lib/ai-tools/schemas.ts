@@ -1,5 +1,6 @@
 import { TENT_MOCKUP_VALIDATIONS } from '@/app/constants'
 import { z } from 'zod'
+import { EventTypes } from '../types/ga'
 
 export const ButtonToolSchema = z.object({
   content: z.string().describe('Asking user to choose from the options'),
@@ -76,6 +77,40 @@ export const RegionsColorsManagerSchema = z.object({
     )
     .describe('The options to display')
     .nonempty()
+})
+
+export const AddOnSchema = z.object({
+  content: z
+    .string()
+    .describe('The content to be displayed while displaying add-ons options.'),
+  options: z
+    .array(
+      z.object({
+        name: z.string().describe('The name for the button'),
+        value: z.string().describe('The value for the button'),
+        selected: z
+          .boolean()
+          .describe('Whether the button is selected')
+          .default(false),
+        edit: z
+          .boolean()
+          .describe('The edit state for the button')
+          .default(false)
+      })
+    )
+    .describe('The options to display')
+    .nonempty()
+})
+
+export const UserInteractionTrackingSchema = z.object({
+  content: z.string().describe('The content to be displayed'),
+  event: z.nativeEnum(EventTypes).describe('The event to track'),
+  inputs: z.array(
+    z.object({
+      name: z.string().describe('The name of the input'),
+      value: z.string().describe('The value of the input')
+    })
+  )
 })
 
 export const CustomCanopyToolSchema = z.object({
@@ -169,7 +204,8 @@ export const CustomCanopyToolSchema = z.object({
         .describe('Font of the text to be displayed on the tent banner'),
       tableColor: z
         .string()
-        .describe('Color of the table to be displayed on the tent banner')
+        .describe('Color of the table to be displayed on the tent banner'),
+      addOns: z.array(z.string()).describe('Add-ons selected').default(['None'])
     })
     .describe('Details of the tent to be generated')
     .required()
