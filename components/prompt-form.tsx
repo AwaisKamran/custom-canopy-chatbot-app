@@ -20,6 +20,8 @@ import { saveFilesApi } from '@/lib/redux/apis/chat'
 import { ImagePart, UserContent } from 'ai'
 import { isLastFileUploadMessage } from '@/lib/ai-tools/utils'
 import { IMAGE } from '@/app/constants'
+import { trackEvent } from '@/lib/utils/gtag'
+import { EventTypes } from '@/lib/types/ga'
 
 export function PromptForm({ session }: { session?: Session }) {
   const { formRef, onKeyDown } = useEnterSubmit()
@@ -27,7 +29,7 @@ export function PromptForm({ session }: { session?: Session }) {
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
   const [selectedFiles, setSelectedFiles] = React.useState<FileData[]>([])
   const { submitUserMessage } = useActions()
-  const [_, setMessages] = useUIState()
+  const [messages, setMessages] = useUIState()
   const [aiState, _setAIState] = useAIState()
   const lastMessage = aiState?.messages?.at(-1)
   const lastFileUploadMessage = isLastFileUploadMessage(lastMessage)
@@ -36,6 +38,18 @@ export function PromptForm({ session }: { session?: Session }) {
   React.useEffect(() => {
     inputRef.current?.focus()
   }, [])
+
+  React.useEffect(() => {
+    if (aiState.messages.length === 3) {
+      trackEvent({
+        event: EventTypes.ORDER_STARTED,
+        context: {
+          chatId: aiState.id,
+          userId: session?.user?.id
+        }
+      })
+    }
+  }, [aiState.messages])
 
   const handleFileSelect = (files: FileData[]) => {
     const newFiles: FileData[] = files.map(fileData => {

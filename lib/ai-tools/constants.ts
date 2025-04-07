@@ -27,8 +27,11 @@ export const PROMPT_INSTRUCTIONS = `
           - Company Name: {companyName}
           - Canopy type: {canopyType}
           - Colors: {colors} 
-            If the user has selected a color, display the color in a small square next to the color name.
+            If the user has selected a color, display the color in a small div with size 40x20 next to the color name.
+            <div style='display: flex; align-items: center;'><div style="background-color: {color}; width: 40px; height: 20px;"></div><span>{colorName}</span></div>
+            All the colors should be well aligned
           - Logo: <img src={logo} alt="Logo" width="150" height="150" />
+            DONT show image as a separate item but a part of logo item
           - Add-ons [MENTION THIS AS SUB-LIST ONLY IF ATLEAST ONE ADD-ON IS SELECTED BY THE USER]
 
          - {options}: [
@@ -133,9 +136,18 @@ export const PROMPT_INSTRUCTIONS = `
       - Question # 4: (If Separate text for each valence Text Add-on Selected)
     - Whenever asking the user to Separate color for each print location, EXPLICITLY CALL the renderRegionsColorsManager tool function. Below are the questions that require color selection:
       - Question # 4: (If Separate color for each print location Add-on Selected)
+    - Whenever user ask to show the add-ons for selections, EXPLICITLY CALL the getAddOns tool function and Make sure to syncrhonize the user inputs with the tool function calls.
     - **generateCanopyMockups tool function**
       - EXPLICITLY CALL the generateCanopyMockups tool function to generate the mockups of the canopy whenever the user confirms the inputs.
       - WHILE SENDING COLORS TO THE generateCanopyMockups TOOL FUNCTION, ALWAYS SEND THE BGR VALUES OF THE COLORS IN THE FOLLOWING FORMAT: \`[B, G, R]\`
+
+  ** Track user interactions:**
+    - EXPLICITLY CALL the trackUserEvent tool function to track user interactions IF AND ONLY IF THE FOLLOWING CONDITIONS ARE MET:
+      - Order is finalized:
+        - assistantResponse
+        - event: "order_completed"
+        - inputs: [{name: "email", value: userInput}, {name: "phone", value: userInput}]
+    - DO NOT TRACK ANY OTHER USER INTERACTIONS.
 
   **Editing Guidelines:**
     - At any point user can request for edit. If so update the inputs accordingly and move back to the question where the user requested for edit.
@@ -153,7 +165,9 @@ export const TOOL_FUNCTIONS = {
   RENDER_TEXT_INPUT_GROUP: 'renderTextInputGroup',
   RENDER_COLOR_LABEL_PICKER_SET: 'renderColorLabelPickerSet',
   RENDER_REGION_MANAGER: 'renderRegionManager',
-  GENERATE_CANOPY_MOCKUPS: 'generateCanopyMockups'
+  GENERATE_CANOPY_MOCKUPS: 'generateCanopyMockups',
+  TRACK_USER_EVENT: 'trackUserEvent',
+  GET_ADD_ONS: 'getAddOns'
 }
 
 export const INITIAL_CHAT_MESSAGE =
