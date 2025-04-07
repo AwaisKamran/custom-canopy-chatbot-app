@@ -3,7 +3,6 @@ import { useUIState } from 'ai/rsc'
 
 export function ChatList() {
   const [messages, _] = useUIState()
-  console.log('messages', messages)
 
   return (
     <div className="relative mx-auto max-w-2xl px-4">
