@@ -180,5 +180,8 @@ export const PlaceFinalOrderSchema = z.object({
     .string()
     .describe(
       'Message to display when asking for user details before placing final order'
-    )
+    ),
+  action: z.string().describe('Action to be performed by the form'),
+  email: z.string().describe('Email of the user'),
+  phoneNumber: z.string().describe('Phone number of the user')
 })

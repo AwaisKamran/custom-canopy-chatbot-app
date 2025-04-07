@@ -49,9 +49,9 @@ export const PROMPT_INSTRUCTIONS = `
       3. If the user selects "No," ask them which details they want to change, make the updates.
 
       ** Place order Workflow:** (If the user clicks on "Place order" button)
-       - EXPLICITLY CALL the placeFinalOrder tool and obtain the email and phone number from the user.
-       - After the tool call is successful, thank the user for placing their order and complete the conversation.
-       - DO NOT generate mockups at this step.
+        - {action}: "Submit Details"
+        - EXPLICITLY CALL the placeFinalOrder tool with {content} as the empty string
+        - DO NOT generate mockups at this step.
 
       **Add-ons Workflow:**  
     - An Add-on is selected if the selected property of that add-on in the Add-ons options array is true.

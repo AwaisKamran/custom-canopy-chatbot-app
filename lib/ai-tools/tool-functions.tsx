@@ -23,6 +23,7 @@ import ChatActionMultiSelector from '@/components/chat-action-multi-selector'
 import RegionsColorsManager from '@/components/regions_colors_manager'
 import { ColorLabelPickerSet } from '@/components/color-label-picker-set'
 import { UserDetailsForm } from '@/components/user-details-form'
+import { auth } from '@/auth'
 
 function modifyToolAIState(history: any, content: ToolContent) {
   modifyAIState(history, {
@@ -236,20 +237,42 @@ export function placeFinalOrder(history: any, messageId: string) {
       'Handles the final order placement logic including auth and chat saving',
     parameters: PlaceFinalOrderSchema,
     generate: async function ({
-      content
+      content,
+      action,
+      email,
+      phoneNumber
     }: z.infer<typeof PlaceFinalOrderSchema>) {
+      const session = await auth()
       modifyToolAIState(history, [
         {
           toolCallId: messageId,
           toolName: TOOL_FUNCTIONS.PLACE_FINAL_ORDER,
           result: {
-            message: content
+            message: content,
+            props: { action, email, phoneNumber }
           }
         }
       ] as ToolContent)
+      let disabled = false
+      if (session) {
+        disabled = true
+      }
       return (
-        <BotMessage key={messageId} content={content}>
-          <UserDetailsForm messageId={messageId} />
+        <BotMessage
+          key={messageId}
+          content={
+            disabled
+              ? 'Your order has been placed with the following information:'
+              : content
+          }
+        >
+          <UserDetailsForm
+            messageId={messageId}
+            action={action}
+            email={email}
+            phoneNumber={phoneNumber}
+            disabled={disabled}
+          />
         </BotMessage>
       )
     }
