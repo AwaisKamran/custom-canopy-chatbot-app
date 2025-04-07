@@ -3,11 +3,12 @@ import { useUIState } from 'ai/rsc'
 
 export function ChatList() {
   const [messages, _] = useUIState()
+  console.log('messages', messages)
 
   return (
     <div className="relative mx-auto max-w-2xl px-4">
-      {messages.map((item: ClientMessage, index: number) => (
-        <div key={index}>{item.display}</div>
+      {messages.map((item: ClientMessage) => (
+        <div key={item.id}>{item.display}</div>
       ))}
     </div>
   )

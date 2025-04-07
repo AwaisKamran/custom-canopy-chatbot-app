@@ -54,10 +54,7 @@ export const PROMPT_INSTRUCTIONS = `
         2. When email and phone number are provided, EXPLICITLY CALL the showUserDetails tool with the following parameters:
           - {email}: {email}
           - {phoneNumber}: {phoneNumber}
-          - {content}:
-            - "Your order has been placed with the following details. Thank you for choosing Custom Canopy!
-               - Email: {email}
-               - Phone number: {phoneNumber}"
+          - {content}: "Your order has been placed with the following details:\n\n - Email: {email}\n - Phone number: {phoneNumber}\n\n Thank you for choosing Custom Canopy!"
         - DO NOT generate mockups at this step.
 
 
