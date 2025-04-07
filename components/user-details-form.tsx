@@ -48,7 +48,7 @@ export function UserDetailsForm({
   }
 
   return (
-    <div className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0">
+    <div className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 -mt-4 mx-2">
       {disabled ? (
         <div>
           <div>Your order has been placed with the following details:</div>
