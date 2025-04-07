@@ -2,10 +2,10 @@
 
 import { AnalyticsEvent } from '../types/ga'
 
-export const pageview = (url: string) => {
+export const pageview = (url: string, debug_mode: boolean = false) => {
   if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_GA_TRACKING_ID) {
     window.gtag('config', process.env.NEXT_PUBLIC_GA_TRACKING_ID, {
-      debug_mode: true,
+      debug_mode,
       page_path: url
     })
   }
@@ -45,7 +45,7 @@ export const sendClientIdToServer = () => {
   }
 }
 
-export const trackEvent = ({ event, context, data = {} }: AnalyticsEvent) => {
+export const trackEvent = ({ event, context, data = {} }: AnalyticsEvent, debug_mode: boolean = false) => {
   if (
     typeof window === 'undefined' ||
     !window.gtag ||
@@ -61,7 +61,7 @@ export const trackEvent = ({ event, context, data = {} }: AnalyticsEvent) => {
   const params = {
     ...context,
     ...data,
-    debug_mode: true
+    debug_mode,
   }
 
   window.gtag(
