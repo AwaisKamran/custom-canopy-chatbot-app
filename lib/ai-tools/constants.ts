@@ -49,9 +49,17 @@ export const PROMPT_INSTRUCTIONS = `
       3. If the user selects "No," ask them which details they want to change, make the updates.
 
       ** Place order Workflow:** (If the user clicks on "Place order" button)
-        - {action}: "Submit Details"
-        - EXPLICITLY CALL the placeFinalOrder tool with {content} as the empty string
+        1. If the "Place Order" option is selected, EXPLICITLY CALL the placeFinalOrder tool with the following parameters:
+          - {content}: "Please provide the following information:"
+        2. When email and phone number are provided, EXPLICITLY CALL the showUserDetails tool with the following parameters:
+          - {email}: {email}
+          - {phoneNumber}: {phoneNumber}
+          - {content}:
+            - "Your order has been placed with the following details. Thank you for choosing Custom Canopy!
+               - Email: {email}
+               - Phone number: {phoneNumber}"
         - DO NOT generate mockups at this step.
+
 
       **Add-ons Workflow:**  
     - An Add-on is selected if the selected property of that add-on in the Add-ons options array is true.
@@ -153,7 +161,8 @@ export const TOOL_FUNCTIONS = {
   RENDER_COLOR_LABEL_PICKER_SET: 'renderColorLabelPickerSet',
   RENDER_REGION_MANAGER: 'renderRegionManager',
   GENERATE_CANOPY_MOCKUPS: 'generateCanopyMockups',
-  PLACE_FINAL_ORDER: 'placeFinalOrder'
+  PLACE_FINAL_ORDER: 'placeFinalOrder',
+  SHOW_USER_DETAILS: 'showUserDetails'
 }
 
 export const INITIAL_CHAT_MESSAGE =
