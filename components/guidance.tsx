@@ -21,8 +21,10 @@ export function Guidance({
           To get you started, please refer to this diagram in order to
           understand the anatomy of our canopy:
         </p>
+        <p className="text-xs text-foreground mb-1">
+          A 10’x10’ Custom Canopy has 8 print locations; 4 peaks and 4 valences.
+        </p>
         <p className="text-xs text-foreground mb-5">
-          A 10’x10’ Custom canopy has 8 print locations; 4 peaks and 4 valences.
           It can also be accessorized with full walls and half walls.
         </p>
         <p className="text-[10px] text-muted-foreground mb-5">
