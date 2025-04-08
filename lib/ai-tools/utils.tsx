@@ -97,7 +97,7 @@ const getToolMessage = (content: ToolContent): ClientMessage => {
       case TOOL_FUNCTIONS.PLACE_FINAL_ORDER:
         return (
           <>
-            <UserDetailsForm {...props} messageId={toolCallId} />
+            <UserDetailsForm {...props} messageId={toolCallId} session={null} />
           </>
         )
 

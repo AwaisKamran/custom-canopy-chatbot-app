@@ -1,21 +1,51 @@
 'use client'
 
-import { authenticateOrSignup } from '@/app/login/actions'
+import { authenticateOrSignup, getUser } from '@/app/login/actions'
 import { useRouter } from 'next/navigation'
 import { useAIState, useUIState, useActions } from 'ai/rsc'
 import { toast } from 'sonner'
 import { getMessageFromCode } from '@/lib/utils'
 import { saveChat } from '@/app/actions'
+import { Session } from '@/lib/types'
+import { useEffect } from 'react'
+import { DEFAULT_PHONE_NUMBER } from '@/app/constants'
 
 export interface UserDetailsFormProps {
   messageId: string
+  session: Session | null
 }
 
-export function UserDetailsForm({ messageId }: UserDetailsFormProps) {
+export function UserDetailsForm({ messageId, session }: UserDetailsFormProps) {
   const router = useRouter()
-  const [messages, _setMessages] = useUIState()
+  const [messages, setMessages] = useUIState()
   const [aiState, _setAIState] = useAIState()
   const { submitUserMessage } = useActions()
+
+  useEffect(() => {
+    const autoSubmit = async () => {
+      if (session && session.user.email) {
+        const user = await getUser(session.user.email)
+        if (user && user.email) {
+          const userResponse = {
+            email: user.email,
+            phoneNumber: user.phoneNumber || DEFAULT_PHONE_NUMBER
+          }
+          const message = await submitUserMessage(JSON.stringify(userResponse))
+          await saveChat(aiState)
+          setMessages((currentMessages: any) => [...currentMessages, message])
+          router.refresh()
+        }
+      }
+    }
+
+    if (session) {
+      autoSubmit()
+    }
+  }, [session])
+
+  if (session) {
+    return null
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -23,10 +53,12 @@ export function UserDetailsForm({ messageId }: UserDetailsFormProps) {
     const result = await authenticateOrSignup(undefined, formData)
     if (result?.type === 'success') {
       const jsonResult = Object.fromEntries(formData.entries())
-      await submitUserMessage(JSON.stringify(jsonResult))
+      const message = await submitUserMessage(JSON.stringify(jsonResult))
       await saveChat(aiState)
+      setMessages((currentMessages: any) => [...currentMessages, message])
       toast.success(getMessageFromCode(result.resultCode))
       router.refresh()
+      router.push(aiState.path)
     } else {
       console.error(result?.resultCode)
       const error = result?.resultCode
@@ -58,6 +90,9 @@ export function UserDetailsForm({ messageId }: UserDetailsFormProps) {
               name="email"
               placeholder="Enter your email address"
               required
+              disabled={
+                session || messageId !== messages.at(-1)?.id || aiState.loading
+              }
             />
           </div>
         </div>
@@ -76,6 +111,9 @@ export function UserDetailsForm({ messageId }: UserDetailsFormProps) {
               name="phoneNumber"
               placeholder="Enter your phone number"
               required
+              disabled={
+                session || messageId !== messages.at(-1)?.id || aiState.loading
+              }
             />
           </div>
         </div>

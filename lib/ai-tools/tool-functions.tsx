@@ -16,7 +16,7 @@ import { BotCard, BotMessage } from '@/components/stocks/message'
 import { ChatRadioButtonWrapper } from '@/components/chat-radio-buttons-wrapper'
 import { ChatColorPickerWrapper } from '@/components/chat-color-picker-wrapper'
 import { generateTentMockupsApi } from '../redux/apis/tent-mockup-prompt'
-import { MockupResponse, Roles, TentMockUpPrompt } from '../types'
+import { MockupResponse, Roles, Session, TentMockUpPrompt } from '../types'
 import { TOOL_FUNCTIONS } from './constants'
 import { modifyAIState } from './utils'
 import { ChatTextInputGroup } from '@/components/chat-text-input-group'
@@ -24,6 +24,7 @@ import ChatActionMultiSelector from '@/components/chat-action-multi-selector'
 import RegionsColorsManager from '@/components/regions_colors_manager'
 import { ColorLabelPickerSet } from '@/components/color-label-picker-set'
 import { UserDetailsForm } from '@/components/user-details-form'
+import { auth } from '@/auth'
 
 function modifyToolAIState(history: any, content: ToolContent) {
   modifyAIState(history, {
@@ -239,6 +240,7 @@ export function placeFinalOrder(history: any, messageId: string) {
     generate: async function ({
       content
     }: z.infer<typeof PlaceFinalOrderSchema>) {
+      const session = (await auth()) as Session
       modifyToolAIState(history, [
         {
           toolCallId: messageId,
@@ -249,8 +251,11 @@ export function placeFinalOrder(history: any, messageId: string) {
         }
       ] as ToolContent)
       return (
-        <BotMessage key={messageId} content={content}>
-          <UserDetailsForm messageId={messageId} />
+        <BotMessage
+          key={messageId}
+          content={session ? 'Placing your order, please wait...' : content}
+        >
+          <UserDetailsForm messageId={messageId} session={session} />
         </BotMessage>
       )
     }
