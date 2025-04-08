@@ -15,7 +15,11 @@ export const { auth, signIn, signOut } = NextAuth({
           })
           .safeParse(credentials)
 
-        if (parsedCredentials.success) {
+        if (
+          parsedCredentials &&
+          parsedCredentials.success &&
+          parsedCredentials.data
+        ) {
           const { email } = parsedCredentials.data
           const user = await getUser(email)
 
