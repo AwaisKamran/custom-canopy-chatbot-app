@@ -30,9 +30,8 @@ export function UserDetailsForm({ messageId, session }: UserDetailsFormProps) {
             email: user.email,
             phoneNumber: user.phoneNumber || DEFAULT_PHONE_NUMBER
           }
-          const message = await submitUserMessage(JSON.stringify(userResponse))
+          await submitUserMessage(JSON.stringify(userResponse))
           await saveChat(aiState)
-          setMessages((currentMessages: any) => [...currentMessages, message])
           router.refresh()
         }
       }
