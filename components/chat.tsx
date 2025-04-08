@@ -12,6 +12,7 @@ import { usePathname } from 'next/navigation'
 import { useScrollAnchor } from '@/lib/hooks/use-scroll-anchor'
 import { toast } from 'sonner'
 import { CHAT } from '@/app/constants'
+import { nanoid } from 'nanoid'
 
 export interface ChatProps extends React.ComponentProps<'div'> {
   className?: string
@@ -24,12 +25,10 @@ export function Chat({ className, session, missingKeys }: ChatProps) {
   const [aiState, _setAIState] = useAIState()
   const [_, setNewChatId] = useLocalStorage('newChatId', aiState.id)
   useEffect(() => {
-    if (session?.user) {
-      if (!path.includes(CHAT)) {
-        window.history.replaceState({}, '', aiState.path)
-      }
+    if (!path.includes(CHAT)) {
+      window.history.replaceState({}, '', aiState.path)
     }
-  }, [aiState.id, path, session?.user])
+  }, [aiState.id, path])
 
   useEffect(() => {
     setNewChatId(aiState.id)
@@ -53,11 +52,7 @@ export function Chat({ className, session, missingKeys }: ChatProps) {
         className={cn('pb-[200px] pt-4 md:pt-10', className)}
         ref={messagesRef}
       >
-        {aiState.messages.length ? (
-          <ChatList isShared={false} session={session} />
-        ) : (
-          <EmptyScreen />
-        )}
+        {aiState.messages.length ? <ChatList /> : <EmptyScreen />}
         <div className="w-full h-px" ref={visibilityRef} />
       </div>
       <ChatPanel

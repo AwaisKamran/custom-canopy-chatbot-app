@@ -41,15 +41,6 @@ export default function SignupForm() {
         <h1 className="mb-3 text-2xl font-bold">Sign up for an account!</h1>
         <div className="w-full">
           <InputField
-            label="Username"
-            id="username"
-            name="username"
-            placeholder="Enter your username"
-            error={result?.errors?.fieldErrors?.username}
-            type="text"
-            required
-          />
-          <InputField
             label="Email"
             id="email"
             name="email"
@@ -67,17 +58,6 @@ export default function SignupForm() {
             error={result?.errors?.fieldErrors?.phoneNumber}
             type="text"
             containerClassName="mt-2"
-            required
-          />
-          <InputField
-            label="Password"
-            id="password"
-            name="password"
-            placeholder="Enter password"
-            error={result?.errors?.fieldErrors?.password}
-            type="password"
-            containerClassName="mt-2"
-            minLength={6}
             required
           />
         </div>

@@ -45,6 +45,10 @@ export async function getChats(userId?: string | null) {
 export async function getChat(id: string, userId: string) {
   const session = await auth()
 
+  if (!session) {
+    return
+  }
+
   if (userId !== session?.user?.id) {
     return {
       error: Error401Response.message

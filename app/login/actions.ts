@@ -6,6 +6,7 @@ import { AuthError } from 'next-auth'
 import { z } from 'zod'
 import { kv } from '@vercel/kv'
 import { ErrorMessage, SuccessMessage } from '../constants'
+import { signup } from '../signup/actions'
 
 export async function getUser(email: string) {
   const user = await kv.hgetall<User>(`user:${email}`)
@@ -23,22 +24,18 @@ export async function authenticate(
 ): Promise<Result | undefined> {
   try {
     const email = formData.get('email')
-    const password = formData.get('password')
 
     const parsedCredentials = z
       .object({
-        email: z.string().email(),
-        password: z.string().min(6)
+        email: z.string().email()
       })
       .safeParse({
-        email,
-        password
+        email
       })
 
     if (parsedCredentials.success) {
       await signIn('credentials', {
         email,
-        password,
         redirect: false
       })
 
@@ -68,4 +65,21 @@ export async function authenticate(
       }
     }
   }
+}
+
+export async function authenticateOrSignup(
+  prevState: Result | undefined,
+  formData: FormData
+): Promise<Result | undefined> {
+  const email = formData.get('email') as string
+  const user = await getUser(email)
+
+  let result: Result | undefined
+  if (!user) {
+    result = await signup(prevState, formData)
+  } else {
+    result = await authenticate(prevState, formData)
+  }
+
+  return result
 }

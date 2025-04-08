@@ -15,6 +15,7 @@ import { ChatTextInputGroup } from '@/components/chat-text-input-group'
 import { ColorLabelPickerSet } from '@/components/color-label-picker-set'
 import ChatActionMultiSelector from '@/components/chat-action-multi-selector'
 import RegionsColorsManager from '@/components/regions_colors_manager'
+import { UserDetailsForm } from '@/components/user-details-form'
 
 const createInitialAIState = (): Chat => {
   const chatId = nanoid()
@@ -91,6 +92,12 @@ const getToolMessage = (content: ToolContent): ClientMessage => {
           <>
             <Carousal {...props} />
             <ChatActionMultiSelector {...props} messageId={toolCallId} />
+          </>
+        )
+      case TOOL_FUNCTIONS.PLACE_FINAL_ORDER:
+        return (
+          <>
+            <UserDetailsForm {...props} messageId={toolCallId} />
           </>
         )
 

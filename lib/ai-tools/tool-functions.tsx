@@ -7,7 +7,9 @@ import {
   CustomCanopyToolSchema,
   ChatTextInputGroupSchema,
   RegionsColorsManagerSchema,
-  ColorLabelPickerSetSchema
+  ColorLabelPickerSetSchema,
+  PlaceFinalOrderSchema,
+  ShowUserDetailsSchema
 } from './schemas'
 import { Carousal } from '@/components/carousel'
 import { BotCard, BotMessage } from '@/components/stocks/message'
@@ -21,6 +23,7 @@ import { ChatTextInputGroup } from '@/components/chat-text-input-group'
 import ChatActionMultiSelector from '@/components/chat-action-multi-selector'
 import RegionsColorsManager from '@/components/regions_colors_manager'
 import { ColorLabelPickerSet } from '@/components/color-label-picker-set'
+import { UserDetailsForm } from '@/components/user-details-form'
 
 function modifyToolAIState(history: any, content: ToolContent) {
   modifyAIState(history, {
@@ -169,6 +172,7 @@ export function renderRegionManager(history: any, messageId: string) {
     }
   }
 }
+
 export function generateCanopyMockups(history: any, messageId: string) {
   return {
     description: 'Generates the images for canopy tents based on user details',
@@ -227,6 +231,53 @@ export function generateCanopyMockups(history: any, messageId: string) {
   }
 }
 
+export function placeFinalOrder(history: any, messageId: string) {
+  return {
+    description:
+      'Handles the final order placement logic including auth and chat saving',
+    parameters: PlaceFinalOrderSchema,
+    generate: async function ({
+      content
+    }: z.infer<typeof PlaceFinalOrderSchema>) {
+      modifyToolAIState(history, [
+        {
+          toolCallId: messageId,
+          toolName: TOOL_FUNCTIONS.PLACE_FINAL_ORDER,
+          result: {
+            message: content
+          }
+        }
+      ] as ToolContent)
+      return (
+        <BotMessage key={messageId} content={content}>
+          <UserDetailsForm messageId={messageId} />
+        </BotMessage>
+      )
+    }
+  }
+}
+
+export function showUserDetails(history: any, messageId: string) {
+  return {
+    description: "Shows the user's order details",
+    parameters: ShowUserDetailsSchema,
+    generate: async function ({
+      content
+    }: z.infer<typeof ShowUserDetailsSchema>) {
+      modifyToolAIState(history, [
+        {
+          toolCallId: messageId,
+          toolName: TOOL_FUNCTIONS.SHOW_USER_DETAILS,
+          result: {
+            message: content
+          }
+        }
+      ] as ToolContent)
+      return <BotMessage key={messageId} content={content} />
+    }
+  }
+}
+
 export const getToolFunctions = (history: any, messageId: string) => {
   return {
     renderButtons: renderButtonsTool(history, messageId),
@@ -234,6 +285,8 @@ export const getToolFunctions = (history: any, messageId: string) => {
     renderColorLabelPickerSet: renderColorLabelPickerSet(history, messageId),
     renderRegionManager: renderRegionManager(history, messageId),
     renderTextInputGroup: renderTextInputGroup(history, messageId),
-    generateCanopyMockups: generateCanopyMockups(history, messageId)
+    generateCanopyMockups: generateCanopyMockups(history, messageId),
+    placeFinalOrder: placeFinalOrder(history, messageId),
+    showUserDetails: showUserDetails(history, messageId)
   }
 }
