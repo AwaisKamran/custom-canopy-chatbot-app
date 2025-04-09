@@ -30,7 +30,8 @@ const createInitialAIState = (): Chat => {
     ],
     path: `/${CHAT}/${chatId}`,
     createdAt: new Date(),
-    loading: false
+    loading: false,
+    complete: false
   }
 }
 
