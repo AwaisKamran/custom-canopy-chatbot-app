@@ -30,7 +30,11 @@ export function Sidebar({ className, children }: SidebarProps) {
       const systemTheme = getSystemTheme()
       setImages(GUIDANCE_IMAGE_URLS[systemTheme])
     } else {
-      setImages(theme ? GUIDANCE_IMAGE_URLS[theme] : GUIDANCE_IMAGE_URLS.light)
+      setImages(
+        theme
+          ? GUIDANCE_IMAGE_URLS[theme as 'dark' | 'light']
+          : GUIDANCE_IMAGE_URLS.light
+      )
     }
   }, [theme])
 
