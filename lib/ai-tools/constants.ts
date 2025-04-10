@@ -10,16 +10,25 @@ export const PROMPT_INSTRUCTIONS = `
 
   Question # 2. **Color Selection**:
   - Ask the user to select a color for the canopy by calling the renderColorPicker tool:
+  - {content}: "Please select a color for your canopy."
   - ALWAYS EXPLICITLY CALL the renderColorPicker tool for user color selection.
   - Accept the user answer in RGB color values
   - Set the user selected color for the valences (front, back, left, right) and peaks (front, back, left, right) and proceed
-  - The user answer here will refer to the initial/default color selection for the canopy.  
+  - The user answer here will refer to the initial/default color selection for the canopy.
+
+  Question # 3. **Text Color Selection**:
+  - Ask the user to select a color for the text by calling the renderColorPicker tool:
+  - {content}: "Please select a color for the text on your canopy."
+  - ALWAYS EXPLICITLY CALL the renderColorPicker tool for user color selection.
+  - Accept the user answer in RGB color values
+  - Set the user selected color to be the text color
+  - The user answer here will refer to the initial/default color of the text on the canopy.
     
-  Question # 3. **Logo Upload**:
+  Question # 4. **Logo Upload**:
     - Prompt the user to upload their logo:
     - {content}: ["Please upload your company logo to be displayed on the canopy."]
 
-  Question #4. **Generate Mockups Before Add-ons:**
+  Question #5. **Generate Mockups Before Add-ons:**
     - Once the primary color and logo are provided:
       1. Show user selections in unordered list format and confirm with the user to generate mockups by EXPLICITLY CALLING the renderButtons tool:
          - {content}:

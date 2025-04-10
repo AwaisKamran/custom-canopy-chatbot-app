@@ -1,5 +1,4 @@
 import { TentMockUpPrompt } from '../types'
-import { COLORS } from '@/app/constants'
 
 interface TentMockUpPromptFormData extends TentMockUpPrompt {
   logoFile: File
@@ -16,7 +15,8 @@ export const createFormData = (
     peaks,
     walls,
     valences,
-    valencesTexts
+    valencesTexts,
+    fontColor
   } = mockUpPrompt
   const formRequestBody = new FormData()
 
@@ -38,7 +38,7 @@ export const createFormData = (
   })
 
   formRequestBody.append('logo', logoFile)
-  formRequestBody.append('text_color', COLORS.BLACK_COLOR)
+  formRequestBody.append('text_color', fontColor)
   if (tableColor) formRequestBody.append('table_color', tableColor)
   formRequestBody.append('output_dir', `chat:${id}`)
 
