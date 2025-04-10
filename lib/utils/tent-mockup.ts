@@ -34,7 +34,7 @@ export const createFormData = (
   })
 
   Object.entries(valencesTexts).forEach(([key, value]) => {
-    formRequestBody.append(`${key}_text`, value)
+    formRequestBody.append(`${key}_text`, value.toUpperCase())
   })
 
   formRequestBody.append('logo', logoFile)
