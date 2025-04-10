@@ -20,8 +20,8 @@ export const PROMPT_INSTRUCTIONS = `
   - Ask the user to select a color for the text by calling the renderColorPicker tool:
   - {content}: "Please select a color for the text on your canopy."
   - ALWAYS EXPLICITLY CALL the renderColorPicker tool for user color selection.
-  - Accept the user answer in RGB color values
-  - Set the user selected color to be the text color
+  - Accept the user answer in format: {name, hex, rgb}
+  - Set the user selected color in rgb to be the text color
   - The user answer here will refer to the initial/default color of the text on the canopy.
     
   Question # 4. **Logo Upload**:
