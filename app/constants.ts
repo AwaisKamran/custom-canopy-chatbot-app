@@ -57,10 +57,10 @@ export const GUIDANCE_IMAGE_URLS = {
         filename: 'Front View',
         url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/dark/front-DnKuv1U8WUFyV7cwPpTFmNSaMWyNP7.png'
       },
-      // {
-      //   filename: 'No Walls View',
-      //   url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/no-walls-labelled-dark-rr7cSQbPtKOml8DA32tLLMpi7rlhjV.png'
-      // },
+      {
+        filename: 'No Walls View',
+        url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/no-walls-labelled-dark-rr7cSQbPtKOml8DA32tLLMpi7rlhjV.png'
+      },
       {
         filename: 'Side View',
         url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/dark/half-walls-PLdoyKU7DHBOioX9JB6lIXOH5F7Zyh.png'
@@ -83,10 +83,10 @@ export const GUIDANCE_IMAGE_URLS = {
         filename: 'Front View',
         url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/light/front-52JArz8sEDOyvSC7mmZkeK3Hq1cUFh.png'
       },
-      // {
-      //   filename: 'No Walls View',
-      //   url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/light/half-walls-499r5GYDKNkTmlKd8rEGvTlAIVsLfS.png'
-      // },
+      {
+        filename: 'No Walls View',
+        url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/light/half-walls-499r5GYDKNkTmlKd8rEGvTlAIVsLfS.png'
+      },
       {
         filename: 'Side View',
         url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/side-labelled-zBUEx9GMyq1rOp0MembizovFNwurbj.png'
