@@ -43,6 +43,8 @@
     --action-button: 199, 47%, 88%;
     --action-button-foreground: 223, 4%, 36%;
 
+    --carousal: 0 0% 100%;
+
     --border: 0, 0%, 66%;
     --input: 240 5.9% 90%;
     --ring: 240 10% 3.9%;
@@ -89,6 +91,8 @@
 
     --action-button: 191, 38%, 48%;
     --action-button-foreground: 0, 0%, 100%;
+
+    --carousal: 199, 67%, 11%;
  
     --border: 0, 0%, 66%;
     --input: 240 3.7% 15.9%;
