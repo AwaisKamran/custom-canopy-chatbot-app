@@ -1,7 +1,7 @@
 import { convertToCoreMessages, CoreMessage, ToolContent } from 'ai'
 import { BotMessage, UserMessage } from '@/components/stocks/message'
 import { ChatRadioButtonWrapper } from '@/components/chat-radio-buttons-wrapper'
-import { ChatColorPickerWrapper } from '@/components/chat-color-picker-wrapper'
+import { ChatColorSwatcherWrapper } from '@/components/chat-color-swatcher-wrapper'
 import { Chat, ClientMessage, Roles, ToolCallResult } from '@/lib/types'
 import { CHAT, IMAGE } from '@/app/constants'
 import { isValidJson, nanoid } from '@/lib/utils'
@@ -76,7 +76,7 @@ const getToolMessage = (content: ToolContent): ClientMessage => {
         return <ChatRadioButtonWrapper messageId={toolCallId} {...props} />
 
       case TOOL_FUNCTIONS.RENDER_COLOR_PICKER:
-        return <ChatColorPickerWrapper messageId={toolCallId} />
+        return <ChatColorSwatcherWrapper messageId={toolCallId} {...props} />
 
       case TOOL_FUNCTIONS.RENDER_TEXT_INPUT_GROUP:
         return <ChatTextInputGroup messageId={toolCallId} {...props} />
@@ -149,8 +149,7 @@ const getClientMessages = (messages: CoreMessage[]): ClientMessage[] => {
     const nextMessage = messages[i + 1]
     if (
       currentMessage.role === Roles.tool &&
-      nextMessage?.role === Roles.user &&
-      currentMessage.content[0].toolName !== TOOL_FUNCTIONS.RENDER_COLOR_PICKER
+      nextMessage?.role === Roles.user
     ) {
       let updatedProps = (currentMessage.content[0].result as ToolCallResult)
         .props
@@ -170,7 +169,6 @@ const getClientMessages = (messages: CoreMessage[]): ClientMessage[] => {
           }
         }
       ]
-
       i = i + 1
     }
     clientMessages.push(getClientMessage(currentMessage))

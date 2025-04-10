@@ -3,12 +3,13 @@
 import { useState } from 'react'
 import { useActions, useUIState } from 'ai/rsc'
 import ColorPickerWithLabel from './color-picker-with-label'
+import { Color } from '@/lib/types'
 
 interface ColorLabelPickerSetProps {
   fieldColors: {
     name: string
     label: string
-    color: { name: string; value: string }
+    color: Color
   }[]
   messageId?: string
   setFieldColors?: (sides: any) => void
@@ -22,13 +23,7 @@ export const ColorLabelPickerSet = ({
   const { submitUserMessage } = useActions()
   const [messages, setMessages] = useUIState()
   const [fields, setFields] = useState(fieldColors || [])
-  const handleColorPickerSelect = (
-    fieldName: string,
-    colorObj: {
-      name: string
-      value: string
-    }
-  ) => {
+  const handleColorPickerSelect = (fieldName: string, colorObj: Color) => {
     const updatedFields = fields.map(field =>
       field.label === fieldName ? { ...field, color: colorObj } : field
     )
@@ -40,7 +35,7 @@ export const ColorLabelPickerSet = ({
       fields.map(field => ({
         [field.name]: {
           [field.label]: {
-            color: { color: field.color.value, colorName: field.color.name }
+            color: field.color
           }
         }
       }))
@@ -58,9 +53,11 @@ export const ColorLabelPickerSet = ({
           currentColor={field.color}
           disabled={
             messageId !== messages.at(-1)?.id ||
-            fields.some(field => field.color.value === '')
+            fields.some(field => field.color.rgb === '')
           }
-          onColorSelect={handleColorPickerSelect}
+          onColorSelect={(color: Color) =>
+            handleColorPickerSelect(field.label, color)
+          }
         />
       ))}
       {!setFieldColors && (
@@ -69,7 +66,7 @@ export const ColorLabelPickerSet = ({
           onClick={onSubmit}
           disabled={
             messageId !== messages.at(-1)?.id ||
-            fields.some(field => field.color.value === '')
+            fields.some(field => field.color.rgb === '')
           }
         >
           Okay
