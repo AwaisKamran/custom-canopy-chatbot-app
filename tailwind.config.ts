@@ -27,6 +27,7 @@ module.exports = {
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        carousal: 'hsl(var(--carousal))',
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))'
@@ -96,8 +97,8 @@ module.exports = {
         'accordion-up': 'accordion-up 0.2s ease-out'
       },
       borderWidth: {
-        '0.5': '0.5px',
-      },
+        '0.5': '0.5px'
+      }
     }
   },
   plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')]

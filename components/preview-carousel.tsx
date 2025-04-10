@@ -49,10 +49,10 @@ export default function PreviewCarousel({
       onClick={onClose}
     >
       <div
-        className="relative w-[70vw] max-w-4xl bg-background rounded-none shadow-lg"
+        className="relative w-full max-w-xl xl:max-w-6xl lg:max-w-6xl md:max-w-3xl sm:max-w-xl xs:max-w-xl bg-carousal rounded-none shadow-lg"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between w-full pl-4 bg-indigo-100 text-neutral-900 font-normal">
+        <div className="flex items-center justify-between w-full pl-4 bg-action-button text-action-button-foreground font-normal">
           <div className="flex-1">{images[activeIndex || 0]?.filename}</div>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -62,17 +62,17 @@ export default function PreviewCarousel({
                 onClick={onClose}
                 className={cn(
                   'chat-button',
-                  'my-0 rounded-none bg-action-button border-none hover:bg-action-button text-action-button-foreground border-none'
+                  'my-0 rounded-none bg-active-button border-none hover:bg-active-button text-active-button-foreground border-none'
                 )}
               >
-                <IconClose className="w-4 h-4 fill-action-button-foreground" />
+                <IconClose className="w-4 h-4 fill-active-button-foreground" />
                 <span className="sr-only">Close Carousel</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>Close Carousel</TooltipContent>
           </Tooltip>
         </div>
-        <Carousel className="w-full p-8" setApi={setApi}>
+        <Carousel className="w-full p-8 pb-6" setApi={setApi}>
           <CarouselContent>
             {images.map(
               (image: { filename: string; url: string }, index: number) => (
@@ -84,32 +84,33 @@ export default function PreviewCarousel({
                     <img
                       src={image.url}
                       alt={`Image ${index} (${image.filename})`}
-                      className="w-auto h-[400px] sm:rounded-md"
+                      className="w-auto h-[500px] sm:rounded-md"
                     />
                   </div>
                 </CarouselItem>
               )
             )}
           </CarouselContent>
-          <div className="flex items-center justify-center gap-4 pt-6">
+          <div className="flex items-center justify-center gap-4 pt-4">
             <CarouselPrevious className="relative" variant="ghost" />
-            <div className="flex gap-2 overflow-x-auto">
-              {images.map(
-                (image: { filename: string; url: string }, index: number) => (
+            <div className="flex items-center justify-center gap-2 overflow-x-auto p-2">
+              {images.map((image, index) => (
+                <button
+                  key={`thumbnail-${index}`}
+                  onClick={() => api?.scrollTo(index)}
+                  className={`transition-transform duration-300 flex-shrink-0 cursor-pointer bg-white dark:bg-active-button shadow-md ${
+                    index === activeIndex
+                      ? 'p-2 w-[110px] h-[80px]'
+                      : 'p-1 w-[92px] h-[67px]'
+                  } rounded-lg overflow-hidden`}
+                >
                   <img
-                    key={index}
                     src={image.url}
                     alt={`Thumbnail ${index}`}
-                    onClick={() => api?.scrollTo(index)}
-                    className={cn(
-                      'w-20 h-20 object-contain rounded-md cursor-pointer border-2 transition bg-background p-1',
-                      activeIndex === index
-                        ? 'border-primary'
-                        : 'border-accent opacity-60 hover:opacity-100'
-                    )}
+                    className="w-full h-full object-contain"
                   />
-                )
-              )}
+                </button>
+              ))}
             </div>
             <CarouselNext className="relative" variant="ghost" />
           </div>

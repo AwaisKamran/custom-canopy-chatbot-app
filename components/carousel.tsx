@@ -25,15 +25,17 @@ export const Carousal = ({
   const [images, setImages] = useState<Image[]>([])
 
   useEffect(() => {
-    const images: Image[] = Object.entries(mockups).map(([key, value]) => ({
-      url: value.url,
-      contentType: value.contentType,
-      filename:
-        key in MOCKUP_TYPES
-          ? MOCKUP_TYPES[key as keyof typeof MOCKUP_TYPES]
-          : key
-    }))
-    setImages(images)
+    if (mockups) {
+      const images: Image[] = Object.entries(mockups).map(([key, value]) => ({
+        url: value?.url,
+        contentType: value?.contentType,
+        filename:
+          key in MOCKUP_TYPES
+            ? MOCKUP_TYPES[key as keyof typeof MOCKUP_TYPES]
+            : key
+      }))
+      setImages(images)
+    }
   }, [mockups])
 
   const handleDownload = async () => {

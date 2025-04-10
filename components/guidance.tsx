@@ -4,9 +4,9 @@ import { ThemeToggle } from './theme-toggle'
 import { Image } from '@/lib/types'
 
 interface GuidanceProps {
-  images: Image[]
+  images: { [key: string]: Image[] }
   setIsCarouselOpen: (isOpen: boolean) => void
-  setInitialIndex: (index: number) => void
+  setInitialIndex: (keyIndex: number, index: number) => void
 }
 
 export function Guidance({
@@ -32,13 +32,16 @@ export function Guidance({
           <br />
           Valence = the portion which connects with the peak
         </p>
-
-        <GuidanceImageView
-          images={images}
-          setIsCarouselOpen={setIsCarouselOpen}
-          setInitialIndex={setInitialIndex}
-        />
-
+        {Object.entries(images).map(([key, values], keyIndex) => {
+          return (
+            <GuidanceImageView
+              key={`${key}-${keyIndex}`}
+              images={values}
+              setIsCarouselOpen={setIsCarouselOpen}
+              setInitialIndex={index => setInitialIndex(keyIndex, index)}
+            />
+          )
+        })}
         <div className="flex justify-end">
           <ThemeToggle />
         </div>

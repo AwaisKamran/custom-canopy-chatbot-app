@@ -2,7 +2,7 @@ import { clsx, type ClassValue } from 'clsx'
 import { customAlphabet } from 'nanoid'
 import { twMerge } from 'tailwind-merge'
 import namer from 'color-namer'
-import { ResultCode } from '../types'
+import { Image, ResultCode } from '../types'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -160,4 +160,16 @@ export const isValidJson = (jsonString: string) => {
   } catch (e) {
     return false
   }
+}
+
+export function calculateIndex(
+  keyindex: number,
+  index: number,
+  items: { [key: string]: Image[] }
+): number {
+  const totalBefore = Object.values(items)
+    .slice(0, keyindex)
+    .reduce((sum, item) => sum + item.length, 0)
+
+  return totalBefore + keyindex * index + index
 }
