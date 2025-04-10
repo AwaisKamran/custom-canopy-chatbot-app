@@ -1,13 +1,11 @@
 import { useState } from 'react'
-import ColorPickerPopover from './color-picker'
+import { Color } from '@/lib/types'
+import ColorSwatcherPopover from './color-swatcher-popover'
 
 interface ColorPickerWithLabelProps {
   label: string
-  currentColor: { name: string; value: string }
-  onColorSelect: (
-    fieldName: string,
-    { name, value }: { name: string; value: string }
-  ) => void
+  currentColor: Color
+  onColorSelect: (color: Color) => void
   disabled?: boolean
 }
 
@@ -17,18 +15,11 @@ const ColorPickerWithLabel: React.FC<ColorPickerWithLabelProps> = ({
   onColorSelect,
   disabled = false
 }) => {
-  const [color, setColor] = useState<{ name: string; value: string }>(
-    currentColor
-  )
+  const [color, setColor] = useState<Color>(currentColor)
 
-  const handleColorSelect = (
-    colorValue: string,
-    colorName: string,
-    _fontColor: string
-  ) => {
-    const colorObj = { name: colorName, value: colorValue }
-    setColor(colorObj)
-    onColorSelect(label, colorObj)
+  const handleColorSelect = (color: Color) => {
+    setColor(color)
+    onColorSelect(color)
   }
 
   return (
@@ -44,13 +35,14 @@ const ColorPickerWithLabel: React.FC<ColorPickerWithLabelProps> = ({
           <span
             className="w-10 h-5 border border-gray-300 dark:border-gray-700"
             style={{
-              backgroundColor: `rgb(${JSON.parse(color.value).join(',')})`
+              backgroundColor: color.hex
             }}
           ></span>
           <span className="text-gray-700 dark:text-gray-300">{color.name}</span>
         </div>
       )}
-      <ColorPickerPopover
+      <ColorSwatcherPopover
+        currentColor={color}
         onColorSelect={handleColorSelect}
         label={color ? 'Change Color' : 'Pick a Color'}
         disabled={disabled}

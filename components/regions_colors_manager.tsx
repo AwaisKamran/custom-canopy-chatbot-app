@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useActions, useUIState } from 'ai/rsc'
 import { ColorLabelPickerSet } from './color-label-picker-set'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
+import { Color } from '@/lib/types'
 
 interface RegionColorsManagerProps {
   regions: {
@@ -11,7 +12,7 @@ interface RegionColorsManagerProps {
     sides: {
       name: string
       label: string
-      color: { name: string; value: string }
+      color: Color
     }[]
   }[]
   messageId?: string
@@ -27,15 +28,7 @@ const RegionsColorsManager = ({
 
   const submitRegionData = async () => {
     const serializedRegions = JSON.stringify({
-      regions: regionData.map(({ name, sides }) => ({
-        [name]: sides.map(({ name, label, color }) => ({
-          [name]: {
-            [label]: {
-              color: { color: color.value, colorName: color.name }
-            }
-          }
-        }))
-      }))
+      regions: regionData
     })
 
     const newMessage = await submitUserMessage(serializedRegions)
