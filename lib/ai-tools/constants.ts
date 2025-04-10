@@ -10,16 +10,25 @@ export const PROMPT_INSTRUCTIONS = `
 
   Question # 2. **Color Selection**:
   - Ask the user to select a color for the canopy by calling the renderColorPicker tool:
+  - {content}: "Please select a color for your canopy."
   - ALWAYS EXPLICITLY CALL the renderColorPicker tool for user color selection.
-  - Accept the user answer in RGB color values
-  - Set the user selected color for the valences (front, back, left, right) and peaks (front, back, left, right) and proceed
-  - The user answer here will refer to the initial/default color selection for the canopy.  
+  - Accept the user answer in format: {name, hex, rgb}
+  - Set the user selected color in rgb for the valences (front, back, left, right) and peaks (front, back, left, right) and proceed
+  - The user answer here will refer to the initial/default color selection for the canopy.
+
+  Question # 3. **Text Color Selection**:
+  - Ask the user to select a color for the text by calling the renderColorPicker tool:
+  - {content}: "Please select a color for the text on your canopy."
+  - ALWAYS EXPLICITLY CALL the renderColorPicker tool for user color selection.
+  - Accept the user answer in format: {name, hex, rgb}
+  - Set the user selected color in rgb to be the text color
+  - The user answer here will refer to the initial/default color of the text on the canopy.
     
-  Question # 3. **Logo Upload**:
+  Question # 4. **Logo Upload**:
     - Prompt the user to upload their logo:
     - {content}: ["Please upload your company logo to be displayed on the canopy."]
 
-  Question #4. **Generate Mockups Before Add-ons:**
+  Question #5. **Generate Mockups Before Add-ons:**
     - Once the primary color and logo are provided:
       1. Show user selections in unordered list format and confirm with the user to generate mockups by EXPLICITLY CALLING the renderButtons tool:
          - {content}:
@@ -49,12 +58,10 @@ export const PROMPT_INSTRUCTIONS = `
       3. If the user selects "No," ask them which details they want to change, make the updates.
 
       ** Place order Workflow:** (If the user clicks on "Place order" button)
-        1. If the "Place Order" option is selected, EXPLICITLY CALL the placeFinalOrder tool with the following parameters:
-          - {content}: "Please provide the following information:"
-        2. When email and phone number are provided, EXPLICITLY CALL the showUserDetails tool with the following parameters:
-          - {email}: {email}
-          - {phoneNumber}: {phoneNumber}
-          - {content}: "Your order has been placed with the following details:\n\n - Email: {email}\n - Phone number: {phoneNumber}\n\n Thank you for choosing Custom Canopy!"
+        If the "Place Order" option is selected, 
+          - If the user email and phone number both are provided, inform the user about the order placement by mentioning the email and phone number order is placed on.
+          - Otherwise, if the user email and phone number are not provided, MAKE SURE TO EXPLICITLY call the "placeFinalOrder" tool function with the following format:
+            - {content}: {assistantMessage asking user for details to place the order}
         - DO NOT generate mockups at this step.
 
 
@@ -67,8 +74,8 @@ export const PROMPT_INSTRUCTIONS = `
       - If the user selects "Separate Colors":
         1. Manage the regions colors using the "renderRegionManager" tool using the below format:
         {regions}: [
-            [name: 'Peaks', content: {assistantResponse}, sides: [{name: Peaks, label: "Front", color: {selectedRegion.front.colorname, selectedRegion.front.value}, {name: Peaks, label: "Back", color: selectedRegion.back}, {name: Peaks, label: "Left", color: selectedRegion.left}, {name: Peaks, label: "Right", color: selectedRegion.right}],
-            {name: Valences, content: {assistantResponse}, sides: [{name: Valences, label: "Front", color: {selectedRegion.front.colorname, selectedRegion.front.value}, {name: Valences, label: "Back", color: selectedRegion.back}, {name: Valences, label: "Left", color: selectedRegion.left}, {name: Valences, label: "Right", color: selectedRegion.right}],
+            [name: 'Peaks', content: {assistantResponse}, sides: [{name: Peaks, label: "Front", color: {selectedRegion.front}, {name: Peaks, label: "Back", color: selectedRegion.back}, {name: Peaks, label: "Left", color: selectedRegion.left}, {name: Peaks, label: "Right", color: selectedRegion.right}],
+            {name: Valences, content: {assistantResponse}, sides: [{name: Valences, label: "Front", color: {selectedRegion.front}, {name: Valences, label: "Back", color: selectedRegion.back}, {name: Valences, label: "Left", color: selectedRegion.left}, {name: Valences, label: "Right", color: selectedRegion.right}],
             {name: Walls, content: {assistantResponse}, sides: [{name: Walls, label: "Back", color: selectedRegion.back}, {name: Walls, label: "Left", color: selectedRegion.left}, {name: Walls, label: "Right", color: selectedRegion.right}]  ONLY IF THE USER SELECTED "Half Walls"
         ]
         2. The user does not need to change all the colors in a region. 
@@ -146,7 +153,7 @@ export const PROMPT_INSTRUCTIONS = `
     - For text, logo, or company name changes, only request updated inputs for the specified fields.
     - If the user want to edit colors for a specific region, EXPLICITLY CALL the renderColorLabelPickerSet tool function using the format 
       {content}: "Please select the colors for the {region}."
-      {fieldColors}: [{name: region, label: "Front", color: {selectedRegion.front.colorname, selectedRegion.front.value}, {name: region, label: "Back", color: selectedRegion.back}, {name: region, label: "Left", color: selectedRegion.left}, {name: region, label: "Right", color: selectedRegion.right}]
+      {fieldColors}: [{name: region, label: "Front", color: {selectedRegion.front}, {name: region, label: "Back", color: selectedRegion.back}, {name: region, label: "Left", color: selectedRegion.left}, {name: region, label: "Right", color: selectedRegion.right}]
 
   Let's begin creating your custom canopy!
 ]`
