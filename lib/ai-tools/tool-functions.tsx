@@ -14,7 +14,7 @@ import {
 import { Carousal } from '@/components/carousel'
 import { BotCard, BotMessage } from '@/components/stocks/message'
 import { ChatRadioButtonWrapper } from '@/components/chat-radio-buttons-wrapper'
-import { ChatColorPickerWrapper } from '@/components/chat-color-picker-wrapper'
+import { ChatColorSwatcherWrapper } from '@/components/chat-color-swatcher-wrapper'
 import { generateTentMockupsApi } from '../redux/apis/tent-mockup-prompt'
 import { MockupResponse, Roles, TentMockUpPrompt } from '../types'
 import { TOOL_FUNCTIONS } from './constants'
@@ -79,7 +79,7 @@ export function renderColorPickerTool(history: any, messageId: string) {
 
       return (
         <BotMessage key={messageId} content={content}>
-          <ChatColorPickerWrapper messageId={messageId} />
+          <ChatColorSwatcherWrapper messageId={messageId} />
         </BotMessage>
       )
     }

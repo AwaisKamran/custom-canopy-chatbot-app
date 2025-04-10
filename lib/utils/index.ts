@@ -131,26 +131,28 @@ export function getColorName(hexColor: string): string | null {
   return namedColor ? namedColor.name : null
 }
 
-function rgbToHex(rgbColor: string) {
-  const rgb = JSON.parse(rgbColor)
-  const [r, g, b] = rgb
-  if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
-    throw new Error('RGB values must be between 0 and 255.')
-  }
+export const hexToBGR = (hex: string): any => {
+  const bigint = parseInt(hex.slice(1), 16)
+  const r = (bigint >> 16) & 255
+  const g = (bigint >> 8) & 255
+  const b = bigint & 255
 
-  const toHex = (value: number) =>
-    value.toString(16).padStart(2, '0').toUpperCase()
-
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`
+  return { r, g, b }
 }
 
-export function getRGBColorName(rgbColor: string): string | null {
-  const hexColor = rgbToHex(rgbColor)
-  return getColorName(hexColor)
+export function validateHEX(input: string) {
+  const hexRegex = /^#([0-9A-Fa-f]{6})$/
+  return hexRegex.test(input)
 }
 export const convertToBGR = (rgb: string) => {
   const [r, g, b] = JSON.parse(rgb)
   return `[${b}, ${g}, ${r}]`
+}
+
+export const toCamelCase = (str: string) => {
+  return str
+    .toLowerCase()
+    .replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase())
 }
 
 export const isValidJson = (jsonString: string) => {
