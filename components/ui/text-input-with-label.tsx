@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react'
 type TextInputWithLabelProps = {
   label: string | React.ReactNode
   value: string
-  error: string
+  error?: string
   onChange: (value: string) => void
   [key: string]: any
 }

@@ -10,6 +10,7 @@ interface RegionColorsManagerProps {
   regions: {
     name: string
     sides: {
+      name: string
       label: string
       color: Color
     }[]
