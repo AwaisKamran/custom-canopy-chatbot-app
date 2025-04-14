@@ -37,7 +37,7 @@ const ColorSwatcher = ({
       const { r, g, b } = hexToBGR(hex)
       handleColorPick({
         hex,
-        rgb: JSON.stringify(`[${r}, ${g}, ${b}]`),
+        rgb: JSON.stringify([r, g, b]),
         name: getColorName(hex) ?? 'Custom'
       })
     } else {
@@ -94,7 +94,7 @@ const ColorSwatcher = ({
               )
             }
             value={selectedColor?.hex ?? ''}
-            placeholder="#000000"
+            placeholder={COLOR_SWATCHES[0].hex}
             error={isValidHex ? '' : 'Invalid HEX'}
             onChange={handleInputChange}
             disabled={disabled}
