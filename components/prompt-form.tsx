@@ -114,7 +114,7 @@ export function PromptForm({ session }: { session?: Session }) {
           <div className="left-0 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4">
             <FileUploadPopover
               onFileSelect={handleFileSelect}
-              disabled={!lastFileUploadMessage || loading}
+              disabled={!lastFileUploadMessage || loading || aiState.complete}
             />
           </div>
           <Textarea
@@ -131,7 +131,7 @@ export function PromptForm({ session }: { session?: Session }) {
             rows={1}
             value={input}
             onChange={e => setInput(e.target.value)}
-            disabled={loading || lastFileUploadMessage}
+            disabled={loading || lastFileUploadMessage || aiState.complete}
           />
           <div className="right-0 top-[13px] sm:right-4">
             <Tooltip>
@@ -141,6 +141,7 @@ export function PromptForm({ session }: { session?: Session }) {
                   size="icon"
                   disabled={
                     loading ||
+                    aiState.complete ||
                     (lastFileUploadMessage && selectedFiles.length === 0)
                   }
                   className="bg-action-button hover:bg-action-button text-action-button-foreground"

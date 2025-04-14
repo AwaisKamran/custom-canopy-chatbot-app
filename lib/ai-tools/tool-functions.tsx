@@ -273,6 +273,13 @@ export function showUserDetails(history: any, messageId: string) {
           }
         }
       ] as ToolContent)
+
+      const current = history.get()
+      history.done({
+        ...current,
+        complete: true
+      })
+
       return <BotMessage key={messageId} content={content} />
     }
   }
