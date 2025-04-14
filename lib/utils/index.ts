@@ -149,12 +149,6 @@ export const convertToBGR = (rgb: string) => {
   return `[${b}, ${g}, ${r}]`
 }
 
-export const toCamelCase = (str: string) => {
-  return str
-    .toLowerCase()
-    .replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase())
-}
-
 export const isValidJson = (jsonString: string) => {
   try {
     JSON.parse(jsonString)
