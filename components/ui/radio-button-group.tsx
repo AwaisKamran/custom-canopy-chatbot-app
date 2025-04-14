@@ -49,7 +49,7 @@ export const RadioButtonGroup = ({
   return (
     <div className="w-full flex flex-col gap-2 items-center">
       <div className="grid grid-cols-2 gap-2 w-full self-start">
-        {options.map((option, index) => (
+        {options?.map((option, index) => (
           <div key={option.value} className="relative w-full">
             <button
               key={option.value}
