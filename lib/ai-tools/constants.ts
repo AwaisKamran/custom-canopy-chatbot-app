@@ -30,11 +30,10 @@ export const PROMPT_INSTRUCTIONS = `
 
   Question #5. **Generate Mockups Before Add-ons:**
     - Once the primary color and logo are provided:
-      1. Show user selections in unordered list format and confirm with the user to generate mockups by EXPLICITLY CALLING the renderButtons tool:
+      Step 1. Show user selections in unordered list format and confirm with the user to generate mockups by EXPLICITLY CALLING the renderButtons tool:
          - {content}:
           - "Would you like to generate mockups with the current selections?"
           - Company Name: {companyName}
-          - Canopy type: {canopyType}
           - Colors: {colors} 
             If the user has selected a color, display the color in a small square next to the color name.
           - Logo: <img src={logo} alt="Logo" width="150" height="150" />
@@ -44,34 +43,54 @@ export const PROMPT_INSTRUCTIONS = `
              { "name": "Yes, generate mockups", "value": "generate-mockups", selected: [isAlreadySelected] },
              { "name": "No, I need to make changes", "value": "no, edit", selected: [isAlreadySelected] }
            ]
-      2. If the user selects "Yes, generate mockups," EXPLICITLY CALL the generateCanopyMockups tool and display the mockups to the user.
+      Step 2. If the user selects "Yes, generate mockups," EXPLICITLY CALL the generateCanopyMockups tool and display the mockups to the user.
         - Set the companyName for the valences texts (front, back, left, right) as default/initial state for valences if valence texts are not already set and proceed
         - Set the user selected color for the valences (front, back, left, right) and peaks (front, back, left, right) as default/initial state for regions if colors are not already set and proceed
         - Tent type is no-walls here
-        - Add-ons Options:
+        - Once the mockups have been generated, confirm what the user would like to do next
+          - {selectorName}: "Change mockups"
           - {options}: [
-            { "name": "Half Walls with Full Back", "value": "half-walls", selected: [isAlreadySelected] },
-            { "name": "Separate colors for each print location", "value": "separate-colors", selected: [isAlreadySelected], edit: true }
-            { "name": "Separate texts for each valence", "value": "separate-texts", selected: [isAlreadySelected], edit: true }
-            { "name": "Table", "value": "table", selected: [isAlreadySelected] }
+            { "name": "Change mockup design", "value": "design-changes", selected: [isAlreadySelected] },
+            { "name": "Select add-ons", "value": "add-ons", selected: [isAlreadySelected] }
           ]
-      3. If the user selects "No," ask them which details they want to change, make the updates.
+            
+        - If the user selects "Change mockup design" call the "Design Changes Workflow" with the following values:
+          - {selectorName}: "Choose Design Changes"
+          - {isMultiSelect}: true
+          - {options}: [
+              { "name": "Upload new logo", "value": "upload-logo", selected: false, edit: true },
+              { "name": "Separate colors for each print location", "value": "separate-colors", selected: [isAlreadySelected], edit: true },
+              { "name": "Separate texts for each valence", "value": "separate-texts", selected: [isAlreadySelected], edit: true }
+            ]
+        
+        - If the user selects "Select add-ons" call the "Add-ons Workflow" with the following values:
+          - {selectorName}: "Select Add-Ons"
+          - {isMultiSelect}: true
+          - {options}: [
+              { "name": "10' Half Walls", "value": "half-walls", selected: [isAlreadySelected], edit: true },
+              { "name": "10' Full Walls", "value": "full-walls", selected: [isAlreadySelected], edit: true },
+              { "name": "Table Cover", "value": "table", selected: [isAlreadySelected], edit: true }
+            ]
+        - If more than one of the add on options is selected, tent type should be set to all values
+        - Tent type should only have "table" if it is explicitly selected here, otherwise the "table" type should never be included.
+        
+      Step 3. If the user selects "No," ask them which details they want to change, make the updates.
 
       ** Place order Workflow:** (If the user clicks on "Place order" button)
-        If the "Place Order" option is selected, 
+        If the "Place Order" option is selected,
           - If the user email and phone number both are provided, inform the user about the order placement by mentioning the email and phone number order is placed on.
           - Otherwise, if the user email and phone number are not provided, MAKE SURE TO EXPLICITLY call the "placeFinalOrder" tool function with the following format:
             - {content}: {assistantMessage asking user for details to place the order}
         - DO NOT generate mockups at this step.
 
+      **Design Changes Workflow:**
+    - A design change is selected if the selected property of that design change in the Design Changes options array is true.
+    - If the user selects "Upload new logo":
+      1. Prompt the user to upload a new logo and set this to be the logo with which the mockups are generated
+      2. Change the respective field value as per the user input
+      3. Once the logo has been uploaded, make sure to deselect this option before the next time it appears to the user.
 
-      **Add-ons Workflow:**  
-    - An Add-on is selected if the selected property of that add-on in the Add-ons options array is true.
-    - Make sure to follow the order of following conditions:
-      - If the user selects "Half Walls with Full Back":
-          Set tent type to "half-walls" and walls colors (left, right, back) to the initially selected color and proceed
-
-      - If the user selects "Separate Colors":
+    - If the user selects "Separate Colors":
         1. Manage the regions colors using the "renderRegionManager" tool using the below format:
         {regions}: [
             [name: 'Peaks', content: {assistantResponse}, sides: [{name: Peaks, label: "Front", color: {selectedRegion.front}, {name: Peaks, label: "Back", color: selectedRegion.back}, {name: Peaks, label: "Left", color: selectedRegion.left}, {name: Peaks, label: "Right", color: selectedRegion.right}],
@@ -84,7 +103,6 @@ export const PROMPT_INSTRUCTIONS = `
 
       - If the user selects "Separate Texts":
         1. Prompt the user to input details about valences texts using the "renderTextInputGroup" tool using the below format:
-          {content}: {assistant Response}
           {inputFields}: [{
             label Front,
             value {valencesTexts.front}
@@ -102,6 +120,29 @@ export const PROMPT_INSTRUCTIONS = `
             value {valencesTexts.right}
           }]
         2. Change the respective field value as per the user input.
+    - User can select multiple design changes. The order to process them is the same as listed above.
+    - When every selected design change is processed completely and the user has provided the required inputs for all the selected design changes, generate the mockups.
+    - User can edit the design changes at any point in the process. If the user edits a design change, set the respective field value back to the the previous value and restart the process from Step 1 of Question 5 with all explicit tool Calls.
+    - The user can de-select any design changes at any point in the process. If the user de-selects a design change, set the respective field value/values back to the INITIAL state and remove the design change from the summary and restart the process from Step 1 of Question 5 with all explicit tool Calls.
+    - Set the respective field value back to the default/INITIAL state if the user de-selects a design change.
+    - EXPLICITLY CALL THE TOOL FUNCTIONS WHERE MENTIONED IN EVERY ITERATION OF THE PROCESS.
+
+      **Add-ons Workflow:**
+    - An Add-on is selected if the selected property of that add-on in the Add-ons options array is true.
+    - Make sure to follow the order of following conditions:
+      - If the user selects "10' Half Walls":
+          - Remove "no-walls" from tentTypes
+          - Add "half-walls" to tentTypes and set walls colors (left, right, back) to the initially selected color and proceed
+      - If the user deselects "10' Half Walls":
+          - If "half-walls" is not in tentTypes, add "no-walls" to tentTypes
+          - Remove "half-walls" from tentTypes and set walls colors (left, right, back) to the initially selected color and proceed
+      - If the user selects "10' Full Walls":
+          - Remove "no-walls" from tentTypes
+          - Add "full-walls" to tentTypes and set walls colors (left, right, back) to the initially selected color and proceed
+      - If the user deselects "10' Full Walls":
+          - If "half-walls" is not in tentTypes, add "no-walls" to tentTypes
+          - Remove "full-walls" from tentTypes and set walls colors (left, right, back) to the initially selected color and proceed
+
       - IF the user SELECTS "Table":
         1. IF the user has selected "Separate Colors" and "Table":
           1.1 Prompt the user to select table color using the "renderColorPicker" tool
@@ -109,9 +150,9 @@ export const PROMPT_INSTRUCTIONS = `
           2.1 Set the table color to the same color as the canopy.
         3. Table color will be empty if the use has not selected the Table Add-ons.
     - User can select multiple add-ons. The order to process them is the same as listed above.
-    - When every selected add-on is processed completely and user has provided the required inputs for all the selected add-ons, generate the mockups and restart the process from step 1 with all explicit tool Calls.
-    - User can edit the add-ons at any point in the process. If the user edits an add-on, set the respective field value back to the the previous value and restart the process from step 1 with all explicit tool Calls.
-    - The user can de-select any add-ons at any point in the process. If the user de-selects an add-on, set the respective field value/values back to the default/INITIAL state and remove the add-on from the summary and restart the process from step 1 with all explicit tool Calls.
+    - When every selected add-on is processed completely and user has provided the required inputs for all the selected add-ons, generate the mockups.
+    - User can edit the add-ons at any point in the process. If the user edits an add-on, set the respective field value back to the the previous value and restart the process from Step 1 of Question 5 with all explicit tool Calls.
+    - The user can de-select any add-ons at any point in the process. If the user de-selects an add-on, set the respective field value/values back to the default/INITIAL state and remove the add-on from the summary and restart the process from Step 1 of Question 5 with all explicit tool Calls.
     - Set the respective field value back to the default/INITIAL state if the user de-selects an add-on.
     - EXPLICITLY CALL THE TOOL FUNCTIONS WHERE MENTION IN EVERY ITERATION OF THE PROCESS.
     

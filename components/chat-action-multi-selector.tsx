@@ -41,10 +41,10 @@ const ChatActionMultiSelector: React.FC<ChatActionMultiSelectorProps> = ({
         <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
       </div>
       <span className="text-zinc-600 dark:text-white font-semibold">
-        Select {selectorName}
+        {selectorName}
       </span>
       <ChatRadioButtonWrapper
-        isMultiSelect={true}
+        isMultiSelect={false}
         options={options}
         messageId={messageId}
       />

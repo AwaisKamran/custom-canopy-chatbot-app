@@ -38,6 +38,7 @@ export function renderButtonsTool(history: any, messageId: string) {
     parameters: ButtonToolSchema,
     generate: async function ({
       content,
+      isMultiSelect,
       options
     }: z.infer<typeof ButtonToolSchema>) {
       modifyToolAIState(history, [
@@ -46,14 +47,18 @@ export function renderButtonsTool(history: any, messageId: string) {
           toolName: TOOL_FUNCTIONS.RENDER_BUTTONS,
           result: {
             message: content,
-            props: { options }
+            props: { options, isMultiSelect }
           }
         }
       ] as ToolContent)
 
       return (
         <BotMessage key={messageId} content={content}>
-          <ChatRadioButtonWrapper options={options} messageId={messageId} />
+          <ChatRadioButtonWrapper
+            options={options}
+            isMultiSelect={isMultiSelect}
+            messageId={messageId}
+          />
         </BotMessage>
       )
     }
@@ -180,6 +185,7 @@ export function generateCanopyMockups(history: any, messageId: string) {
     generate: async function* ({
       content,
       options,
+      selectorName,
       payload
     }: z.infer<typeof CustomCanopyToolSchema>) {
       yield <BotCard>{content[0]}</BotCard>
@@ -197,8 +203,8 @@ export function generateCanopyMockups(history: any, messageId: string) {
               props: {
                 mockups,
                 options,
-                action: 'Place Order',
-                selectorName: 'Add-Ons'
+                selectorName,
+                action: 'Place Order'
               }
             }
           }
@@ -208,7 +214,7 @@ export function generateCanopyMockups(history: any, messageId: string) {
             <Carousal mockups={mockups} open={true} />
             <ChatActionMultiSelector
               action="Place Order"
-              selectorName="Add-Ons"
+              selectorName={selectorName}
               options={options}
               messageId={messageId}
             />
