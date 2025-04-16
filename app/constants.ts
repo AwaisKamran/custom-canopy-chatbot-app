@@ -119,3 +119,5 @@ export const COLOR_SWATCHES = [
   { name: 'Yellow', rgb: '[254, 221, 0]', hex: '#FEDD00' },
   { name: 'Black', rgb: '[45, 41, 38]', hex: '#2D2926' }
 ]
+
+export const HEX_REGEX = /^#([0-9A-Fa-f]{6})$/

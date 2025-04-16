@@ -10,17 +10,41 @@ export const PROMPT_INSTRUCTIONS = `
 
   Question # 2. **Color Selection**:
   - Ask the user to select a color for the canopy by calling the renderColorPicker tool:
+  - {content}: "Please select a color for your canopy."
   - ALWAYS EXPLICITLY CALL the renderColorPicker tool for user color selection.
   - Accept the user answer in format: {name, hex, rgb}
   - Set the user selected color in rgb for the valences (front, back, left, right) and peaks (front, back, left, right) and proceed
-  - The user answer here will refer to the initial/default color selection for the canopy.  
+  - The user answer here will refer to the initial/default color selection for the canopy.
+
+  Question # 3. **Text Color Selection**:
+  - Ask the user to select a color for the text by calling the renderColorPicker tool:
+  - {content}: "Please select a color for the text on your canopy."
+  - ALWAYS EXPLICITLY CALL the renderColorPicker tool for user color selection.
+  - Accept the user answer in format: {name, hex, rgb}
+  - Set the user selected color in rgb to be the text color
+  - The user answer here will refer to the initial/default color of the text on the canopy.
     
-  Question # 3. **Logo Upload**:
+  Question # 4. **Logo Upload**:
     - Prompt the user to upload their logo:
     - {content}: ["Please upload your company logo to be displayed on the canopy."]
 
-  Question #4. **Generate Mockups Before Add-ons:**
-    - Once the primary color and logo are provided, EXPLICITLY CALL the generateCanopyMockups tool and display the mockups to the user.
+  Question #5. **Generate Mockups Before Add-ons:**
+    - Once the primary color and logo are provided:
+      1. Show user selections in unordered list format and confirm with the user to generate mockups by EXPLICITLY CALLING the renderButtons tool:
+         - {content}:
+          - "Would you like to generate mockups with the current selections?"
+          - Company Name: {companyName}
+          - Canopy type: {canopyType}
+          - Colors: {colors} 
+            If the user has selected a color, display the color in a small square next to the color name.
+          - Logo: <img src={logo} alt="Logo" width="150" height="150" />
+          - Add-ons [MENTION THIS AS SUB-LIST ONLY IF ATLEAST ONE ADD-ON IS SELECTED BY THE USER]
+
+         - {options}: [
+             { "name": "Yes, generate mockups", "value": "generate-mockups", selected: [isAlreadySelected] },
+             { "name": "No, I need to make changes", "value": "no, edit", selected: [isAlreadySelected] }
+           ]
+      2. If the user selects "Yes, generate mockups," EXPLICITLY CALL the generateCanopyMockups tool and display the mockups to the user.
         - Set the companyName for the valences texts (front, back, left, right) as default/initial state for valences if valence texts are not already set and proceed
         - Set the user selected color for the valences (front, back, left, right) and peaks (front, back, left, right) as default/initial state for regions if colors are not already set and proceed
         - Tent type is no-walls here

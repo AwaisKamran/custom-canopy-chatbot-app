@@ -3,6 +3,7 @@ import { customAlphabet } from 'nanoid'
 import { twMerge } from 'tailwind-merge'
 import namer from 'color-namer'
 import { Image, ResultCode } from '../types'
+import { HEX_REGEX } from '@/app/constants'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -141,18 +142,11 @@ export const hexToBGR = (hex: string): any => {
 }
 
 export function validateHEX(input: string) {
-  const hexRegex = /^#([0-9A-Fa-f]{6})$/
-  return hexRegex.test(input)
+  return HEX_REGEX.test(input)
 }
 export const convertToBGR = (rgb: string) => {
   const [r, g, b] = JSON.parse(rgb)
   return `[${b}, ${g}, ${r}]`
-}
-
-export const toCamelCase = (str: string) => {
-  return str
-    .toLowerCase()
-    .replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase())
 }
 
 export const isValidJson = (jsonString: string) => {
