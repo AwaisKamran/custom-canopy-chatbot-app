@@ -33,7 +33,7 @@ export default function ColorSwatcherPopover({
           size="icon"
           className="flex items-center gap-2 w-full p-2 disabled:cursor-not-allowed"
           disabled={disabled}
-          onClick={() => setPickerOpen(false)}
+          onClick={() => setPickerOpen(!isPickerOpen)}
         >
           <IconColorPicker />
           <span>{label}</span>
