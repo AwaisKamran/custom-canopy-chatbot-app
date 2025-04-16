@@ -187,7 +187,7 @@ export function generateCanopyMockups(history: any, messageId: string) {
     description:
       'Starts backend mockup generation and shows user form while waiting',
     parameters: CustomCanopyToolSchema,
-    generate: async function* ({
+    generate: async function ({
       content,
       payload
     }: z.infer<typeof CustomCanopyToolSchema>) {
@@ -223,14 +223,12 @@ export function showGeneratedMockups(history: any, messageId: string) {
   return {
     description: 'Displays mockups after user details are submitted',
     parameters: ShowGeneratedMockupsToolSchema,
-    generate: async function* ({
+    generate: async function ({
       content,
       mockupRequestId,
       options,
       selectorName
     }: z.infer<typeof ShowGeneratedMockupsToolSchema>) {
-      yield <BotCard>{content}</BotCard>
-      debugger
       const chatID = history.get().id
       const outputDir = `chat:${chatID}`
       const mockups: MockupResponse = await pollMockupGeneration(
@@ -244,14 +242,19 @@ export function showGeneratedMockups(history: any, messageId: string) {
           toolName: TOOL_FUNCTIONS.SHOW_GENERATED_MOCKUPS,
           result: {
             message: content,
-            props: { mockupRequestId, options, selectorName, mockups }
+            props: {
+              options,
+              selectorName,
+              mockups,
+              action: 'Place Order'
+            }
           }
         }
       ] as ToolContent)
 
       return (
-        <BotMessage content="Here are your mockups!">
-          <Carousal mockups={mockups} open />
+        <BotMessage content={content}>
+          <Carousal mockups={mockups} open={true} />
           <ChatActionMultiSelector
             action="Place Order"
             selectorName={selectorName}

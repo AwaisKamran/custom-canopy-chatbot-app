@@ -15,13 +15,13 @@ export function UserDetailsForm({
   messageId,
   mockupRequestId
 }: UserDetailsFormProps) {
-  const [messages, _setMessages] = useUIState()
+  const [messages, setMessages] = useUIState()
   const [aiState, _setAIState] = useAIState()
   const { submitUserMessage } = useActions()
 
   const submitResponse = async (message: string) => {
-    await submitUserMessage(message)
-    await saveChat(aiState)
+    const response = await submitUserMessage(message)
+    setMessages((currentMessages: any) => [...currentMessages, response])
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
