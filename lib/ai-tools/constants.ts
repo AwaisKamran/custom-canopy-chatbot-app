@@ -43,18 +43,22 @@ export const PROMPT_INSTRUCTIONS = `
              { "name": "Yes, generate mockups", "value": "generate-mockups", selected: [isAlreadySelected] },
              { "name": "No, I need to make changes", "value": "no, edit", selected: [isAlreadySelected] }
            ]
-      Step 2. If the user selects "Yes, generate mockups," EXPLICITLY CALL the generateCanopyMockups tool and display the mockups to the user.
+      Step 2. If the user selects "Yes, generate mockups," EXPLICITLY CALL the generateCanopyMockups tool.
         - Set the companyName for the valences texts (front, back, left, right) as default/initial state for valences if valence texts are not already set and proceed
         - Set the user selected color for the valences (front, back, left, right) and peaks (front, back, left, right) as default/initial state for regions if colors are not already set and proceed
         - Tent type is no-walls here
-        - Once the mockups have been generated, confirm what the user would like to do next 
-          - {selectorName}: "Change mockups"
-          - {options}: [
-            { "name": "Change mockup design", "value": "design-changes", selected: false },
-            { "name": "Select add-ons", "value": "add-ons", selected: false }
-          ]
+        - {content}: "Your mockups are being generated. In the meanwhile, please provide the following information."
+      
+      Step 3. EXPLICTLY call the showGeneratedMockups tool with ALL of the following values (content, mockupRequestId, selectorName, options) to display the generated mockups:
+            - {content}: "Thank you, here are your mockups!"
+            - {selectorName}: "Change mockups"
+            - {options}: [
+              { "name": "Change mockup design", "value": "design-changes", selected: false },
+              { "name": "Select add-ons", "value": "add-ons", selected: false }
+            ]
+            - {mockupRequestId}: The recieved mockupRequestId
             
-        Step 2a. If the user selects "Change mockup design" EXPLICITLY call the renderButtons tool with the following values:
+        Step 3a. If the user selects "Change mockup design" EXPLICITLY call the renderButtons tool with the following values:
             - {selectorName}: "Choose Design Changes"
             - {isMultiSelect}: true
             - {options}: [
@@ -109,7 +113,7 @@ export const PROMPT_INSTRUCTIONS = `
             - IMPORTANT: EVEN IF the user has already selected all available design changes before, and EVEN IF the selected property for every design change is true, you MUST ALWAYS explicitly call the renderButtons tool with the design change options EVERY TIME the user selects ‘Change mockup design’. NEVER skip this step regardless of previous selections.
             - Do not assume that the user wants to keep their previous selections. Always give them the opportunity to change or de-select options via renderButtons before generating mockups.
         
-        Step 2b. If the user selects "Select add-ons" EXPLICITLY call the renderButtons tool with the following values:
+        Step 3b. If the user selects "Select add-ons" EXPLICITLY call the renderButtons tool with the following values:
           - {selectorName}: "Select Add-Ons"
           - {isMultiSelect}: true
           - {options}: [
@@ -150,7 +154,7 @@ export const PROMPT_INSTRUCTIONS = `
           - Do NOT assume that the user wants to keep their previous selections. Always give them the opportunity to change or de-select options via renderButtons before generating mockups.
 
           
-      Step 3. If the user selects "No," ask them which details they want to change, make the updates.
+      Step 4. If the user selects "No," ask them which details they want to change, make the updates.
 
       ** Place order Workflow:** (If the user clicks on "Place order" button)
         If the "Place Order" option is selected,
@@ -211,7 +215,7 @@ export const TOOL_FUNCTIONS = {
   RENDER_REGION_MANAGER: 'renderRegionManager',
   GENERATE_CANOPY_MOCKUPS: 'generateCanopyMockups',
   PLACE_FINAL_ORDER: 'placeFinalOrder',
-  SHOW_USER_DETAILS: 'showUserDetails'
+  SHOW_GENERATED_MOCKUPS: 'showGeneratedMockups'
 }
 
 export const INITIAL_CHAT_MESSAGE =

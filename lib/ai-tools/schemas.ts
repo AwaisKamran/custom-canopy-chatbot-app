@@ -85,31 +85,10 @@ export const RegionsColorsManagerSchema = z.object({
 
 export const CustomCanopyToolSchema = z.object({
   content: z
-    .array(z.string())
+    .string()
     .describe(
       'The content to be displayed for the canopy tool while waiting, after the image and while displaying add-ons options.'
-    )
-    .length(3),
-  selectorName: z
-    .string()
-    .describe('The name of the selector for the mockup changes'),
-  options: z
-    .array(
-      z.object({
-        name: z.string().describe('The name for the button'),
-        value: z.string().describe('The value for the button'),
-        selected: z
-          .boolean()
-          .describe('Whether the button is selected')
-          .default(false),
-        edit: z
-          .boolean()
-          .describe('The edit state for the button')
-          .default(false)
-      })
-    )
-    .describe('The options to display')
-    .nonempty(),
+    ),
   payload: z
     .object({
       companyName: z.string().describe('Name of the company or organization'),
@@ -181,6 +160,37 @@ export const CustomCanopyToolSchema = z.object({
     })
     .describe('Details of the tent to be generated')
     .required()
+})
+
+export const ShowGeneratedMockupsToolSchema = z.object({
+  content: z
+    .string()
+    .describe(
+      'The content to be displayed for the canopy tool when showing the mockup images.'
+    ),
+  mockupRequestId: z
+    .string()
+    .describe('The ID for the mockup generation request'),
+  selectorName: z
+    .string()
+    .describe('The name of the selector for the mockup changes'),
+  options: z
+    .array(
+      z.object({
+        name: z.string().describe('The name for the button'),
+        value: z.string().describe('The value for the button'),
+        selected: z
+          .boolean()
+          .describe('Whether the button is selected')
+          .default(false),
+        edit: z
+          .boolean()
+          .describe('The edit state for the button')
+          .default(false)
+      })
+    )
+    .describe('The options to display')
+    .nonempty()
 })
 
 export const PlaceFinalOrderSchema = z.object({

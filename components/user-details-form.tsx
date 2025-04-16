@@ -1,7 +1,6 @@
 'use client'
 
 import { authenticateOrSignup } from '@/app/login/actions'
-import { useRouter } from 'next/navigation'
 import { useAIState, useUIState, useActions } from 'ai/rsc'
 import { toast } from 'sonner'
 import { getMessageFromCode } from '@/lib/utils'
@@ -9,13 +8,21 @@ import { saveChat } from '@/app/actions'
 
 export interface UserDetailsFormProps {
   messageId: string
+  mockupRequestId: string
 }
 
-export function UserDetailsForm({ messageId }: UserDetailsFormProps) {
-  const router = useRouter()
+export function UserDetailsForm({
+  messageId,
+  mockupRequestId
+}: UserDetailsFormProps) {
   const [messages, _setMessages] = useUIState()
   const [aiState, _setAIState] = useAIState()
   const { submitUserMessage } = useActions()
+
+  const submitResponse = async (message: string) => {
+    await submitUserMessage(message)
+    await saveChat(aiState)
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -23,10 +30,12 @@ export function UserDetailsForm({ messageId }: UserDetailsFormProps) {
     const result = await authenticateOrSignup(undefined, formData)
     if (result?.type === 'success') {
       const jsonResult = Object.fromEntries(formData.entries())
-      await submitUserMessage(JSON.stringify(jsonResult))
-      await saveChat(aiState)
+      await submitResponse(
+        JSON.stringify({
+          mockupRequestId: mockupRequestId
+        })
+      )
       toast.success(getMessageFromCode(result.resultCode))
-      router.refresh()
     } else {
       console.error(result?.resultCode)
       const error = result?.resultCode
