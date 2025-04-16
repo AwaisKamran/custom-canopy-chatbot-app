@@ -104,3 +104,18 @@ export const GUIDANCE_IMAGE_URLS = {
     ]
   }
 }
+
+export const COLOR_SWATCHES = [
+  { name: 'White', rgb: '[255, 255, 255]', hex: '#FFFFFF' },
+  { name: 'Red', rgb: '[213, 0, 50]', hex: '#D50032' },
+  { name: 'Pink', rgb: '[227, 28, 121]', hex: '#E31C79' },
+  { name: 'Purple', rgb: '[88, 44, 131]', hex: '#582C83' },
+  { name: 'Navy Blue', rgb: '[0, 32, 91]', hex: '#00205B' },
+  { name: 'Sky Blue', rgb: '[65, 182, 230]', hex: '#41B6E6' },
+  { name: 'Lime Green', rgb: '[151, 215, 0]', hex: '#97D700' },
+  { name: 'Brown', rgb: '[78, 54, 41]', hex: '#4E3629' },
+  { name: 'Dark Green', rgb: '[21, 71, 52]', hex: '#154734' },
+  { name: 'Reflex Blue', rgb: '[0, 20, 137]', hex: '#001489' },
+  { name: 'Yellow', rgb: '[254, 221, 0]', hex: '#FEDD00' },
+  { name: 'Black', rgb: '[45, 41, 38]', hex: '#2D2926' }
+]

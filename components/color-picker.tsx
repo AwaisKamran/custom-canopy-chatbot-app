@@ -2,12 +2,13 @@ import { useState } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Button } from '@/components/ui/button'
-import { getColorName } from '@/lib/utils'
+import { getColorName, hexToBGR } from '@/lib/utils'
 import { IconColorPicker } from './ui/icons'
 import { COLORS } from '@/app/constants'
+import { Color } from '@/lib/types'
 
 interface ColorPickerPopoverProps {
-  onColorSelect: (color: string, colorName: string, fontColor: string) => void
+  onColorSelect: (color: Color, fontColor: string) => void
   disabled: boolean
   label?: string
 }
@@ -19,15 +20,6 @@ export default function ColorPickerPopover({
 }: Readonly<ColorPickerPopoverProps>) {
   const [color, setColor] = useState('#000000')
   const [isPickerOpen, setPickerOpen] = useState(false)
-
-  const hexToBGR = (hex: string): any => {
-    const bigint = parseInt(hex.slice(1), 16)
-    const r = (bigint >> 16) & 255
-    const g = (bigint >> 8) & 255
-    const b = bigint & 255
-
-    return { r, g, b }
-  }
 
   const handleColorChange = (newColor: string) => {
     setColor(newColor)
@@ -48,7 +40,10 @@ export default function ColorPickerPopover({
     const contrastFontColor = getContrastColor(b, g, r)
     const colorName = getColorName(color) ?? color
     const rgbColor = `[${r}, ${g}, ${b}]`
-    onColorSelect(rgbColor, colorName, contrastFontColor)
+    onColorSelect(
+      { rgb: rgbColor, hex: color, name: colorName },
+      contrastFontColor
+    )
     setPickerOpen(false)
   }
 

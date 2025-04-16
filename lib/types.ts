@@ -155,3 +155,9 @@ export type EditableOption = {
   selected: boolean
   edit?: boolean
 }
+
+export type Color = {
+  rgb: string
+  hex: string
+  name: string
+}
