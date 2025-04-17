@@ -1,10 +1,6 @@
 'use client'
 
-import { authenticateOrSignup } from '@/app/login/actions'
 import { useAIState, useUIState, useActions } from 'ai/rsc'
-import { toast } from 'sonner'
-import { getMessageFromCode } from '@/lib/utils'
-import { saveChat } from '@/app/actions'
 
 export interface UserDetailsFormProps {
   messageId: string
@@ -27,22 +23,13 @@ export function UserDetailsForm({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-    const result = await authenticateOrSignup(undefined, formData)
-    if (result?.type === 'success') {
-      const jsonResult = Object.fromEntries(formData.entries())
-      await submitResponse(
-        JSON.stringify({
-          mockupRequestId: mockupRequestId
-        })
-      )
-      toast.success(getMessageFromCode(result.resultCode))
-    } else {
-      console.error(result?.resultCode)
-      const error = result?.resultCode
-        ? getMessageFromCode(result.resultCode)
-        : 'An unexpected error occurred, please try again later!'
-      toast.error(error)
-    }
+    const jsonResult = Object.fromEntries(formData.entries())
+    await submitResponse(
+      JSON.stringify({
+        ...jsonResult,
+        mockupRequestId: mockupRequestId
+      })
+    )
   }
 
   return (
