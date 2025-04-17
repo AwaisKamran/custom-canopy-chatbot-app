@@ -41,7 +41,8 @@ export function UserDetailsForm({
       const message = await submitUserMessage(
         JSON.stringify({
           userFields: fields,
-          mockupRequestId: mockupRequestId
+          mockupRequestId: mockupRequestId,
+          userDetailsSubmitted: true
         }),
         true
       )

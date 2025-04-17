@@ -89,6 +89,9 @@ export const CustomCanopyToolSchema = z.object({
     .describe(
       'The content to be displayed for the canopy tool while waiting, after the image and while displaying add-ons options.'
     ),
+  requireDetails: z
+    .boolean()
+    .describe("Whether or not the user's details need to be collected again"),
   payload: z
     .object({
       companyName: z.string().describe('Name of the company or organization'),

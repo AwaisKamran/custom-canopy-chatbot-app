@@ -29,13 +29,19 @@ export const PROMPT_INSTRUCTIONS = `
     - {content}: ["Please upload your company logo to be displayed on the canopy."]
 
   Question #5. **Generate Mockups Before Add-ons:**
-    - Once the primary color and logo are provided, EXPLICITLY CALL the generateCanopyMockups tool.
+      Step 1. Once the primary color and logo are provided, EXPLICITLY CALL the generateCanopyMockups tool.
         - Set the companyName for the valences texts (front, back, left, right) as default/initial state for valences if valence texts are not already set and proceed
         - Set the user selected color for the valences (front, back, left, right) and peaks (front, back, left, right) as default/initial state for regions if colors are not already set and proceed
         - Tent type is no-walls here
-        - {content}: "Your mockups are being generated. In the meanwhile, please provide the following information."
+        - If userDetailsSubmitted is true:
+          - {content}: "Your mockups are being generated with the following details: <ul><li>Email: {email}</li><li>Phone number: {phoneNumber}</li></ul>Thank you for your patience!"
+          - {requireDetails}: false
+        - If userDetailsSubmitted is false:
+          - {content}: "Your mockups are being generated. In the meanwhile, please provide the following information."
+          - {requireDetails}: true
+      - Once the userDetailsSubmitted value is submitted by the user, make sure to save it.
       
-      Step 2. As soon as user information and the mockupRequestId have been recieved, EXPLICTLY call the showGeneratedMockups tool with ALL of the following values (content, mockupRequestId, selectorName, options) to display the generated mockups:
+      Step 2. As soon as the generateCanopyMockups tool has returned, EXPLICTLY call the showGeneratedMockups tool with ALL of the following values (content, mockupRequestId, selectorName, options) to display the generated mockups:
             - {content}: "Thank you, here are your mockups!"
             - {selectorName}: "Change mockups"
             - {options}: [

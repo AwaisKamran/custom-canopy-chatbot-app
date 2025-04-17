@@ -190,8 +190,10 @@ export function generateCanopyMockups(history: any, messageId: string) {
     parameters: CustomCanopyToolSchema,
     generate: async function ({
       content,
+      requireDetails,
       payload
     }: z.infer<typeof CustomCanopyToolSchema>) {
+      debugger
       const { mockupRequestId } = await generateTentMockupsApi({
         ...(payload as TentMockUpPrompt),
         id: history.get().id
@@ -225,11 +227,13 @@ export function generateCanopyMockups(history: any, messageId: string) {
 
       return (
         <BotMessage content={content}>
-          <UserDetailsForm
-            messageId={messageId}
-            userFields={inputFields}
-            mockupRequestId={mockupRequestId}
-          />
+          {requireDetails && (
+            <UserDetailsForm
+              messageId={messageId}
+              userFields={inputFields}
+              mockupRequestId={mockupRequestId}
+            />
+          )}
         </BotMessage>
       )
     }
