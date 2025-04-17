@@ -11,8 +11,6 @@ import { Session } from '@/lib/types'
 import { usePathname } from 'next/navigation'
 import { useScrollAnchor } from '@/lib/hooks/use-scroll-anchor'
 import { toast } from 'sonner'
-import { CHAT } from '@/app/constants'
-import { nanoid } from 'nanoid'
 
 export interface ChatProps extends React.ComponentProps<'div'> {
   className?: string
@@ -21,14 +19,8 @@ export interface ChatProps extends React.ComponentProps<'div'> {
 }
 
 export function Chat({ className, session, missingKeys }: ChatProps) {
-  const path = usePathname()
   const [aiState, _setAIState] = useAIState()
   const [_, setNewChatId] = useLocalStorage('newChatId', aiState.id)
-  useEffect(() => {
-    if (!path.includes(CHAT)) {
-      window.history.replaceState({}, '', aiState.path)
-    }
-  }, [aiState.id, path])
 
   useEffect(() => {
     setNewChatId(aiState.id)

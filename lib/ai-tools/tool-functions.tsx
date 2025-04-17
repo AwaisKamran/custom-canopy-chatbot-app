@@ -20,7 +20,7 @@ import {
   generateTentMockupsApi,
   pollMockupGeneration
 } from '../redux/apis/tent-mockup-prompt'
-import { MockupResponse, Roles, TentMockUpPrompt } from '../types'
+import { MockupResponse, Roles, Session, TentMockUpPrompt } from '../types'
 import { TOOL_FUNCTIONS } from './constants'
 import { modifyAIState } from './utils'
 import { ChatTextInputGroup } from '@/components/chat-text-input-group'
@@ -28,6 +28,7 @@ import ChatActionMultiSelector from '@/components/chat-action-multi-selector'
 import RegionsColorsManager from '@/components/regions_colors_manager'
 import { ColorLabelPickerSet } from '@/components/color-label-picker-set'
 import { UserDetailsForm } from '@/components/user-details-form'
+import { auth } from '@/auth'
 
 function modifyToolAIState(history: any, content: ToolContent) {
   modifyAIState(history, {
@@ -195,6 +196,21 @@ export function generateCanopyMockups(history: any, messageId: string) {
         ...(payload as TentMockUpPrompt),
         id: history.get().id
       })
+      const session = (await auth()) as Session
+      const inputFields = [
+        {
+          label: 'Email',
+          value: session?.user?.email || '',
+          disabled: !!session?.user?.email,
+          type: 'email'
+        },
+        {
+          label: 'Phone Number',
+          value: session?.user?.phoneNumber ?? '',
+          type: 'tel',
+          disabled: !!session?.user?.phoneNumber
+        }
+      ]
 
       modifyToolAIState(history, [
         {
@@ -211,6 +227,7 @@ export function generateCanopyMockups(history: any, messageId: string) {
         <BotMessage content={content}>
           <UserDetailsForm
             messageId={messageId}
+            inputFields={inputFields}
             mockupRequestId={mockupRequestId}
           />
         </BotMessage>

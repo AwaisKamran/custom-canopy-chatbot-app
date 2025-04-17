@@ -29,27 +29,13 @@ export const PROMPT_INSTRUCTIONS = `
     - {content}: ["Please upload your company logo to be displayed on the canopy."]
 
   Question #5. **Generate Mockups Before Add-ons:**
-    - Once the primary color and logo are provided:
-      Step 1. Show user selections in unordered list format and confirm with the user to generate mockups by EXPLICITLY CALLING the renderButtons tool:
-         - {content}:
-          - "Would you like to generate mockups with the current selections?"
-          - Company Name: {companyName}
-          - Colors: {colors} 
-            If the user has selected a color, display the color in a small square next to the color name.
-          - Logo: <img src={logo} alt="Logo" width="150" height="150" />
-          - Add-ons [MENTION THIS AS SUB-LIST ONLY IF ATLEAST ONE ADD-ON IS SELECTED BY THE USER]
-
-         - {options}: [
-             { "name": "Yes, generate mockups", "value": "generate-mockups", selected: [isAlreadySelected] },
-             { "name": "No, I need to make changes", "value": "no, edit", selected: [isAlreadySelected] }
-           ]
-      Step 2. If the user selects "Yes, generate mockups," EXPLICITLY CALL the generateCanopyMockups tool.
+    - Once the primary color and logo are provided, EXPLICITLY CALL the generateCanopyMockups tool.
         - Set the companyName for the valences texts (front, back, left, right) as default/initial state for valences if valence texts are not already set and proceed
         - Set the user selected color for the valences (front, back, left, right) and peaks (front, back, left, right) as default/initial state for regions if colors are not already set and proceed
         - Tent type is no-walls here
         - {content}: "Your mockups are being generated. In the meanwhile, please provide the following information."
       
-      Step 3. As soon as user information and the mockupRequestId have been recieved, EXPLICTLY call the showGeneratedMockups tool with ALL of the following values (content, mockupRequestId, selectorName, options) to display the generated mockups:
+      Step 2. As soon as user information and the mockupRequestId have been recieved, EXPLICTLY call the showGeneratedMockups tool with ALL of the following values (content, mockupRequestId, selectorName, options) to display the generated mockups:
             - {content}: "Thank you, here are your mockups!"
             - {selectorName}: "Change mockups"
             - {options}: [
