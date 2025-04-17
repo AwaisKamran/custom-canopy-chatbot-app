@@ -75,7 +75,7 @@ export interface TentSides {
 export interface TentMockUpPrompt {
   id: string
   companyName: string
-  tentType: string
+  tentTypes: string[]
   peaks: TentSides
   valences: TentSides
   walls: TentSides

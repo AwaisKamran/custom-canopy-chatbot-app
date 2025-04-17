@@ -3,6 +3,9 @@ import { z } from 'zod'
 
 export const ButtonToolSchema = z.object({
   content: z.string().describe('Asking user to choose from the options'),
+  isMultiSelect: z
+    .boolean()
+    .describe('Whether or not the options are multi-select'),
   options: z
     .array(
       z.object({
@@ -87,6 +90,9 @@ export const CustomCanopyToolSchema = z.object({
       'The content to be displayed for the canopy tool while waiting, after the image and while displaying add-ons options.'
     )
     .length(3),
+  selectorName: z
+    .string()
+    .describe('The name of the selector for the mockup changes'),
   options: z
     .array(
       z.object({
@@ -107,7 +113,7 @@ export const CustomCanopyToolSchema = z.object({
   payload: z
     .object({
       companyName: z.string().describe('Name of the company or organization'),
-      tentType: z.string().describe('Type of Tent'),
+      tentTypes: z.array(z.string()).describe('Types of Tent'),
       peaks: z
         .object({
           front: z.string().describe('Color of peak front'),

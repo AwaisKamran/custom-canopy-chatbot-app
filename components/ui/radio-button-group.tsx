@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import clsx from 'clsx'
 import { Pencil1Icon } from '@radix-ui/react-icons'
 import { EditableOption } from '@/lib/types'
+import { useAIState } from 'ai/rsc'
 
 interface RadioOptionProps {
   options: EditableOption[]
@@ -21,6 +22,7 @@ export const RadioButtonGroup = ({
   const [selectedOptions, setSelectedOptions] = useState<Array<EditableOption>>(
     options || []
   )
+  const [aiState, _] = useAIState()
 
   const updateSelections = (option: EditableOption) => {
     if (isMultiSelect) {
@@ -97,7 +99,8 @@ export const RadioButtonGroup = ({
             selectedOptions.every(
               (option: any, index: number) =>
                 option.selected === options[index].selected
-            )
+            ) ||
+            aiState.loading
           }
         >
           Okay
