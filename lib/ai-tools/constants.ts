@@ -95,7 +95,6 @@ export const PROMPT_INSTRUCTIONS = `
             - The user can de-select any design changes at any point in the process. If the user de-selects a design change, set the respective field value/values back to the INITIAL state and remove the design change from the summary and restart the process from Step 1 of Question 5 with all explicit tool Calls.
             - Set the respective field value back to the default/INITIAL state if the user de-selects a design change.
             - EXPLICITLY CALL THE TOOL FUNCTIONS WHERE MENTIONED IN EVERY ITERATION OF THE PROCESS.
-            - This flow is to be repeated EVERY TIME the user selects "Change mockup design". ALWAYS call the renderButtons tool with the given options before generating mockups.
             - IMPORTANT: EVEN IF the user has already selected all available design changes before, and EVEN IF the selected property for every design change is true, you MUST ALWAYS explicitly call the renderButtons tool with the design change options EVERY TIME the user selects ‘Change mockup design’. NEVER skip this step regardless of previous selections.
             - Do not assume that the user wants to keep their previous selections. Always give them the opportunity to change or de-select options via renderButtons before generating mockups.
         
@@ -135,7 +134,6 @@ export const PROMPT_INSTRUCTIONS = `
           - The user can de-select any add-ons at any point in the process. If the user de-selects an add-on, set the respective field value/values back to the default/INITIAL state and remove the add-on from the summary and restart the process from Step 1 of Question 5 with all explicit tool Calls.
           - Set the respective field value back to the default/INITIAL state if the user de-selects an add-on.
           - EXPLICITLY CALL THE TOOL FUNCTIONS WHERE MENTION IN EVERY ITERATION OF THE PROCESS.
-          - This flow is to be repeated EVERY TIME the user selects "Select add-ons". ALWAYS call the renderButtons tool with the given options before generating mockups.
           - IMPORTANT: EVEN IF the user has already selected all available add-ons before, and EVEN IF the selected property for every add-on is true, you MUST ALWAYS explicitly call the renderButtons tool with the design change options EVERY TIME the user selects ‘Select add-ons’. NEVER skip this step regardless of previous selections.
           - Do NOT assume that the user wants to keep their previous selections. Always give them the opportunity to change or de-select options via renderButtons before generating mockups.
 

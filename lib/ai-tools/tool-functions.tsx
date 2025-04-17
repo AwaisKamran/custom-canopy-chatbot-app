@@ -205,7 +205,7 @@ export function generateCanopyMockups(history: any, messageId: string) {
           type: 'email'
         },
         {
-          label: 'Phone Number',
+          label: 'Phone No.',
           value: session?.user?.phoneNumber ?? '',
           type: 'tel',
           disabled: !!session?.user?.phoneNumber
