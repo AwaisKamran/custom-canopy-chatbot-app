@@ -227,7 +227,7 @@ export function generateCanopyMockups(history: any, messageId: string) {
         <BotMessage content={content}>
           <UserDetailsForm
             messageId={messageId}
-            inputFields={inputFields}
+            userFields={inputFields}
             mockupRequestId={mockupRequestId}
           />
         </BotMessage>

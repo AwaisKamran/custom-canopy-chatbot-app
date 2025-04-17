@@ -13,7 +13,7 @@ import { useRouter } from 'next/navigation'
 
 export interface UserDetailsFormProps {
   messageId: string
-  inputFields: {
+  userFields: {
     label: string
     value: string
     disabled?: boolean
@@ -24,14 +24,14 @@ export interface UserDetailsFormProps {
 
 export function UserDetailsForm({
   messageId,
-  inputFields,
+  userFields,
   mockupRequestId
 }: Readonly<UserDetailsFormProps>) {
   const [messages, setMessages] = useUIState()
   const [aiState, _setAIState] = useAIState()
   const { submitUserMessage } = useActions()
   const { data, update } = useSession()
-  const [fields, setFields] = useState(inputFields)
+  const [fields, setFields] = useState(userFields)
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -40,7 +40,7 @@ export function UserDetailsForm({
     if (data) {
       const message = await submitUserMessage(
         JSON.stringify({
-          inputFields: fields,
+          userFields: fields,
           mockupRequestId: mockupRequestId
         }),
         true
