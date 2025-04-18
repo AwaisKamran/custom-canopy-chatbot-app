@@ -19,7 +19,7 @@ import { ChatColorSwatcherWrapper } from '@/components/chat-color-swatcher-wrapp
 import { generateTentMockupsApi } from '../redux/apis/tent-mockup-prompt'
 import { MockupResponse, Roles, Session, TentMockUpPrompt } from '../types'
 import { TOOL_FUNCTIONS } from './constants'
-import { modifyAIState } from './utils'
+import { findGeneratedMockups, modifyAIState } from './utils'
 import { ChatTextInputGroup } from '@/components/chat-text-input-group'
 import ChatActionMultiSelector from '@/components/chat-action-multi-selector'
 import RegionsColorsManager from '@/components/regions_colors_manager'
@@ -233,10 +233,6 @@ export function generateCanopyMockups(history: any, messageId: string) {
       selectorName,
       options
     }: z.infer<typeof CustomCanopyToolSchema>) {
-      const mockups = await generateTentMockupsApi({
-        ...(payload as TentMockUpPrompt),
-        id: history.get().id
-      })
       const session = (await auth()) as Session
 
       yield (
@@ -246,6 +242,10 @@ export function generateCanopyMockups(history: any, messageId: string) {
       )
 
       if (session?.user) {
+        const mockups = await generateTentMockupsApi({
+          ...(payload as TentMockUpPrompt),
+          id: history.get().id
+        })
         return showMockupsMessage(
           'Your mockups are ready! Thank you for your patience.',
           options,
@@ -309,7 +309,7 @@ export function showGeneratedMockups(history: any, messageId: string) {
         options,
         selectorName,
         messageId,
-        history.messages.findLas,
+        findGeneratedMockups(history.messages),
         history
       )
     }
