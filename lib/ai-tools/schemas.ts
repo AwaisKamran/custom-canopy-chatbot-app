@@ -92,7 +92,7 @@ export const CustomCanopyToolSchema = z.object({
   payload: z
     .object({
       companyName: z.string().describe('Name of the company or organization'),
-      tentTypes: z.array(z.string()).describe('Types of Tent'),
+      tentType: z.string().describe('Type of Tent'),
       peaks: z
         .object({
           front: z.string().describe('Color of peak front'),

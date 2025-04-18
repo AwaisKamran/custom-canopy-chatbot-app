@@ -10,7 +10,7 @@ export const createFormData = (
   const {
     id,
     logoFile,
-    tentTypes,
+    tentType,
     tableColor,
     peaks,
     walls,
@@ -24,7 +24,7 @@ export const createFormData = (
     formRequestBody.append(`peaks_${key}`, value)
   })
 
-  if (!tentTypes.includes('no-walls')) {
+  if (tentType !== 'no-walls') {
     Object.entries(walls).forEach(([key, value]) => {
       formRequestBody.append(`panels_${key}`, value)
     })
@@ -41,7 +41,7 @@ export const createFormData = (
   formRequestBody.append('text_color', fontColor)
   if (tableColor) formRequestBody.append('table_color', tableColor)
   formRequestBody.append('output_dir', `chat:${id}`)
-  formRequestBody.append('tent_types', JSON.stringify(tentTypes))
+  formRequestBody.append('tent_types', JSON.stringify(tentType))
 
   return formRequestBody
 }

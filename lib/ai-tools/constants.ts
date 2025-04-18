@@ -24,7 +24,7 @@ export const PROMPT_INSTRUCTIONS = `
     - Once the primary color and logo are provided, EXPLICITLY CALL the generateCanopyMockups tool.
         - Set the companyName for the valences texts (front, back, left, right) as default/initial state for valences if valence texts are not already set and proceed
         - Set the user selected color for the valences (front, back, left, right) and peaks (front, back, left, right) as default/initial state for regions if colors are not already set and proceed
-        - Tent type is no-walls here
+        - Tent type is "no-walls" here
           - {content}: "Your mockups are being generated."
           - {selectorName}: "Change mockups"
           - {options}: [
@@ -105,40 +105,27 @@ export const PROMPT_INSTRUCTIONS = `
         
         Step 3b. If the user selects "Select add-ons" EXPLICITLY call the renderButtons tool with the following values:
           - {content}: "Please select add-ons"
-          - {isMultiSelect}: true
+          - {isMultiSelect}: false
           - {options}: [
               { "name": "10' Half Walls", "value": "half-walls", selected: false, edit: true },
               { "name": "10' Full Walls", "value": "full-walls", selected: false, edit: true },
               { "name": "Table Cover", "value": "table", selected: false, edit: true }
             ]
           - The renderButtons tool should ALWAYS be explicitly called every time the user selects "Select add-ons", even if the user has already selected "Select add-ons" before.
-          - If more than one of the add on options is selected, tent type should be set to all values
-          - An Add-on is selected if the selected property of that add-on in the Add-ons options array is true.
+          - An Add-on is selected if the selected property of that add-on is equal to tentType.
           - Make sure to follow the order of following conditions:
             - If the user selects "10' Half Walls":
-                - Remove "no-walls" from tentTypes
-                - Add "half-walls" to tentTypes and set walls colors (left, right, back) to the initially selected color and proceed
-            - If the user deselects "10' Half Walls":
-                - If "half-walls" is not in tentTypes, add "no-walls" to tentTypes
-                - Remove "half-walls" from tentTypes and set walls colors (left, right, back) to the initially selected color and proceed
+                - Set tent type to be "half-walls"
             - If the user selects "10' Full Walls":
-                - Remove "no-walls" from tentTypes
-                - Add "full-walls" to tentTypes and set walls colors (left, right, back) to the initially selected color and proceed
-            - If the user deselects "10' Full Walls":
-                - If "half-walls" is not in tentTypes, add "no-walls" to tentTypes
-                - Remove "full-walls" from tentTypes and set walls colors (left, right, back) to the initially selected color and proceed
+                - Set tent type to be "full-walls"
             - IF the user SELECTS "Table":
               1. IF the user has selected "Separate Colors" and "Table":
                 1.1 Prompt the user to select table color using the "renderColorPicker" tool
               2. If the user has not selected "Separate Colors" but Table :
                 2.1 Set the table color to the same color as the canopy.
               3. Table color will be empty if the use has not selected the Table Add-ons.
-          - User can select multiple add-ons. The order to process them should be exactly the same as listed above, regardless of the order in which they are selected.
-          - When every selected add-on is processed completely and user has provided the required inputs for all the selected add-ons, generate the mockups.
-          - User can edit the add-ons at any point in the process. If the user edits an add-on, set the respective field value back to the the previous value and restart the process from Step 1 of Question 5 with all explicit tool Calls.
-          - The user can de-select any add-ons at any point in the process. If the user de-selects an add-on, set the respective field value/values back to the default/INITIAL state and remove the add-on from the summary and restart the process from Step 1 of Question 5 with all explicit tool Calls.
-          - Set the respective field value back to the default/INITIAL state if the user de-selects an add-on.
-          - EXPLICITLY CALL THE TOOL FUNCTIONS WHERE MENTION IN EVERY ITERATION OF THE PROCESS.
+          - When the add-on has been selected and the value for tentType has been assigned, generate the mockups.
+          - EXPLICITLY CALL THE TOOL FUNCTIONS WHERE MENTIONED IN EVERY ITERATION OF THE PROCESS.
           - IMPORTANT: EVEN IF the user has already selected all available add-ons before, and EVEN IF the selected property for every add-on is true, you MUST ALWAYS explicitly call the renderButtons tool with the design change options EVERY TIME the user selects ‘Select add-ons’. NEVER skip this step regardless of previous selections.
           - Do NOT assume that the user wants to keep their previous selections. Always give them the opportunity to change or de-select options via renderButtons before generating mockups.
 
