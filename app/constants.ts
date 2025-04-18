@@ -55,52 +55,46 @@ export const GUIDANCE_IMAGE_URLS = {
     canopy: [
       {
         filename: 'No Walls View',
-        url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/no-walls-labelled-dark-rr7cSQbPtKOml8DA32tLLMpi7rlhjV.png'
+        url: process.env.NEXT_PUBLIC_DARK_CANOPY_NO_WALLS_VIEW ?? ''
       },
       {
         filename: 'Top View',
-        url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/dark/top-view-ORDGOIiq5KxKpT2dpjUWCC4QRaIQMF.png'
+        url: process.env.NEXT_PUBLIC_DARK_CANOPY_TOP_VIEW ?? ''
       },
       {
         filename: 'Front View',
-        url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/dark/front-DnKuv1U8WUFyV7cwPpTFmNSaMWyNP7.png'
+        url: process.env.NEXT_PUBLIC_DARK_CANOPY_FRONT_VIEW ?? ''
       },
       {
         filename: 'Side View',
-        url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/dark/half-walls-PLdoyKU7DHBOioX9JB6lIXOH5F7Zyh.png'
+        url: process.env.NEXT_PUBLIC_DARK_CANOPY_SIDE_VIEW ?? ''
       }
     ],
     table: [
-      {
-        filename: 'Table',
-        url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/dark/table-OqtfnAmQIGUDiNHersEB2CNpCEoypu.png'
-      }
+      { filename: 'Table', url: process.env.NEXT_PUBLIC_DARK_TABLE ?? '' }
     ]
   },
   light: {
     canopy: [
       {
         filename: 'Front View',
-        url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/light/front-52JArz8sEDOyvSC7mmZkeK3Hq1cUFh.png'
+        url: process.env.NEXT_PUBLIC_LIGHT_CANOPY_FRONT_VIEW ?? ''
       },
       {
         filename: 'No Walls View',
-        url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/light/half-walls-499r5GYDKNkTmlKd8rEGvTlAIVsLfS.png'
+        url: process.env.NEXT_PUBLIC_LIGHT_CANOPY_NO_WALLS_VIEW ?? ''
       },
       {
         filename: 'Side View',
-        url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/side-labelled-zBUEx9GMyq1rOp0MembizovFNwurbj.png'
+        url: process.env.NEXT_PUBLIC_LIGHT_CANOPY_SIDE_VIEW ?? ''
       },
       {
         filename: 'Top View',
-        url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/light/top-view-cOYUspNcRtfFM35sZoTdGFXLEoSZQ1.png'
+        url: process.env.NEXT_PUBLIC_LIGHT_CANOPY_TOP_VIEW ?? ''
       }
     ],
     table: [
-      {
-        filename: 'Table',
-        url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/light/table-qXl2boQQaUmxI9EnOAm774E8HQAvE8.png'
-      }
+      { filename: 'Table', url: process.env.NEXT_PUBLIC_LIGHT_TABLE ?? '' }
     ]
   }
 }
