@@ -7,6 +7,7 @@ type TextInputWithLabelProps = {
   value: string
   error?: string
   onChange: (value: string) => void
+  type?: string
   [key: string]: any
 }
 
@@ -15,12 +16,27 @@ const TextInputWithLabel = ({
   value,
   error,
   onChange,
+  type,
   ...rest
 }: TextInputWithLabelProps) => {
   const [text, setText] = useState(value)
 
+  function formatPhoneNumber(value: string): string {
+    const digits = value.replace(/\D/g, '')
+
+    const length = digits.length
+    if (length === 0) return ''
+    if (length < 4) return digits
+    if (length < 7) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value
+    let newValue = e.target.value
+    if (type === 'tel') {
+      newValue = formatPhoneNumber(newValue)
+    }
+
     setText(newValue)
     onChange(newValue)
   }
@@ -43,7 +59,6 @@ const TextInputWithLabel = ({
           type="text"
           value={text}
           onChange={handleChange}
-          placeholder="Enter something..."
           className={`w-full px-4 py-2 text-base text-gray-800 dark:text-gray-200 dark:bg-gray-800 focus:outline-none focus:ring-1 ${error ? 'focus:ring-red-500 focus:border-red-500 border-red-500' : 'focus:ring-blue-500 focus:border-blue-500'}`}
           {...rest}
         />

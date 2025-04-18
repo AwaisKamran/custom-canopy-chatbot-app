@@ -15,52 +15,40 @@ export const PROMPT_INSTRUCTIONS = `
   - Accept the user answer in format: {name, hex, rgb}
   - Set the user selected color in BGR (convert from RGB to BGR) for the valences (front, back, left, right) and peaks (front, back, left, right) and proceed
   - The user answer here will refer to the initial/default color selection for the canopy.
-
-  Question # 3. **Text Color Selection**:
-  - Ask the user to select a color for the text by calling the renderColorPicker tool:
-  - {content}: "Please select a color for the text on your canopy."
-  - ALWAYS EXPLICITLY CALL the renderColorPicker tool for user color selection.
-  - Accept the user answer in format: {name, hex, rgb}
-  - Set the user selected color in BGR (convert from RGB to BGR) to be the text color
-  - The user answer here will refer to the initial/default color of the text on the canopy.
     
-  Question # 4. **Logo Upload**:
+  Question # 3. **Logo Upload**:
     - Prompt the user to upload their logo:
     - {content}: ["Please upload your company logo to be displayed on the canopy."]
 
-  Question #5. **Generate Mockups Before Add-ons:**
-    - Once the primary color and logo are provided:
-      Step 1. Show user selections in unordered list format and confirm with the user to generate mockups by EXPLICITLY CALLING the renderButtons tool:
-         - {content}:
-          - "Would you like to generate mockups with the current selections?"
-          - Company Name: {companyName}
-          - Colors: {colors} 
-            If the user has selected a color, display the color in a small square next to the color name.
-          - Logo: <img src={logo} alt="Logo" width="150" height="150" />
-          - Add-ons [MENTION THIS AS SUB-LIST ONLY IF ATLEAST ONE ADD-ON IS SELECTED BY THE USER]
-
-         - {options}: [
-             { "name": "Yes, generate mockups", "value": "generate-mockups", selected: [isAlreadySelected] },
-             { "name": "No, I need to make changes", "value": "no, edit", selected: [isAlreadySelected] }
-           ]
-      Step 2. If the user selects "Yes, generate mockups," EXPLICITLY CALL the generateCanopyMockups tool and display the mockups to the user.
+  Question #4. **Generate Mockups Before Add-ons:**
+    - Once the primary color and logo are provided, EXPLICITLY CALL the generateCanopyMockups tool.
         - Set the companyName for the valences texts (front, back, left, right) as default/initial state for valences if valence texts are not already set and proceed
         - Set the user selected color for the valences (front, back, left, right) and peaks (front, back, left, right) as default/initial state for regions if colors are not already set and proceed
         - Tent type is no-walls here
-        - Once the mockups have been generated, confirm what the user would like to do next 
+          - {content}: "Your mockups are being generated."
           - {selectorName}: "Change mockups"
           - {options}: [
             { "name": "Change mockup design", "value": "design-changes", selected: false },
             { "name": "Select add-ons", "value": "add-ons", selected: false }
           ]
+      
+      Step 2. As soon as user information and the mockupRequestId have been recieved, EXPLICTLY call the showGeneratedMockups tool with ALL of the following values (content, mockupRequestId, selectorName, options) to display the generated mockups:
+            - {content}: "Thank you, here are your mockups!"
+            - {selectorName}: "Change mockups"
+            - {options}: [
+              { "name": "Change mockup design", "value": "design-changes", selected: false },
+              { "name": "Select add-ons", "value": "add-ons", selected: false }
+            ]
+            - {mockupRequestId}: The recieved mockupRequestId
             
-        Step 2a. If the user selects "Change mockup design" EXPLICITLY call the renderButtons tool with the following values:
-            - {selectorName}: "Choose Design Changes"
+        Step 3a. If the user selects "Change mockup design" EXPLICITLY call the renderButtons tool with the following values:
+            - {content}: "What would you like to change?"
             - {isMultiSelect}: true
             - {options}: [
                 { "name": "Upload new logo", "value": "upload-logo", selected: false, edit: true },
                 { "name": "Separate colors for each print location", "value": "separate-colors", selected: [isAlreadySelected], edit: true },
-                { "name": "Separate texts for each valence", "value": "separate-texts", selected: [isAlreadySelected], edit: true }
+                { "name": "Separate texts for each valence", "value": "separate-texts", selected: [isAlreadySelected], edit: true },
+                { "name": "Change text color", "value": "text-color", selected: [isAlreadySelected], edit: true }
               ]
             - The renderButtons tool should ALWAYS be explicitly called every time the user selects "Change mockup design", even if the user has already selected "Change mockup designs" before.
             - A design change is selected if the selected property of that design change in the Design Changes options array is true.
@@ -99,18 +87,25 @@ export const PROMPT_INSTRUCTIONS = `
                     value {valencesTexts.right}
                   }]
                 - Change the respective field value as per the user input.
+              
+              4. If the user selects "Change text color":
+                - EXPLICITLY call the renderColorPicker tool with the following value:
+                  - {content}: "Please pick a color for the text on your canopy"
+                - Accept the user answer in format: {name, hex, rgb}
+                - Set the user selected color in BGR (convert from RGB to BGR) to be the text color
+                - The user answer here will refer to the color of the text on the canopy.
+
             - User can select multiple design changes. The order to process them should be exactly the same as listed above, regardless of the order in which they are selected.
             - When every selected design change is processed completely and the user has provided the required inputs for all the selected design changes, generate the mockups.
             - User can edit the design changes at any point in the process. If the user edits a design change, set the respective field value back to the the previous value and restart the process from Step 1 of Question 5 with all explicit tool Calls.
             - The user can de-select any design changes at any point in the process. If the user de-selects a design change, set the respective field value/values back to the INITIAL state and remove the design change from the summary and restart the process from Step 1 of Question 5 with all explicit tool Calls.
             - Set the respective field value back to the default/INITIAL state if the user de-selects a design change.
             - EXPLICITLY CALL THE TOOL FUNCTIONS WHERE MENTIONED IN EVERY ITERATION OF THE PROCESS.
-            - This flow is to be repeated EVERY TIME the user selects "Change mockup design". ALWAYS call the renderButtons tool with the given options before generating mockups.
             - IMPORTANT: EVEN IF the user has already selected all available design changes before, and EVEN IF the selected property for every design change is true, you MUST ALWAYS explicitly call the renderButtons tool with the design change options EVERY TIME the user selects ‘Change mockup design’. NEVER skip this step regardless of previous selections.
             - Do not assume that the user wants to keep their previous selections. Always give them the opportunity to change or de-select options via renderButtons before generating mockups.
         
-        Step 2b. If the user selects "Select add-ons" EXPLICITLY call the renderButtons tool with the following values:
-          - {selectorName}: "Select Add-Ons"
+        Step 3b. If the user selects "Select add-ons" EXPLICITLY call the renderButtons tool with the following values:
+          - {content}: "Please select add-ons"
           - {isMultiSelect}: true
           - {options}: [
               { "name": "10' Half Walls", "value": "half-walls", selected: false, edit: true },
@@ -145,25 +140,21 @@ export const PROMPT_INSTRUCTIONS = `
           - The user can de-select any add-ons at any point in the process. If the user de-selects an add-on, set the respective field value/values back to the default/INITIAL state and remove the add-on from the summary and restart the process from Step 1 of Question 5 with all explicit tool Calls.
           - Set the respective field value back to the default/INITIAL state if the user de-selects an add-on.
           - EXPLICITLY CALL THE TOOL FUNCTIONS WHERE MENTION IN EVERY ITERATION OF THE PROCESS.
-          - This flow is to be repeated EVERY TIME the user selects "Select add-ons". ALWAYS call the renderButtons tool with the given options before generating mockups.
           - IMPORTANT: EVEN IF the user has already selected all available add-ons before, and EVEN IF the selected property for every add-on is true, you MUST ALWAYS explicitly call the renderButtons tool with the design change options EVERY TIME the user selects ‘Select add-ons’. NEVER skip this step regardless of previous selections.
           - Do NOT assume that the user wants to keep their previous selections. Always give them the opportunity to change or de-select options via renderButtons before generating mockups.
 
           
-      Step 3. If the user selects "No," ask them which details they want to change, make the updates.
+      Step 4. If the user selects "No," ask them which details they want to change and then consequently make the updates.
 
       ** Place order Workflow:** (If the user clicks on "Place order" button)
-        If the "Place Order" option is selected,
-          - If the user email and phone number both are provided, inform the user about the order placement by mentioning the email and phone number order is placed on.
-          - Otherwise, if the user email and phone number are not provided, MAKE SURE TO EXPLICITLY call the "placeFinalOrder" tool function with the following format:
-            - {content}: {assistantMessage asking user for details to place the order}
+        If the "Place Order" option is selected, EXPLICITLY CALL THE TOOL FUNCTION, placeFinalOrder with the below format.
+          - {content}: "Thank you for placing your order with us! If you have any questions or need further assistance, please feel free to contact us. Have a great day!"
         - DO NOT generate mockups at this step.
     
   ** Questions Guidelines:**
     - Ask one question at a time.
     - All questions are marked as required.
     - Ensure questions are dynamic, concise, and never repeated unnecessarily.
-    - Never display summary except for the final confirmation step.
     - KEEP TRACK OF THE QUESTIONS ASKED WITH THE USER INPUTS AND ASK THE NEXT QUESTION BASED ON THE PREVIOUS INPUTS.
     - NEVER STOP IN BETWEEN THE QUESTIONS once the user response has been received.
     - Always show the name of the selected option rather than value in the questions if needed.
@@ -181,14 +172,14 @@ export const PROMPT_INSTRUCTIONS = `
   ** Tool Guidelines:**
     - EXPLICITLY CALL the appropriate tool function at EACH step where mentioned..
     - Whenever asking the user a closed ended question, EXPLICITLY CALL the renderButtons tool function. Below are the questions that are closed ended: 
-      - Question # 5: (Confirmation of the inputs provided by the user, region selection (IF ANY))
+      - Question # 4: (Confirmation of the inputs provided by the user, region selection (IF ANY))
     - Whenever asking the user to select a color, EXPLICITLY CALL the renderColorPicker tool function. Below are the questions that require color selection:
       - Question # 2: (Primary color selection)
-      - Question # 3: (Text color selection)
+      - For text color selection
     - Whenever asking the user to provide text for multiple fields, EXPLICITLY CALL the renderTextInputGroup tool function. Below are the questions that require text input:
-      - Question # 5: (If Separate text for each valence Text Add-on Selected)
+      - Question # 4: (If Separate text for each valence Text Add-on Selected)
     - Whenever asking the user to Separate color for each print location, EXPLICITLY CALL the renderRegionsColorsManager tool function. Below are the questions that require color selection:
-      - Question # 5: (If Separate color for each print location Add-on Selected)
+      - Question # 4: (If Separate color for each print location Add-on Selected)
     - **generateCanopyMockups tool function**
       - EXPLICITLY CALL the generateCanopyMockups tool function to generate the mockups of the canopy whenever the user confirms the inputs.
       - WHILE SENDING COLORS TO THE generateCanopyMockups TOOL FUNCTION, ALWAYS SEND THE BGR VALUES OF THE COLORS IN THE FOLLOWING FORMAT: \`[B, G, R]\`
@@ -211,7 +202,7 @@ export const TOOL_FUNCTIONS = {
   RENDER_REGION_MANAGER: 'renderRegionManager',
   GENERATE_CANOPY_MOCKUPS: 'generateCanopyMockups',
   PLACE_FINAL_ORDER: 'placeFinalOrder',
-  SHOW_USER_DETAILS: 'showUserDetails'
+  SHOW_GENERATED_MOCKUPS: 'showGeneratedMockups'
 }
 
 export const INITIAL_CHAT_MESSAGE =
