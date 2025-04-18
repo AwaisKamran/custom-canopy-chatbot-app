@@ -111,7 +111,8 @@ export const PROMPT_INSTRUCTIONS = `
               { "name": "10' Full Walls", "value": "full-walls", selected: false, edit: true },
               { "name": "Table Cover", "value": "table", selected: false, edit: true }
             ]
-          - The renderButtons tool should ALWAYS be explicitly called every time the user selects "Select add-ons", even if the user has already selected "Select add-ons" before.
+          - The renderButtons tool should ALWAYS be explicitly called each and every time the user selects "Select add-ons", even if the user has already selected "Select add-ons" before.
+          - Do NOT call generateCanopyMockups tool at this point. ONLY call the generateCanopyMockups tool AFTER user has made a selection from one of the {options} for the "Select Add-Ons" flow:
           - If more than one of the add on options is selected, tent type should be set to all values
           - An Add-on is selected if the selected property of that add-on in the Add-ons options array is true.
           - Make sure to follow the order of following conditions:
@@ -134,7 +135,7 @@ export const PROMPT_INSTRUCTIONS = `
                 2.1 Set the table color to the same color as the canopy.
               3. Table color will be empty if the use has not selected the Table Add-ons.
           - User can select multiple add-ons. The order to process them should be exactly the same as listed above, regardless of the order in which they are selected.
-          - When every selected add-on is processed completely and user has provided the required inputs for all the selected add-ons, generate the mockups.
+          - When the user is done selecting their add-ons and the value for tentTypes has been set appropriately, generate the mockups by EXPLICITLY calling the generateCanopyMockups tool.
           - User can edit the add-ons at any point in the process. If the user edits an add-on, set the respective field value back to the the previous value and restart the process from Step 1 of Question 5 with all explicit tool Calls.
           - The user can de-select any add-ons at any point in the process. If the user de-selects an add-on, set the respective field value/values back to the default/INITIAL state and remove the add-on from the summary and restart the process from Step 1 of Question 5 with all explicit tool Calls.
           - Set the respective field value back to the default/INITIAL state if the user de-selects an add-on.
