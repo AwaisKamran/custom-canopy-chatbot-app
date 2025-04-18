@@ -175,6 +175,18 @@ const getClientMessages = (messages: CoreMessage[]): ClientMessage[] => {
   return clientMessages
 }
 
+export const findGeneratedMockups = (messages: CoreMessage[]) => {
+  let i = messages.length - 1
+  while (i >= 0) {
+    const message = messages[i]
+    if (
+      message.role === Roles.tool &&
+      message.content[0]?.toolName === TOOL_FUNCTIONS.GENERATE_CANOPY_MOCKUPS
+    ) {
+      return (message.content[0].result as ToolCallResult).props.mockups
+    }
+  }
+}
 export const isLastFileUploadMessage = (message: CoreMessage): boolean => {
   return (
     message?.role === Roles.assistant &&

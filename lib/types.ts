@@ -127,10 +127,6 @@ export type MockupResponse = {
   'no-walls': PutBlobResult
 }
 
-export type MockupIdResponse = {
-  mockupRequestId: string
-}
-
 export type ActionResult = {
   type: string
   resultCode: ResultCode

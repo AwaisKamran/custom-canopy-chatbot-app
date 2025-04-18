@@ -20,13 +20,11 @@ export interface UserDetailsFormProps {
     type: string
     placeholder: string
   }[]
-  mockupRequestId: string
 }
 
 export function UserDetailsForm({
   messageId,
-  userFields,
-  mockupRequestId
+  userFields
 }: Readonly<UserDetailsFormProps>) {
   const [messages, setMessages] = useUIState()
   const [aiState, _setAIState] = useAIState()
@@ -41,8 +39,7 @@ export function UserDetailsForm({
     if (data) {
       const message = await submitUserMessage(
         JSON.stringify({
-          userFields: fields,
-          mockupRequestId: mockupRequestId
+          userFields: fields
         }),
         true
       )
@@ -61,8 +58,7 @@ export function UserDetailsForm({
 
       const message = await submitUserMessage(
         JSON.stringify({
-          inputFields: fields,
-          mockupRequestId: mockupRequestId
+          inputFields: fields
         }),
         true
       )

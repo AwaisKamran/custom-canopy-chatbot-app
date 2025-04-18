@@ -13,17 +13,10 @@ import {
   ShowGeneratedMockupsToolSchema
 } from './schemas'
 import { Carousal } from '@/components/carousel'
-import {
-  BotCard,
-  BotMessage,
-  SpinnerMessage
-} from '@/components/stocks/message'
+import { BotCard, BotMessage } from '@/components/stocks/message'
 import { ChatRadioButtonWrapper } from '@/components/chat-radio-buttons-wrapper'
 import { ChatColorSwatcherWrapper } from '@/components/chat-color-swatcher-wrapper'
-import {
-  generateTentMockupsApi,
-  pollMockupGeneration
-} from '../redux/apis/tent-mockup-prompt'
+import { generateTentMockupsApi } from '../redux/apis/tent-mockup-prompt'
 import { MockupResponse, Roles, Session, TentMockUpPrompt } from '../types'
 import { TOOL_FUNCTIONS } from './constants'
 import { modifyAIState } from './utils'
@@ -51,16 +44,9 @@ async function showMockupsMessage(
   }[],
   selectorName: string,
   messageId: string,
-  mockupRequestId: string,
+  mockups: MockupResponse,
   history: any
 ) {
-  const chatID = history.get().id
-  const outputDir = `chat:${chatID}`
-  const mockups: MockupResponse = await pollMockupGeneration(
-    mockupRequestId,
-    outputDir
-  )
-
   modifyToolAIState(history, [
     {
       toolCallId: messageId,
@@ -247,7 +233,7 @@ export function generateCanopyMockups(history: any, messageId: string) {
       selectorName,
       options
     }: z.infer<typeof CustomCanopyToolSchema>) {
-      const { mockupRequestId } = await generateTentMockupsApi({
+      const mockups = await generateTentMockupsApi({
         ...(payload as TentMockUpPrompt),
         id: history.get().id
       })
@@ -265,7 +251,7 @@ export function generateCanopyMockups(history: any, messageId: string) {
           options,
           selectorName,
           messageId,
-          mockupRequestId,
+          mockups,
           history
         )
       }
@@ -300,11 +286,7 @@ export function generateCanopyMockups(history: any, messageId: string) {
         <BotMessage
           content={`${content} Please provide your email and phone number to continue.`}
         >
-          <UserDetailsForm
-            messageId={messageId}
-            userFields={inputFields}
-            mockupRequestId={mockupRequestId}
-          />
+          <UserDetailsForm messageId={messageId} userFields={inputFields} />
         </BotMessage>
       )
     }
@@ -317,7 +299,6 @@ export function showGeneratedMockups(history: any, messageId: string) {
     parameters: ShowGeneratedMockupsToolSchema,
     generate: async function ({
       content,
-      mockupRequestId,
       options,
       selectorName
     }: z.infer<typeof ShowGeneratedMockupsToolSchema>) {
@@ -326,7 +307,7 @@ export function showGeneratedMockups(history: any, messageId: string) {
         options,
         selectorName,
         messageId,
-        mockupRequestId,
+        history.messages.findLas,
         history
       )
     }

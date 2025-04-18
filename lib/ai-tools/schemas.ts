@@ -188,9 +188,6 @@ export const ShowGeneratedMockupsToolSchema = z.object({
     .describe(
       'The content to be displayed for the canopy tool when showing the mockup images.'
     ),
-  mockupRequestId: z
-    .string()
-    .describe('The ID for the mockup generation request'),
   selectorName: z
     .string()
     .describe('The name of the selector for the mockup changes'),
