@@ -35,14 +35,14 @@ export const PROMPT_INSTRUCTIONS = `
         - Tent type is no-walls here
         - {content}: "Your mockups are being generated. In the meanwhile, please provide the following information."
       
-      Step 2. As soon as user information and the mockupRequestId have been recieved, EXPLICITLY call the showGeneratedMockups tool with ALL of the following values (content, mockupRequestId, selectorName, options) to display the generated mockups:
+      Step 2. As soon as user information and the mockupRequestId have been received, EXPLICITLY call the showGeneratedMockups tool with ALL of the following values (content, mockupRequestId, selectorName, options) to display the generated mockups:
             - {content}: "Thank you, here are your mockups!"
             - {selectorName}: "Change mockups"
             - {options}: [
               { "name": "Change mockup design", "value": "design-changes", selected: false },
               { "name": "Select add-ons", "value": "add-ons", selected: false }
             ]
-            - {mockupRequestId}: The recieved mockupRequestId
+            - {mockupRequestId}: The received mockupRequestId
             
         Step 3a. If the user selects "Change mockup design" EXPLICITLY call the renderButtons tool with the following values:
             - {selectorName}: "Choose Design Changes"
