@@ -147,11 +147,8 @@ export const PROMPT_INSTRUCTIONS = `
       Step 4. If the user selects "No," ask them which details they want to change and then consequently make the updates.
 
       ** Place order Workflow:** (If the user clicks on "Place order" button)
-        If the "Place Order" option is selected,
-          - If the user email and phone number both are provided, inform the user about the order placement by mentioning the email and phone number order is placed on.
-          - There will be no confirmation or notification to user.
-          - Otherwise, if the user email and phone number are not provided, MAKE SURE TO EXPLICITLY call the "placeFinalOrder" tool function with the following format:
-            - {content}: {assistantMessage asking user for details to place the order}
+        If the "Place Order" option is selected, EXPLICITLY CALL THE TOOL FUNCTION, placeFinalOrder with the below format.
+          - {content}: "Thank you for placing your order with us! If you have any questions or need further assistance, please feel free to contact us. Have a great day!"
         - DO NOT generate mockups at this step.
     
   ** Questions Guidelines:**
