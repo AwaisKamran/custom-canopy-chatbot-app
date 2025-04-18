@@ -21,8 +21,7 @@ const fetchMockups = async (formData: FormData): Promise<MockupResponse> => {
     }
   )
   if (!response.ok) {
-    const error = await response.json()
-    console.log(error)
+    console.error('Response from the backend is: ', response)
     throw new Error('Failed to generate custom canopy')
   }
 
