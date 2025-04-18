@@ -16,7 +16,7 @@ export interface UserDetailsFormProps {
   userFields: {
     label: string
     value: string
-    disabled?: boolean
+    name: string
     type: string
     placeholder: string
   }[]
@@ -50,7 +50,7 @@ export function UserDetailsForm({
       return
     }
     fields.forEach(field => {
-      formData.append(_.camelCase(field.label), field.value)
+      formData.append(field.name, field.value)
     })
     const result = await authenticateOrSignup(undefined, formData)
     if (result?.type === 'success') {
@@ -93,7 +93,7 @@ export function UserDetailsForm({
             type={field.type}
             value={field.value}
             onChange={(value: any) => handleChange(index, value)}
-            disabled={field.disabled || messageId !== messages.at(-1)?.id}
+            disabled={messageId !== messages.at(-1)?.id}
             placeholder={field.placeholder}
             required
           />
