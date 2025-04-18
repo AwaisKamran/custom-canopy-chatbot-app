@@ -13,7 +13,11 @@ import {
   ShowGeneratedMockupsToolSchema
 } from './schemas'
 import { Carousal } from '@/components/carousel'
-import { BotCard, BotMessage } from '@/components/stocks/message'
+import {
+  BotCard,
+  BotMessage,
+  SpinnerMessage
+} from '@/components/stocks/message'
 import { ChatRadioButtonWrapper } from '@/components/chat-radio-buttons-wrapper'
 import { ChatColorSwatcherWrapper } from '@/components/chat-color-swatcher-wrapper'
 import {
@@ -35,6 +39,55 @@ function modifyToolAIState(history: any, content: ToolContent) {
     role: Roles.tool,
     content
   })
+}
+
+async function showMockupsMessage(
+  content: string,
+  options: {
+    name: string
+    value: string
+    selected: boolean
+    edit: boolean
+  }[],
+  selectorName: string,
+  messageId: string,
+  mockupRequestId: string,
+  history: any
+) {
+  const chatID = history.get().id
+  const outputDir = `chat:${chatID}`
+  const mockups: MockupResponse = await pollMockupGeneration(
+    mockupRequestId,
+    outputDir
+  )
+
+  modifyToolAIState(history, [
+    {
+      toolCallId: messageId,
+      toolName: TOOL_FUNCTIONS.SHOW_GENERATED_MOCKUPS,
+      result: {
+        message: content,
+        props: {
+          options,
+          selectorName,
+          mockups,
+          action: 'Place Order'
+        }
+      }
+    }
+  ] as ToolContent)
+
+  return (
+    <BotMessage content={content}>
+      <Carousal mockups={mockups} open={true} />
+      <ChatActionMultiSelector
+        action="Place Order"
+        selectorName={selectorName}
+        options={options}
+        messageId={messageId}
+      />
+    </BotMessage>
+  )
 }
 
 export function renderButtonsTool(history: any, messageId: string) {
@@ -188,27 +241,45 @@ export function generateCanopyMockups(history: any, messageId: string) {
     description:
       'Starts backend mockup generation and shows user form while waiting',
     parameters: CustomCanopyToolSchema,
-    generate: async function ({
+    generate: async function* ({
       content,
-      payload
+      payload,
+      selectorName,
+      options
     }: z.infer<typeof CustomCanopyToolSchema>) {
       const { mockupRequestId } = await generateTentMockupsApi({
         ...(payload as TentMockUpPrompt),
         id: history.get().id
       })
       const session = (await auth()) as Session
+
+      yield (
+        <BotCard key={messageId}>
+          <div className="flex gap-2">{`${content} Please wait...`}</div>
+        </BotCard>
+      )
+
+      if (session?.user) {
+        return showMockupsMessage(
+          'Your mockups are ready! Thank you for your patience.',
+          options,
+          selectorName,
+          messageId,
+          mockupRequestId,
+          history
+        )
+      }
+
       const inputFields = [
         {
           label: 'Email',
-          value: session?.user?.email || '',
-          disabled: !!session?.user?.email,
+          value: '',
           type: 'email'
         },
         {
           label: 'Phone No.',
-          value: session?.user?.phoneNumber ?? '',
-          type: 'tel',
-          disabled: !!session?.user?.phoneNumber
+          value: '',
+          type: 'tel'
         }
       ]
 
@@ -224,7 +295,9 @@ export function generateCanopyMockups(history: any, messageId: string) {
       ] as ToolContent)
 
       return (
-        <BotMessage content={content}>
+        <BotMessage
+          content={`${content} Please provide your email and phone number to continue.`}
+        >
           <UserDetailsForm
             messageId={messageId}
             userFields={inputFields}
@@ -246,39 +319,13 @@ export function showGeneratedMockups(history: any, messageId: string) {
       options,
       selectorName
     }: z.infer<typeof ShowGeneratedMockupsToolSchema>) {
-      const chatID = history.get().id
-      const outputDir = `chat:${chatID}`
-      const mockups: MockupResponse = await pollMockupGeneration(
+      return showMockupsMessage(
+        content,
+        options,
+        selectorName,
+        messageId,
         mockupRequestId,
-        outputDir
-      )
-
-      modifyToolAIState(history, [
-        {
-          toolCallId: messageId,
-          toolName: TOOL_FUNCTIONS.SHOW_GENERATED_MOCKUPS,
-          result: {
-            message: content,
-            props: {
-              options,
-              selectorName,
-              mockups,
-              action: 'Place Order'
-            }
-          }
-        }
-      ] as ToolContent)
-
-      return (
-        <BotMessage content={content}>
-          <Carousal mockups={mockups} open={true} />
-          <ChatActionMultiSelector
-            action="Place Order"
-            selectorName={selectorName}
-            options={options}
-            messageId={messageId}
-          />
-        </BotMessage>
+        history
       )
     }
   }

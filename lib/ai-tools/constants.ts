@@ -33,7 +33,12 @@ export const PROMPT_INSTRUCTIONS = `
         - Set the companyName for the valences texts (front, back, left, right) as default/initial state for valences if valence texts are not already set and proceed
         - Set the user selected color for the valences (front, back, left, right) and peaks (front, back, left, right) as default/initial state for regions if colors are not already set and proceed
         - Tent type is no-walls here
-        - {content}: "Your mockups are being generated. In the meanwhile, please provide the following information."
+        - {content}: "Your mockups are being generated."
+        - {selectorName}: "Change mockups"
+            - {options}: [
+              { "name": "Change mockup design", "value": "design-changes", selected: false },
+              { "name": "Select add-ons", "value": "add-ons", selected: false }
+            ]
       
       Step 2. As soon as user information and the mockupRequestId have been recieved, EXPLICTLY call the showGeneratedMockups tool with ALL of the following values (content, mockupRequestId, selectorName, options) to display the generated mockups:
             - {content}: "Thank you, here are your mockups!"
@@ -143,6 +148,7 @@ export const PROMPT_INSTRUCTIONS = `
       ** Place order Workflow:** (If the user clicks on "Place order" button)
         If the "Place Order" option is selected,
           - If the user email and phone number both are provided, inform the user about the order placement by mentioning the email and phone number order is placed on.
+          - There will be no confirmation or notification to user.
           - Otherwise, if the user email and phone number are not provided, MAKE SURE TO EXPLICITLY call the "placeFinalOrder" tool function with the following format:
             - {content}: {assistantMessage asking user for details to place the order}
         - DO NOT generate mockups at this step.

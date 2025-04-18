@@ -27,7 +27,7 @@ export async function submitUserMessage(
   const messageId = nanoid()
   const ui = await streamUI({
     model: openai('gpt-4o'),
-    temperature: 0.3,
+    temperature: 0.1,
     messages: [
       {
         role: Roles.system,
