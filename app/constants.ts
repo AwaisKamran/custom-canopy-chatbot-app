@@ -54,20 +54,20 @@ export const GUIDANCE_IMAGE_URLS = {
   dark: {
     canopy: [
       {
-        filename: 'Front View',
-        url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/dark/front-DnKuv1U8WUFyV7cwPpTFmNSaMWyNP7.png'
-      },
-      {
         filename: 'No Walls View',
         url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/no-walls-labelled-dark-rr7cSQbPtKOml8DA32tLLMpi7rlhjV.png'
       },
       {
-        filename: 'Side View',
-        url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/dark/half-walls-PLdoyKU7DHBOioX9JB6lIXOH5F7Zyh.png'
-      },
-      {
         filename: 'Top View',
         url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/dark/top-view-ORDGOIiq5KxKpT2dpjUWCC4QRaIQMF.png'
+      },
+      {
+        filename: 'Front View',
+        url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/dark/front-DnKuv1U8WUFyV7cwPpTFmNSaMWyNP7.png'
+      },
+      {
+        filename: 'Side View',
+        url: 'https://xyvvsdhvfprf3oqa.public.blob.vercel-storage.com/custom-canopy-server-static/templates/dark/half-walls-PLdoyKU7DHBOioX9JB6lIXOH5F7Zyh.png'
       }
     ],
     table: [

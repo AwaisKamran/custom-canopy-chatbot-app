@@ -9,14 +9,22 @@ import {
   RegionsColorsManagerSchema,
   ColorLabelPickerSetSchema,
   PlaceFinalOrderSchema,
-  ShowUserDetailsSchema
+  ShowUserDetailsSchema,
+  ShowGeneratedMockupsToolSchema
 } from './schemas'
 import { Carousal } from '@/components/carousel'
-import { BotCard, BotMessage } from '@/components/stocks/message'
+import {
+  BotCard,
+  BotMessage,
+  SpinnerMessage
+} from '@/components/stocks/message'
 import { ChatRadioButtonWrapper } from '@/components/chat-radio-buttons-wrapper'
 import { ChatColorSwatcherWrapper } from '@/components/chat-color-swatcher-wrapper'
-import { generateTentMockupsApi } from '../redux/apis/tent-mockup-prompt'
-import { MockupResponse, Roles, TentMockUpPrompt } from '../types'
+import {
+  generateTentMockupsApi,
+  pollMockupGeneration
+} from '../redux/apis/tent-mockup-prompt'
+import { MockupResponse, Roles, Session, TentMockUpPrompt } from '../types'
 import { TOOL_FUNCTIONS } from './constants'
 import { modifyAIState } from './utils'
 import { ChatTextInputGroup } from '@/components/chat-text-input-group'
@@ -24,12 +32,62 @@ import ChatActionMultiSelector from '@/components/chat-action-multi-selector'
 import RegionsColorsManager from '@/components/regions_colors_manager'
 import { ColorLabelPickerSet } from '@/components/color-label-picker-set'
 import { UserDetailsForm } from '@/components/user-details-form'
+import { auth } from '@/auth'
 
 function modifyToolAIState(history: any, content: ToolContent) {
   modifyAIState(history, {
     role: Roles.tool,
     content
   })
+}
+
+async function showMockupsMessage(
+  content: string,
+  options: {
+    name: string
+    value: string
+    selected: boolean
+    edit: boolean
+  }[],
+  selectorName: string,
+  messageId: string,
+  mockupRequestId: string,
+  history: any
+) {
+  const chatID = history.get().id
+  const outputDir = `chat:${chatID}`
+  const mockups: MockupResponse = await pollMockupGeneration(
+    mockupRequestId,
+    outputDir
+  )
+
+  modifyToolAIState(history, [
+    {
+      toolCallId: messageId,
+      toolName: TOOL_FUNCTIONS.SHOW_GENERATED_MOCKUPS,
+      result: {
+        message: content,
+        props: {
+          options,
+          selectorName,
+          mockups,
+          action: 'Place Order'
+        }
+      }
+    }
+  ] as ToolContent)
+
+  return (
+    <BotMessage content={content}>
+      <Carousal mockups={mockups} open={true} />
+      <ChatActionMultiSelector
+        action="Place Order"
+        selectorName={selectorName}
+        options={options}
+        messageId={messageId}
+      />
+    </BotMessage>
+  )
 }
 
 export function renderButtonsTool(history: any, messageId: string) {
@@ -180,92 +238,104 @@ export function renderRegionManager(history: any, messageId: string) {
 
 export function generateCanopyMockups(history: any, messageId: string) {
   return {
-    description: 'Generates the images for canopy tents based on user details',
+    description:
+      'Starts backend mockup generation and shows user form while waiting',
     parameters: CustomCanopyToolSchema,
     generate: async function* ({
       content,
-      options,
+      payload,
       selectorName,
-      payload
+      options
     }: z.infer<typeof CustomCanopyToolSchema>) {
-      yield <BotCard>{content[0]}</BotCard>
-      try {
-        const mockups: MockupResponse = await generateTentMockupsApi({
-          ...(payload as TentMockUpPrompt),
-          id: history.get().id
-        })
-        modifyToolAIState(history, [
-          {
-            toolCallId: messageId,
-            toolName: TOOL_FUNCTIONS.GENERATE_CANOPY_MOCKUPS,
-            result: {
-              message: content[1],
-              props: {
-                mockups,
-                options,
-                selectorName,
-                action: 'Place Order'
-              }
-            }
-          }
-        ] as ToolContent)
-        return (
-          <BotMessage content={content[1]}>
-            <Carousal mockups={mockups} open={true} />
-            <ChatActionMultiSelector
-              action="Place Order"
-              selectorName={selectorName}
-              options={options}
-              messageId={messageId}
-            />
-          </BotMessage>
-        )
-      } catch (err) {
-        const error = (err as Error).message
-        modifyToolAIState(history, [
-          {
-            toolCallId: messageId,
-            toolName: TOOL_FUNCTIONS.GENERATE_CANOPY_MOCKUPS,
-            result: {
-              message: error
-            }
-          }
-        ] as ToolContent)
-        return <BotCard>{error}</BotCard>
-      }
-    }
-  }
-}
+      const { mockupRequestId } = await generateTentMockupsApi({
+        ...(payload as TentMockUpPrompt),
+        id: history.get().id
+      })
+      const session = (await auth()) as Session
 
-export function placeFinalOrder(history: any, messageId: string) {
-  return {
-    description:
-      'Handles the final order placement logic including auth and chat saving',
-    parameters: PlaceFinalOrderSchema,
-    generate: async function ({
-      content
-    }: z.infer<typeof PlaceFinalOrderSchema>) {
+      yield (
+        <BotCard key={messageId}>
+          <div className="flex gap-2">{`${content} Please wait...`}</div>
+        </BotCard>
+      )
+
+      if (session?.user) {
+        return showMockupsMessage(
+          'Your mockups are ready! Thank you for your patience.',
+          options,
+          selectorName,
+          messageId,
+          mockupRequestId,
+          history
+        )
+      }
+
+      const inputFields = [
+        {
+          label: 'Email',
+          value: '',
+          type: 'email',
+          placeholder: 'example@gmail.com'
+        },
+        {
+          label: 'Phone No.',
+          value: '',
+          type: 'tel',
+          placeholder: '+1 (555) 555-1234'
+        }
+      ]
+
       modifyToolAIState(history, [
         {
           toolCallId: messageId,
-          toolName: TOOL_FUNCTIONS.PLACE_FINAL_ORDER,
+          toolName: TOOL_FUNCTIONS.GENERATE_CANOPY_MOCKUPS,
           result: {
-            message: content
+            message: content,
+            props: { payload }
           }
         }
       ] as ToolContent)
+
       return (
-        <BotMessage key={messageId} content={content}>
-          <UserDetailsForm messageId={messageId} />
+        <BotMessage
+          content={`${content} Please provide your email and phone number to continue.`}
+        >
+          <UserDetailsForm
+            messageId={messageId}
+            userFields={inputFields}
+            mockupRequestId={mockupRequestId}
+          />
         </BotMessage>
       )
     }
   }
 }
 
-export function showUserDetails(history: any, messageId: string) {
+export function showGeneratedMockups(history: any, messageId: string) {
   return {
-    description: "Shows the user's order details",
+    description: 'Displays mockups after user details are submitted',
+    parameters: ShowGeneratedMockupsToolSchema,
+    generate: async function ({
+      content,
+      mockupRequestId,
+      options,
+      selectorName
+    }: z.infer<typeof ShowGeneratedMockupsToolSchema>) {
+      return showMockupsMessage(
+        content,
+        options,
+        selectorName,
+        messageId,
+        mockupRequestId,
+        history
+      )
+    }
+  }
+}
+
+export function placeFinalOrder(history: any, messageId: string) {
+  return {
+    description: "Place the user's final order.",
     parameters: ShowUserDetailsSchema,
     generate: async function ({
       content
@@ -273,7 +343,7 @@ export function showUserDetails(history: any, messageId: string) {
       modifyToolAIState(history, [
         {
           toolCallId: messageId,
-          toolName: TOOL_FUNCTIONS.SHOW_USER_DETAILS,
+          toolName: TOOL_FUNCTIONS.PLACE_FINAL_ORDER,
           result: {
             message: content
           }
@@ -293,6 +363,6 @@ export const getToolFunctions = (history: any, messageId: string) => {
     renderTextInputGroup: renderTextInputGroup(history, messageId),
     generateCanopyMockups: generateCanopyMockups(history, messageId),
     placeFinalOrder: placeFinalOrder(history, messageId),
-    showUserDetails: showUserDetails(history, messageId)
+    showGeneratedMockups: showGeneratedMockups(history, messageId)
   }
 }

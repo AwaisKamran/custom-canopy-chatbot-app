@@ -79,19 +79,23 @@ const ColorSwatcher = ({
         >
           <TextInputWithLabel
             label={
-              selectedColor?.name ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span
-                      className="w-full h-5 flex items-center justify-between"
-                      style={{ backgroundColor: selectedColor.hex }}
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>{selectedColor.name}</TooltipContent>
-                </Tooltip>
-              ) : (
-                'Custom'
-              )
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    className="w-full h-5 flex items-center justify-center px-2 py-1 rounded"
+                    style={
+                      selectedColor?.name
+                        ? { backgroundColor: selectedColor.hex }
+                        : {}
+                    }
+                  >
+                    {!selectedColor?.name && 'Custom'}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {selectedColor?.name ?? 'Custom'}
+                </TooltipContent>
+              </Tooltip>
             }
             value={selectedColor?.hex ?? ''}
             placeholder={COLOR_SWATCHES[0].hex}

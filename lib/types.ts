@@ -36,6 +36,7 @@ export interface Session {
   user: {
     id: string
     email: string
+    phoneNumber?: string
   }
 }
 
@@ -47,7 +48,7 @@ export interface AuthResult {
 export interface User extends Record<string, any> {
   id: string
   email: string
-  password: string
+  phoneNumber: string
   salt: string
 }
 
@@ -124,6 +125,10 @@ export type MockupResponse = {
   'half-wall': PutBlobResult
   'top-view': PutBlobResult
   'no-walls': PutBlobResult
+}
+
+export type MockupIdResponse = {
+  mockupRequestId: string
 }
 
 export type ActionResult = {

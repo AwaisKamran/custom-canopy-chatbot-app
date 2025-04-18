@@ -88,16 +88,13 @@ const getToolMessage = (content: ToolContent): ClientMessage => {
         return <RegionsColorsManager messageId={toolCallId} {...props} />
 
       case TOOL_FUNCTIONS.GENERATE_CANOPY_MOCKUPS:
+        return <UserDetailsForm {...props} messageId={toolCallId} />
+
+      case TOOL_FUNCTIONS.SHOW_GENERATED_MOCKUPS:
         return (
           <>
             <Carousal {...props} />
             <ChatActionMultiSelector {...props} messageId={toolCallId} />
-          </>
-        )
-      case TOOL_FUNCTIONS.PLACE_FINAL_ORDER:
-        return (
-          <>
-            <UserDetailsForm {...props} messageId={toolCallId} />
           </>
         )
 
