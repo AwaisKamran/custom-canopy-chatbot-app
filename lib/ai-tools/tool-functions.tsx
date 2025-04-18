@@ -274,12 +274,14 @@ export function generateCanopyMockups(history: any, messageId: string) {
         {
           label: 'Email',
           value: '',
-          type: 'email'
+          type: 'email',
+          placeholder: 'example@gmail.com'
         },
         {
           label: 'Phone No.',
           value: '',
-          type: 'tel'
+          type: 'tel',
+          placeholder: '+1 (555) 555-1234'
         }
       ]
 

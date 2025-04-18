@@ -15,30 +15,22 @@ export const PROMPT_INSTRUCTIONS = `
   - Accept the user answer in format: {name, hex, rgb}
   - Set the user selected color in BGR (convert from RGB to BGR) for the valences (front, back, left, right) and peaks (front, back, left, right) and proceed
   - The user answer here will refer to the initial/default color selection for the canopy.
-
-  Question # 3. **Text Color Selection**:
-  - Ask the user to select a color for the text by calling the renderColorPicker tool:
-  - {content}: "Please select a color for the text on your canopy."
-  - ALWAYS EXPLICITLY CALL the renderColorPicker tool for user color selection.
-  - Accept the user answer in format: {name, hex, rgb}
-  - Set the user selected color in BGR (convert from RGB to BGR) to be the text color
-  - The user answer here will refer to the initial/default color of the text on the canopy.
     
-  Question # 4. **Logo Upload**:
+  Question # 3. **Logo Upload**:
     - Prompt the user to upload their logo:
     - {content}: ["Please upload your company logo to be displayed on the canopy."]
 
-  Question #5. **Generate Mockups Before Add-ons:**
+  Question #4. **Generate Mockups Before Add-ons:**
     - Once the primary color and logo are provided, EXPLICITLY CALL the generateCanopyMockups tool.
         - Set the companyName for the valences texts (front, back, left, right) as default/initial state for valences if valence texts are not already set and proceed
         - Set the user selected color for the valences (front, back, left, right) and peaks (front, back, left, right) as default/initial state for regions if colors are not already set and proceed
         - Tent type is no-walls here
-        - {content}: "Your mockups are being generated."
-        - {selectorName}: "Change mockups"
-            - {options}: [
-              { "name": "Change mockup design", "value": "design-changes", selected: false },
-              { "name": "Select add-ons", "value": "add-ons", selected: false }
-            ]
+          - {content}: "Your mockups are being generated."
+          - {selectorName}: "Change mockups"
+          - {options}: [
+            { "name": "Change mockup design", "value": "design-changes", selected: false },
+            { "name": "Select add-ons", "value": "add-ons", selected: false }
+          ]
       
       Step 2. As soon as user information and the mockupRequestId have been recieved, EXPLICTLY call the showGeneratedMockups tool with ALL of the following values (content, mockupRequestId, selectorName, options) to display the generated mockups:
             - {content}: "Thank you, here are your mockups!"
@@ -50,12 +42,13 @@ export const PROMPT_INSTRUCTIONS = `
             - {mockupRequestId}: The recieved mockupRequestId
             
         Step 3a. If the user selects "Change mockup design" EXPLICITLY call the renderButtons tool with the following values:
-            - {selectorName}: "Choose Design Changes"
+            - {content}: "What would you like to change?"
             - {isMultiSelect}: true
             - {options}: [
                 { "name": "Upload new logo", "value": "upload-logo", selected: false, edit: true },
                 { "name": "Separate colors for each print location", "value": "separate-colors", selected: [isAlreadySelected], edit: true },
-                { "name": "Separate texts for each valence", "value": "separate-texts", selected: [isAlreadySelected], edit: true }
+                { "name": "Separate texts for each valence", "value": "separate-texts", selected: [isAlreadySelected], edit: true },
+                { "name": "Change text color", "value": "text-color", selected: [isAlreadySelected], edit: true }
               ]
             - The renderButtons tool should ALWAYS be explicitly called every time the user selects "Change mockup design", even if the user has already selected "Change mockup designs" before.
             - A design change is selected if the selected property of that design change in the Design Changes options array is true.
@@ -94,6 +87,14 @@ export const PROMPT_INSTRUCTIONS = `
                     value {valencesTexts.right}
                   }]
                 - Change the respective field value as per the user input.
+              
+              4. If the user selects "Change text color":
+                - EXPLICITLY call the renderColorPicker tool with the following value:
+                  - {content}: "Please pick a color for the text on your canopy"
+                - Accept the user answer in format: {name, hex, rgb}
+                - Set the user selected color in BGR (convert from RGB to BGR) to be the text color
+                - The user answer here will refer to the color of the text on the canopy.
+
             - User can select multiple design changes. The order to process them should be exactly the same as listed above, regardless of the order in which they are selected.
             - When every selected design change is processed completely and the user has provided the required inputs for all the selected design changes, generate the mockups.
             - User can edit the design changes at any point in the process. If the user edits a design change, set the respective field value back to the the previous value and restart the process from Step 1 of Question 5 with all explicit tool Calls.
@@ -104,7 +105,7 @@ export const PROMPT_INSTRUCTIONS = `
             - Do not assume that the user wants to keep their previous selections. Always give them the opportunity to change or de-select options via renderButtons before generating mockups.
         
         Step 3b. If the user selects "Select add-ons" EXPLICITLY call the renderButtons tool with the following values:
-          - {selectorName}: "Select Add-Ons"
+          - {content}: "Please select add-ons"
           - {isMultiSelect}: true
           - {options}: [
               { "name": "10' Half Walls", "value": "half-walls", selected: false, edit: true },
@@ -143,7 +144,7 @@ export const PROMPT_INSTRUCTIONS = `
           - Do NOT assume that the user wants to keep their previous selections. Always give them the opportunity to change or de-select options via renderButtons before generating mockups.
 
           
-      Step 4. If the user selects "No," ask them which details they want to change, make the updates.
+      Step 4. If the user selects "No," ask them which details they want to change and then consequently make the updates.
 
       ** Place order Workflow:** (If the user clicks on "Place order" button)
         If the "Place Order" option is selected,
@@ -157,7 +158,6 @@ export const PROMPT_INSTRUCTIONS = `
     - Ask one question at a time.
     - All questions are marked as required.
     - Ensure questions are dynamic, concise, and never repeated unnecessarily.
-    - Never display summary except for the final confirmation step.
     - KEEP TRACK OF THE QUESTIONS ASKED WITH THE USER INPUTS AND ASK THE NEXT QUESTION BASED ON THE PREVIOUS INPUTS.
     - NEVER STOP IN BETWEEN THE QUESTIONS once the user response has been received.
     - Always show the name of the selected option rather than value in the questions if needed.
@@ -175,14 +175,14 @@ export const PROMPT_INSTRUCTIONS = `
   ** Tool Guidelines:**
     - EXPLICITLY CALL the appropriate tool function at EACH step where mentioned..
     - Whenever asking the user a closed ended question, EXPLICITLY CALL the renderButtons tool function. Below are the questions that are closed ended: 
-      - Question # 5: (Confirmation of the inputs provided by the user, region selection (IF ANY))
+      - Question # 4: (Confirmation of the inputs provided by the user, region selection (IF ANY))
     - Whenever asking the user to select a color, EXPLICITLY CALL the renderColorPicker tool function. Below are the questions that require color selection:
       - Question # 2: (Primary color selection)
-      - Question # 3: (Text color selection)
+      - For text color selection
     - Whenever asking the user to provide text for multiple fields, EXPLICITLY CALL the renderTextInputGroup tool function. Below are the questions that require text input:
-      - Question # 5: (If Separate text for each valence Text Add-on Selected)
+      - Question # 4: (If Separate text for each valence Text Add-on Selected)
     - Whenever asking the user to Separate color for each print location, EXPLICITLY CALL the renderRegionsColorsManager tool function. Below are the questions that require color selection:
-      - Question # 5: (If Separate color for each print location Add-on Selected)
+      - Question # 4: (If Separate color for each print location Add-on Selected)
     - **generateCanopyMockups tool function**
       - EXPLICITLY CALL the generateCanopyMockups tool function to generate the mockups of the canopy whenever the user confirms the inputs.
       - WHILE SENDING COLORS TO THE generateCanopyMockups TOOL FUNCTION, ALWAYS SEND THE BGR VALUES OF THE COLORS IN THE FOLLOWING FORMAT: \`[B, G, R]\`

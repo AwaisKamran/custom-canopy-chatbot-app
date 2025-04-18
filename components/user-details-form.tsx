@@ -18,6 +18,7 @@ export interface UserDetailsFormProps {
     value: string
     disabled?: boolean
     type: string
+    placeholder: string
   }[]
   mockupRequestId: string
 }
@@ -97,6 +98,7 @@ export function UserDetailsForm({
             value={field.value}
             onChange={(value: any) => handleChange(index, value)}
             disabled={field.disabled || messageId !== messages.at(-1)?.id}
+            placeholder={field.placeholder}
             required
           />
         ))}
