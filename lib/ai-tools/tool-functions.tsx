@@ -8,9 +8,7 @@ import {
   ChatTextInputGroupSchema,
   RegionsColorsManagerSchema,
   ColorLabelPickerSetSchema,
-  PlaceFinalOrderSchema,
-  ShowUserDetailsSchema,
-  ShowGeneratedMockupsToolSchema
+  ShowUserDetailsSchema
 } from './schemas'
 import { Carousal } from '@/components/carousel'
 import { BotCard, BotMessage } from '@/components/stocks/message'
@@ -19,7 +17,7 @@ import { ChatColorSwatcherWrapper } from '@/components/chat-color-swatcher-wrapp
 import { generateTentMockupsApi } from '../redux/apis/tent-mockup-prompt'
 import { MockupResponse, Roles, Session, TentMockUpPrompt } from '../types'
 import { TOOL_FUNCTIONS } from './constants'
-import { findGeneratedMockups, modifyAIState } from './utils'
+import { modifyAIState } from './utils'
 import { ChatTextInputGroup } from '@/components/chat-text-input-group'
 import ChatActionMultiSelector from '@/components/chat-action-multi-selector'
 import RegionsColorsManager from '@/components/regions_colors_manager'
@@ -50,7 +48,7 @@ async function showMockupsMessage(
   modifyToolAIState(history, [
     {
       toolCallId: messageId,
-      toolName: TOOL_FUNCTIONS.SHOW_GENERATED_MOCKUPS,
+      toolName: TOOL_FUNCTIONS.GENERATE_CANOPY_MOCKUPS,
       result: {
         message: content,
         props: {
@@ -295,27 +293,6 @@ export function generateCanopyMockups(history: any, messageId: string) {
   }
 }
 
-export function showGeneratedMockups(history: any, messageId: string) {
-  return {
-    description: 'Displays mockups after user details are submitted',
-    parameters: ShowGeneratedMockupsToolSchema,
-    generate: async function ({
-      content,
-      options,
-      selectorName
-    }: z.infer<typeof ShowGeneratedMockupsToolSchema>) {
-      return showMockupsMessage(
-        content,
-        options,
-        selectorName,
-        messageId,
-        findGeneratedMockups(history.messages),
-        history
-      )
-    }
-  }
-}
-
 export function placeFinalOrder(history: any, messageId: string) {
   return {
     description: "Place the user's final order.",
@@ -345,7 +322,6 @@ export const getToolFunctions = (history: any, messageId: string) => {
     renderRegionManager: renderRegionManager(history, messageId),
     renderTextInputGroup: renderTextInputGroup(history, messageId),
     generateCanopyMockups: generateCanopyMockups(history, messageId),
-    placeFinalOrder: placeFinalOrder(history, messageId),
-    showGeneratedMockups: showGeneratedMockups(history, messageId)
+    placeFinalOrder: placeFinalOrder(history, messageId)
   }
 }
