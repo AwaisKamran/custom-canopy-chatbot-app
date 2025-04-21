@@ -6,8 +6,6 @@ export const PROMPT_INSTRUCTIONS = `
   At each step:
     -	Ask only the designated question.
     -	Explicitly call the designated tool.
-    -	Wait for a valid user response before continuing.
-    -	If the tool is not called exactly as required, or a question is skipped, throw an error and halt the flow.
   The assistant must NEVER:
     -	Change the question order
     -	Reword required questions
@@ -46,21 +44,22 @@ export const PROMPT_INSTRUCTIONS = `
             - {content}: "What would you like to change?"
             - {isMultiSelect}: true
             - {options}: [
-                { "name": "Upload new logo", "value": "upload-logo", selected: false, edit: true },
+                { "name": "Upload new logo", "value": "upload-logo", selected: false },
                 { "name": "Separate colors for each print location", "value": "separate-colors", selected: [isAlreadySelected], edit: true },
                 { "name": "Separate texts for each valence", "value": "separate-texts", selected: [isAlreadySelected], edit: true },
-                { "name": "Change text color", "value": "text-color", selected: false, edit: true }
+                { "name": "Change text color", "value": "text-color", selected: false }
               ]
             - The renderButtons tool should ALWAYS be explicitly called every time the user selects "Change mockup design", even if the user has already selected "Change mockup designs" before.
             - A design change is selected if the selected property of that design change in the Design Changes options array is true.
 
-            1. If the user selects "Upload new logo":
+            1. If the user selects value "upload-logo":
               - Prompt the user to upload a new logo and set this to be the logo with which the mockups are generated
               - Change the respective field value as per the user input
               - {content}: ["Please upload your company logo to be displayed on the canopy."]
 
-            2. If the user selects "Separate Colors":
-                - Manage the regions colors using the "renderRegionManager" tool using the below format:
+            2. If the user selects value "separate-colors":
+                - EXPLICITLY call the "renderRegionManager" tool using the below format:
+                {content}: "Please select the colors for each region."
                 {regions}: [
                     [name: 'Peaks', content: {assistantResponse}, sides: [{name: Peaks, label: "Front", color: {selectedRegion.front}, {name: Peaks, label: "Back", color: selectedRegion.back}, {name: Peaks, label: "Left", color: selectedRegion.left}, {name: Peaks, label: "Right", color: selectedRegion.right}],
                     {name: Valences, content: {assistantResponse}, sides: [{name: Valences, label: "Front", color: {selectedRegion.front}, {name: Valences, label: "Back", color: selectedRegion.back}, {name: Valences, label: "Left", color: selectedRegion.left}, {name: Valences, label: "Right", color: selectedRegion.right}],
@@ -70,8 +69,9 @@ export const PROMPT_INSTRUCTIONS = `
                 - The user can change only the colors they want to change.
                 - Change the respective field value as per the user input.
 
-              3. If the user selects "Separate Texts":
+              3. If the user selects value "separate-texts":
                 - Prompt the user to input details about valences texts using the "renderTextInputGroup" tool using the below format:
+                  {content}: "Please enter the text for each region."
                   {inputFields}: [{
                     label Front,
                     value {valencesTexts.front}
@@ -90,7 +90,7 @@ export const PROMPT_INSTRUCTIONS = `
                   }]
                 - Change the respective field value as per the user input.
               
-              4. If the user selects "Change text color":
+              4. If the user selects value "text-color":
                 - EXPLICITLY call the renderColorPicker tool with the following value:
                   - {content}: "Please pick a color for the text on your canopy"
                 - Accept the user answer in format: {name, hex, rgb}
@@ -110,11 +110,11 @@ export const PROMPT_INSTRUCTIONS = `
           - {content}: "Please select add-ons"
           - {isMultiSelect}: true
           - {options}: [
-              { "name": "10' Half Walls", "value": "half-walls", selected: false, edit: true },
-              { "name": "10' Full Walls", "value": "full-walls", selected: false, edit: true },
-              { "name": "Table Cover", "value": "table", selected: false, edit: true }
+              { "name": "10' Half Walls", "value": "half-walls", selected: [isAlreadySelected] },
+              { "name": "10' Full Walls", "value": "full-walls", selected: [isAlreadySelected] },
+              { "name": "Table Cover", "value": "table", selected: [isAlreadySelected] }
             ]
-          - The renderButtons tool should ALWAYS be explicitly called each and every time the user selects "Select add-ons", even if the user has already selected "Select add-ons" before.
+          - The renderButtons tool should ALWAYS be explicitly called each and every time the user selects "Select add-ons", even if the user has already selected "Select add-ons" before, regardless of the value of {isAlreadySelected} for each option in {options}.
           - Do NOT call generateCanopyMockups tool at this point. ONLY call the generateCanopyMockups tool AFTER user has made a selection from one of the {options} for the "Select Add-Ons" flow:
           - If more than one of the add on options is selected, tent type should be set to all values
           - An Add-on is selected if the selected property of that add-on in the Add-ons options array is true.
