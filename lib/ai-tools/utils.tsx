@@ -87,16 +87,17 @@ const getToolMessage = (content: ToolContent): ClientMessage => {
       case TOOL_FUNCTIONS.RENDER_REGION_MANAGER:
         return <RegionsColorsManager messageId={toolCallId} {...props} />
 
-      case TOOL_FUNCTIONS.GENERATE_CANOPY_MOCKUPS:
+      case TOOL_FUNCTIONS.GENERATE_CANOPY_MOCKUPS: {
+        if (props.mockups) {
+          return (
+            <>
+              <Carousal {...props} />
+              <ChatActionMultiSelector {...props} messageId={toolCallId} />
+            </>
+          )
+        }
         return <UserDetailsForm {...props} messageId={toolCallId} />
-
-      case TOOL_FUNCTIONS.SHOW_GENERATED_MOCKUPS:
-        return (
-          <>
-            <Carousal {...props} />
-            <ChatActionMultiSelector {...props} messageId={toolCallId} />
-          </>
-        )
+      }
 
       default:
         return null
@@ -173,19 +174,6 @@ const getClientMessages = (messages: CoreMessage[]): ClientMessage[] => {
   }
 
   return clientMessages
-}
-
-export const findGeneratedMockups = (messages: CoreMessage[]) => {
-  let i = messages.length - 1
-  while (i >= 0) {
-    const message = messages[i]
-    if (
-      message.role === Roles.tool &&
-      message.content[0]?.toolName === TOOL_FUNCTIONS.GENERATE_CANOPY_MOCKUPS
-    ) {
-      return (message.content[0].result as ToolCallResult).props.mockups
-    }
-  }
 }
 export const isLastFileUploadMessage = (message: CoreMessage): boolean => {
   return (

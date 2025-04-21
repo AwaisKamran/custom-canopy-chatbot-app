@@ -182,34 +182,6 @@ export const CustomCanopyToolSchema = z.object({
     .nonempty()
 })
 
-export const ShowGeneratedMockupsToolSchema = z.object({
-  content: z
-    .string()
-    .describe(
-      'The content to be displayed for the canopy tool when showing the mockup images.'
-    ),
-  selectorName: z
-    .string()
-    .describe('The name of the selector for the mockup changes'),
-  options: z
-    .array(
-      z.object({
-        name: z.string().describe('The name for the button'),
-        value: z.string().describe('The value for the button'),
-        selected: z
-          .boolean()
-          .describe('Whether the button is selected')
-          .default(false),
-        edit: z
-          .boolean()
-          .describe('The edit state for the button')
-          .default(false)
-      })
-    )
-    .describe('The options to display')
-    .nonempty()
-})
-
 export const PlaceFinalOrderSchema = z.object({
   content: z
     .string()
