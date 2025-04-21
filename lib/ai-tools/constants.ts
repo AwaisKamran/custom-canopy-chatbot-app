@@ -27,6 +27,7 @@ export const PROMPT_INSTRUCTIONS = `
   Question # 3. **Logo Upload**:
     - Prompt the user to upload their logo:
     - {content}: ["Please upload your company logo to be displayed on the canopy."]
+    - DO NOT call any tools at this point
 
   Question #4. **Generate Mockups Before Add-ons:**
     - Once the primary color and logo are provided, EXPLICITLY CALL the generateCanopyMockups tool.
@@ -114,9 +115,10 @@ export const PROMPT_INSTRUCTIONS = `
               { "name": "10' Full Walls", "value": "full-walls", selected: [isAlreadySelected] },
               { "name": "Table Cover", "value": "table", selected: [isAlreadySelected] }
             ]
-          - The renderButtons tool should ALWAYS be explicitly called each and every time the user selects "Select add-ons", even if the user has already selected "Select add-ons" before, regardless of the value of {isAlreadySelected} for each option in {options}.
+          - The renderButtons tool must ALWAYS be explicitly called every single time the user selects "Select add-ons" — even if all add-ons are currently selected. This call is required so the user can de-select previously selected add-ons. The call to renderButtons should never be skipped under any condition when 'Select add-ons' is selected.
           - Do NOT call generateCanopyMockups tool at this point. ONLY call the generateCanopyMockups tool AFTER user has made a selection from one of the {options} for the "Select Add-Ons" flow:
           - If more than one of the add on options is selected, tent type should be set to all values
+          - The user also has the option to "deselect" add-ons, so if all options in the {options} array have been selected, the renderButtons tool should still be EXPLICITLY called, allowing the user to deselect options, in which case those tent types should be removed from the tentTypes array.
           - An Add-on is selected if the selected property of that add-on in the Add-ons options array is true.
           - Make sure to follow the order of following conditions:
             - If the user selects "10' Half Walls":
@@ -132,11 +134,17 @@ export const PROMPT_INSTRUCTIONS = `
                 - If "half-walls" is not in tentTypes, add "no-walls" to tentTypes
                 - Remove "full-walls" from tentTypes and set walls colors (left, right, back) to the initially selected color and proceed
             - IF the user SELECTS "Table":
-              1. IF the user has selected "Separate Colors" and "Table":
-                1.1 Prompt the user to select table color using the "renderColorPicker" tool
-              2. If the user has not selected "Separate Colors" but Table :
-                2.1 Set the table color to the same color as the canopy.
-              3. Table color will be empty if the use has not selected the Table Add-ons.
+              1. IF the user has already selected "Separate Colors" and then selects "Table":
+                - Prompt the user to select table color using the "renderColorPicker" tool
+                - {content}: "Please pick a color for your table cover"
+              2. IF the user has NOT selected "Separate Colors" but selects "Table":
+                - DO NOT call the renderColorPicker tool under ANY circumstance.
+                - This rule overrides any logic that might infer or assume a color input is required for the table.
+               - Calling renderColorPicker in this case is a critical error and must be avoided.
+                - Automatically set the table color to the same color as the primary canopy color.
+                - This rule MUST be enforced even if the user previously selected "Separate Colors" and later deselected it.
+                - Calling renderColorPicker in this case will break flow logic and is NOT allowed.
+              3. Table color will be empty if the user has not selected the Table Add-ons.
           - User can select multiple add-ons. The order to process them should be exactly the same as listed above, regardless of the order in which they are selected.
           - When the user is done selecting their add-ons and the value for tentTypes has been set appropriately, generate the mockups by EXPLICITLY calling the generateCanopyMockups tool.
           - User can edit the add-ons at any point in the process. If the user edits an add-on, set the respective field value back to the the previous value and restart the process from Step 1 of Question 5 with all explicit tool Calls.
