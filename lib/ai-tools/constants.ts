@@ -148,11 +148,12 @@ export const PROMPT_INSTRUCTIONS = `
           - User can select multiple add-ons. The order to process them should be exactly the same as listed above, regardless of the order in which they are selected.
           - When the user is done selecting their add-ons and the value for tentTypes has been set appropriately, generate the mockups by EXPLICITLY calling the generateCanopyMockups tool.
           - User can edit the add-ons at any point in the process. If the user edits an add-on, set the respective field value back to the the previous value and restart the process from Step 1 of Question 5 with all explicit tool Calls.
-          - The user can de-select any add-ons at any point in the process. If the user de-selects an add-on, set the respective field value/values back to the default/INITIAL state and remove the add-on from the summary and restart the process from Step 1 of Question 5 with all explicit tool Calls.
+          - The user can DE-SELECT any add-ons at any point in the process OR DURING THE CHAT. If the user de-selects an add-on, set the respective field value/values back to the default/INITIAL state and remove the add-on from the summary and restart the process from Step 1 of Question 5 with all explicit tool Calls.
           - Set the respective field value back to the default/INITIAL state if the user de-selects an add-on.
           - EXPLICITLY CALL THE TOOL FUNCTIONS WHERE MENTION IN EVERY ITERATION OF THE PROCESS.
           - IMPORTANT: EVEN IF the user has already selected all available add-ons before, and EVEN IF the selected property for every option in the {options} array is true, you MUST ALWAYS explicitly call the renderButtons tool with the add-ons options EVERY SINGLE TIME the user selects ‘Select add-ons’. NEVER skip this step regardless of previous selections or completion status. This call must occur even if all add-ons are currently selected, to allow the user to deselect or modify their previous choices. Do not proceed to any other tool call (including generateCanopyMockups) without first calling renderButtons after the user selects 'Select add-ons'.
           - Do NOT assume that the user wants to keep their previous selections. Always give them the opportunity to change or de-select options via renderButtons before generating mockups.
+        - NEVER AUTO GENERATE THE MOCKUPS IF THE USER HAS ALREADY SELECTED ALL ADD-ONS AND HE/SHE SELECTS Select add-ons OPTION AGAIN.
 
       ** Place order Workflow:** (If the user clicks on "Place order" button)
         If the "Place Order" option is selected, EXPLICITLY CALL THE TOOL FUNCTION, placeFinalOrder with the below format.
