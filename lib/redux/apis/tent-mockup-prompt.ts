@@ -43,3 +43,26 @@ export const generateTentMockupsApi = async (
     throw new Error((error as Error).message || 'Something went wrong!')
   }
 }
+
+export const placeOrder = async (order_id: string, email: string, mockups: MockupResponse, canopy_payload: TentMockUpPrompt, phoneNumber?: string) => {
+  const formRequestBody = new FormData()
+  formRequestBody.append("order_id", order_id)
+  formRequestBody.append("user_email", email)
+  formRequestBody.append("user_phone", phoneNumber || '')
+  formRequestBody.append("mockups", JSON.stringify(mockups))
+  formRequestBody.append("canopy_requirements", JSON.stringify(canopy_payload))
+
+
+  const response = await fetch(`${process.env.NEXT_PUBLIC_CUSTOM_CANOPY_SERVER_URL}/place-order`, {
+    method: 'POST',
+    body: formRequestBody,
+    headers: {
+      Connection: 'keep-alive'
+    }
+  })
+
+  if (!response.ok) {
+    console.error('Response from the backend is: ', response)
+    throw new Error('Failed to place order')
+  }
+}

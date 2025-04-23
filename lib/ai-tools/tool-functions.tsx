@@ -14,7 +14,7 @@ import { Carousal } from '@/components/carousel'
 import { BotCard, BotMessage } from '@/components/stocks/message'
 import { ChatRadioButtonWrapper } from '@/components/chat-radio-buttons-wrapper'
 import { ChatColorSwatcherWrapper } from '@/components/chat-color-swatcher-wrapper'
-import { generateTentMockupsApi } from '../redux/apis/tent-mockup-prompt'
+import { generateTentMockupsApi, placeOrder } from '../redux/apis/tent-mockup-prompt'
 import { MockupResponse, Roles, Session, TentMockUpPrompt } from '../types'
 import { TOOL_FUNCTIONS } from './constants'
 import { modifyAIState } from './utils'
@@ -55,7 +55,7 @@ async function showMockupsMessage(
           options,
           selectorName,
           mockups,
-          action: 'Place Order'
+          action: 'Have a Design Specialist Contact Me'
         }
       }
     }
@@ -65,7 +65,7 @@ async function showMockupsMessage(
     <BotMessage content={content}>
       <Carousal mockups={mockups} open={true} />
       <ChatActionMultiSelector
-        action="Place Order"
+        action="Have a Design Specialist Contact Me"
         selectorName={selectorName}
         options={options}
         messageId={messageId}
@@ -244,6 +244,11 @@ export function generateCanopyMockups(history: any, messageId: string) {
           ...(payload as TentMockUpPrompt),
           id: history.get().id
         })
+        history.update({
+          ...history.get(),
+          mockups: mockups,
+          canopy_payload: payload
+        })
         return showMockupsMessage(
           'Your mockups are ready! Thank you for your patience.',
           options,
@@ -297,9 +302,27 @@ export function placeFinalOrder(history: any, messageId: string) {
   return {
     description: "Place the user's final order.",
     parameters: ShowUserDetailsSchema,
-    generate: async function ({
+    generate: async function* ({
       content
     }: z.infer<typeof ShowUserDetailsSchema>) {
+      const session = (await auth()) as Session
+      yield (
+        <BotCard key={messageId}>
+          Placing your order, please wait...
+        </BotCard>
+      )
+
+      const mockups = history.get().mockups
+      const canopy_payload = history.get().canopy_payload
+
+      try {
+        await placeOrder(history.get().id, session?.user?.email, mockups, canopy_payload, session?.user?.phoneNumber)
+      } catch (error) {
+        console.error('Error placing order: ', error)
+        const errorContent = "An error occurred while placing your order. Please try again later."
+        return <BotMessage key={messageId} content={errorContent} />
+      }
+
       modifyToolAIState(history, [
         {
           toolCallId: messageId,
