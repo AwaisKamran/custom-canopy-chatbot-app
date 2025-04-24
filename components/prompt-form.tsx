@@ -75,8 +75,7 @@ export function PromptForm({ session }: { session?: Session }) {
       value = [
         {
           type: IMAGE,
-          image: files[0].url,
-          mimeType: files[0].contentType
+          image: files[0].url
         } as ImagePart
       ]
       setSelectedFiles([])

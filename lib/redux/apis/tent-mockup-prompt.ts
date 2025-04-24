@@ -1,4 +1,4 @@
-import { TENT_MOCKUP_VALIDATIONS } from '@/app/constants'
+import { Error401Response, TENT_MOCKUP_VALIDATIONS } from '@/app/constants'
 import { TentMockUpPrompt, MockupResponse } from '@/lib/types'
 import { createFormData } from '@/lib/utils/tent-mockup'
 import { ImagePart } from 'ai'
@@ -65,4 +65,22 @@ export const placeOrder = async (order_id: string, email: string, mockups: Mocku
     console.error('Response from the backend is: ', response)
     throw new Error(`Failed to place order: ${response.status} ${response.statusText}`)
   }
+}
+
+export const processImage = async (file: File, outputDir: string) => {
+  const formData = new FormData()
+  formData.append('image', file)
+  formData.append('output_dir', outputDir)
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_CUSTOM_CANOPY_SERVER_URL}/process-image`,
+    { method: 'POST', body: formData }
+  )
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.detail ?? Error401Response.message)
+  }
+
+  return response.json()
 }

@@ -1,11 +1,10 @@
 import {
-  BlobAccess,
   Error400Response,
   Error401Response,
   Error500Response
 } from '@/app/constants'
 import { auth } from '@/auth'
-import { put } from '@vercel/blob'
+import { processImage } from '@/lib/redux/apis/tent-mockup-prompt'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -15,40 +14,36 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const chatId = searchParams.get('chatId')
     const filename = searchParams.get('filename')
     const userId = searchParams.get('userId')
-    const file = request.body
+    const formData = await request.formData()
+    const file = formData.get('file') as File | null
     const currentUser = session?.user?.id
 
-    if (chatId && filename && userId && file && userId) {
-      if (currentUser === userId) {
-        const blob = await put(
-          `user:${userId}/chat:${chatId}/${filename}`,
-          file,
-          {
-            access: BlobAccess.public
-          }
-        )
-        return NextResponse.json(blob)
-      } else {
-        return NextResponse.json({
-          status: Error401Response.status,
-          message: Error401Response.message
-        })
-      }
-    } else if (filename && file && chatId) {
-      const blob = await put(`temp/anon/chat:${chatId}/${filename}`, file, {
-        access: BlobAccess.public
-      })
-      return NextResponse.json(blob)
-    } else {
+    if (!chatId || !file || (!filename && !userId)) {
       return NextResponse.json({
         status: Error400Response.status,
         error: Error400Response.message
       })
     }
+
+    const outputDir = userId
+      ? currentUser === userId
+        ? `user:${userId}/chat:${chatId}`
+        : null
+      : `temp/anon/chat:${chatId}/${filename}`
+
+    if (!outputDir) {
+      return NextResponse.json({
+        status: Error401Response.status,
+        message: Error401Response.message
+      })
+    }
+
+    const data = await processImage(file, outputDir)
+    return NextResponse.json(data)
   } catch (error) {
     return NextResponse.json({
       status: Error500Response.status,
-      message: error
+      message: (error as Error).message || Error500Response.message
     })
   }
 }
