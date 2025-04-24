@@ -19,16 +19,19 @@ export function GuidanceImageView({
 
   const singleImage = images.length === 1
   return (
-    <div className="mt-6">
+    <div
+      className={`flex flex-col gap-2 justify-center items-center ${singleImage ? 'my-2' : 'mb-2'}`}
+    >
       {images.map((image, index) => {
         return (
-          <div key={image.filename} className={singleImage ? 'my-4' : ''}>
+          <div
+            key={image.filename}
+            className={`flex flex-col gap-2 justify-center`}
+          >
             {!singleImage && (
-              <p
-                className={`text-xs text-muted-foreground ${singleImage ? 'my-0' : 'my-2'}`}
-              >
+              <span className="text-xs text-muted-foreground">
                 {image.filename}
-              </p>
+              </span>
             )}
             <div className="relative border-0.5 !border-action-button dark:!border-active-button rounded-md rounded-tr-none overflow-auto p-2">
               <Button

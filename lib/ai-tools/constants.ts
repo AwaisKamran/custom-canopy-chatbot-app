@@ -204,7 +204,7 @@ export const TOOL_FUNCTIONS = {
   RENDER_COLOR_LABEL_PICKER_SET: 'renderColorLabelPickerSet',
   RENDER_REGION_MANAGER: 'renderRegionManager',
   GENERATE_CANOPY_MOCKUPS: 'generateCanopyMockups',
-  PLACE_FINAL_ORDER: 'placeFinalOrder',
+  PLACE_FINAL_ORDER: 'placeFinalOrder'
 }
 
 export const INITIAL_CHAT_MESSAGE =

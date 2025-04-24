@@ -14,7 +14,10 @@ import { Carousal } from '@/components/carousel'
 import { BotCard, BotMessage } from '@/components/stocks/message'
 import { ChatRadioButtonWrapper } from '@/components/chat-radio-buttons-wrapper'
 import { ChatColorSwatcherWrapper } from '@/components/chat-color-swatcher-wrapper'
-import { generateTentMockupsApi, placeOrder } from '../redux/apis/tent-mockup-prompt'
+import {
+  generateTentMockupsApi,
+  placeOrder
+} from '../redux/apis/tent-mockup-prompt'
 import { MockupResponse, Roles, Session, TentMockUpPrompt } from '../types'
 import { TOOL_FUNCTIONS } from './constants'
 import { modifyAIState } from './utils'
@@ -307,19 +310,24 @@ export function placeFinalOrder(history: any, messageId: string) {
     }: z.infer<typeof ShowUserDetailsSchema>) {
       const session = (await auth()) as Session
       yield (
-        <BotCard key={messageId}>
-          Placing your order, please wait...
-        </BotCard>
+        <BotCard key={messageId}>Placing your order, please wait...</BotCard>
       )
 
       const mockups = history.get().mockups
       const canopy_payload = history.get().canopy_payload
 
       try {
-        await placeOrder(history.get().id, session?.user?.email, mockups, canopy_payload, session?.user?.phoneNumber)
+        await placeOrder(
+          history.get().id,
+          session?.user?.email,
+          mockups,
+          canopy_payload,
+          session?.user?.phoneNumber
+        )
       } catch (error) {
         console.error('Error placing order: ', error)
-        const errorContent = "An error occurred while placing your order. Please try again later."
+        const errorContent =
+          'An error occurred while placing your order. Please try again later.'
         return <BotMessage key={messageId} content={errorContent} />
       }
 
