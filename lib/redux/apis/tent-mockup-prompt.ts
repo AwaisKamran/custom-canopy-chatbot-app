@@ -63,6 +63,6 @@ export const placeOrder = async (order_id: string, email: string, mockups: Mocku
 
   if (!response.ok) {
     console.error('Response from the backend is: ', response)
-    throw new Error('Failed to place order')
+    throw new Error(`Failed to place order: ${response.status} ${response.statusText}`)
   }
 }
