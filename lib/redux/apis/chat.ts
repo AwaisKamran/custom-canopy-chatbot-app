@@ -60,11 +60,13 @@ export async function saveFilesApi(
   try {
     const fileBlobs = await Promise.all(
       files.map(async file => {
+        const formData = new FormData()
+        formData.append('file', file.file)
         const response = await fetch(
           `/api/save-files?chatId=${chatId}&filename=${file.file.name}&userId=${userId}&messageId=${messageId}`,
           {
             method: 'POST',
-            body: file.file
+            body: formData
           }
         )
 

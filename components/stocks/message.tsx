@@ -38,13 +38,11 @@ export function UserMessage({ content }: { content: UserContent }) {
           {(content as Array<ImagePart>).map(
             (file: ImagePart, index: number) => (
               <div key={`${IMAGE}-${index}`} className="flex items-start gap-4">
-                {file.mimeType?.startsWith('image') && (
-                  <img
-                    src={file.image as string}
-                    alt="Logo"
-                    className="w-32 h-32 sm:rounded-md sm:border sm:shadow-md"
-                  />
-                )}
+                <img
+                  src={file.image as string}
+                  alt="Logo"
+                  className="w-32 h-32 sm:rounded-md sm:border sm:shadow-md"
+                />
               </div>
             )
           )}
