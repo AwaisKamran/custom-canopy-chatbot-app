@@ -48,7 +48,6 @@ export const MOCKUP_TYPES = {
   'no-walls': 'No Walls',
   table: 'Table'
 }
-export const DOWNLOAD_ZIP_NAME = 'images'
 
 export const GUIDANCE_IMAGE_URLS = {
   dark: {
@@ -77,20 +76,20 @@ export const GUIDANCE_IMAGE_URLS = {
   light: {
     canopy: [
       {
-        filename: 'Front View',
-        url: process.env.NEXT_PUBLIC_LIGHT_CANOPY_FRONT_VIEW ?? ''
-      },
-      {
         filename: 'No Walls View',
         url: process.env.NEXT_PUBLIC_LIGHT_CANOPY_NO_WALLS_VIEW ?? ''
       },
       {
-        filename: 'Side View',
-        url: process.env.NEXT_PUBLIC_LIGHT_CANOPY_SIDE_VIEW ?? ''
-      },
-      {
         filename: 'Top View',
         url: process.env.NEXT_PUBLIC_LIGHT_CANOPY_TOP_VIEW ?? ''
+      },
+      {
+        filename: 'Front View',
+        url: process.env.NEXT_PUBLIC_LIGHT_CANOPY_FRONT_VIEW ?? ''
+      },
+      {
+        filename: 'Side View',
+        url: process.env.NEXT_PUBLIC_LIGHT_CANOPY_SIDE_VIEW ?? ''
       }
     ],
     table: [

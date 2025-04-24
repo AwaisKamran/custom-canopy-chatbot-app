@@ -55,7 +55,7 @@ async function showMockupsMessage(
           options,
           selectorName,
           mockups,
-          action: 'Place Order'
+          action: 'Have a Design Specialist. Contact Me.'
         }
       }
     }
@@ -65,7 +65,7 @@ async function showMockupsMessage(
     <BotMessage content={content}>
       <Carousal mockups={mockups} open={true} />
       <ChatActionMultiSelector
-        action="Place Order"
+        action="Have a Design Specialist. Contact Me."
         selectorName={selectorName}
         options={options}
         messageId={messageId}

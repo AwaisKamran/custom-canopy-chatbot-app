@@ -149,9 +149,9 @@ export const PROMPT_INSTRUCTIONS = `
           - Do NOT assume that the user wants to keep their previous selections. Always give them the opportunity to change or de-select options via renderButtons before generating mockups.
           - NEVER EVER AUTO GENERATE THE MOCKUPS IF THE USER HAS ALREADY SELECTED ALL ADD-ONS AND HE/SHE SELECTS Select add-ons OPTION AGAIN NO MATTER HOW MANY TIMES IT IS SELECTED.
 
-      ** Place order Workflow:** (If the user clicks on "Place order" button)
-        If the "Place Order" option is selected, EXPLICITLY CALL THE TOOL FUNCTION, placeFinalOrder with the below format.
-          - {content}: "Thank you for placing your order with us! If you have any questions or need further assistance, please feel free to contact us. Have a great day!"
+      ** "Have a Design Specialist. Contact Me." Workflow:** (If the user clicks on "Have a Design Specialist. Contact Me." button)
+        If the "Have a Design Specialist. Contact Me." option is selected, EXPLICITLY CALL THE TOOL FUNCTION, placeFinalOrder with the below format.
+          - {content}: "Thank you for contacting us! Our design specialist will reach out to you shortly to discuss your project further. In the meantime, if you have any additional questions or need immediate assistance, please let us know."
         - DO NOT generate mockups at this step.
     
   ** Questions Guidelines:**
@@ -204,7 +204,7 @@ export const TOOL_FUNCTIONS = {
   RENDER_COLOR_LABEL_PICKER_SET: 'renderColorLabelPickerSet',
   RENDER_REGION_MANAGER: 'renderRegionManager',
   GENERATE_CANOPY_MOCKUPS: 'generateCanopyMockups',
-  PLACE_FINAL_ORDER: 'placeFinalOrder',
+  PLACE_FINAL_ORDER: 'placeFinalOrder'
 }
 
 export const INITIAL_CHAT_MESSAGE =

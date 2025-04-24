@@ -62,7 +62,7 @@ const ColorSwatcher = ({
                 <button
                   type="button"
                   aria-label={color.name}
-                  className="w-12 h-12 rounded border-2 border-transparent hover:border-gray-500 cursor-pointer flex items-center justify-center mx-auto mb-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-transparent"
+                  className="w-12 h-12 rounded border-2 border-transparent hover:border-gray-500 cursor-pointer flex items-center justify-center mx-auto mb-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-transparent shadow"
                   style={{ backgroundColor: color.hex }}
                   onClick={() => handleColorPick(color)}
                   disabled={disabled}
