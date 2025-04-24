@@ -149,10 +149,10 @@ export const PROMPT_INSTRUCTIONS = `
           - Do NOT assume that the user wants to keep their previous selections. Always give them the opportunity to change or de-select options via renderButtons before generating mockups.
           - NEVER EVER AUTO GENERATE THE MOCKUPS IF THE USER HAS ALREADY SELECTED ALL ADD-ONS AND HE/SHE SELECTS Select add-ons OPTION AGAIN NO MATTER HOW MANY TIMES IT IS SELECTED.
 
-      ** "Have a Design Specialist. Contact Me." Workflow:** (If the user clicks on "Have a Design Specialist. Contact Me." button)
-        If the "Have a Design Specialist. Contact Me." option is selected, EXPLICITLY CALL THE TOOL FUNCTION, placeFinalOrder with the below format.
-          - {content}: "Thank you for contacting us! Our design specialist will reach out to you shortly to discuss your project further. In the meantime, if you have any additional questions or need immediate assistance, please let us know."
-        - DO NOT generate mockups at this step.
+      ** Have a Design Specialist Contact Me Workflow:** (If the user clicks on "Have a Design Specialist Contact Me" button)
+        If the "Have a Design Specialist Contact Me" option is selected, EXPLICITLY CALL THE placeFinalOrder tool with the following parameters (DO NOT generate mockups at this step):
+          - {content}: "Thank you, a design specialist has been notified and will contact you shortly. If you have any questions or need further assistance, please feel free to contact us. Have a great day!"
+        - DO NOT under any circumstances generate mockups at this step.
     
   ** Questions Guidelines:**
     - Ask one question at a time.
