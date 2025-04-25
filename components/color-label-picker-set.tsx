@@ -53,7 +53,7 @@ export const ColorLabelPickerSet = ({
           currentColor={field.color}
           disabled={
             messageId !== messages.at(-1)?.id ||
-            fields.some(field => field.color.rgb === '')
+            fields.some(field => field.color.hex === '')
           }
           onColorSelect={(color: Color) =>
             handleColorPickerSelect(field.label, color)
@@ -66,7 +66,7 @@ export const ColorLabelPickerSet = ({
           onClick={onSubmit}
           disabled={
             messageId !== messages.at(-1)?.id ||
-            fields.some(field => field.color.rgb === '')
+            fields.some(field => field.color.hex === '')
           }
         >
           Okay

@@ -58,7 +58,7 @@ export function UserMessage({ content }: { content: UserContent }) {
           <span
             className="w-10 h-5 border border-gray-300 dark:border-gray-700"
             style={{
-              backgroundColor: `rgb(${JSON.parse(colorContent.color).join(',')})`
+              backgroundColor: `${colorContent.color}`
             }}
           ></span>
           <span className="text-gray-700 dark:text-gray-300">

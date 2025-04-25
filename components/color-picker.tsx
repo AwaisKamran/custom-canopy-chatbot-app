@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Button } from '@/components/ui/button'
-import { getColorName, hexToBGR } from '@/lib/utils'
+import { getColorName } from '@/lib/utils'
 import { IconColorPicker } from './ui/icons'
 import { COLORS } from '@/app/constants'
 import { Color } from '@/lib/types'
@@ -36,14 +36,8 @@ export default function ColorPickerPopover({
   }
 
   const handleConfirm = () => {
-    const { r, g, b } = hexToBGR(color)
-    const contrastFontColor = getContrastColor(b, g, r)
     const colorName = getColorName(color) ?? color
-    const rgbColor = `[${r}, ${g}, ${b}]`
-    onColorSelect(
-      { rgb: rgbColor, hex: color, name: colorName },
-      contrastFontColor
-    )
+    onColorSelect({ hex: color, name: colorName }, color)
     setPickerOpen(false)
   }
 

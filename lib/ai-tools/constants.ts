@@ -20,8 +20,8 @@ export const PROMPT_INSTRUCTIONS = `
   - Ask the user to select a color for the canopy by calling the renderColorPicker tool:
   - {content}: "Please select a color for your canopy."
   - ALWAYS EXPLICITLY CALL the renderColorPicker tool for user color selection.
-  - Accept the user answer in format: {name, hex, rgb}
-  - Set the user selected color in BGR (convert from RGB to BGR) for the valences (front, back, left, right) and peaks (front, back, left, right) and proceed
+  - Accept the user answer in format: {name, hex}
+  - Set the user selected color in hex format for the valences (front, back, left, right) and peaks (front, back, left, right) and proceed
   - The user answer here will refer to the initial/default color selection for the canopy.
     
   Question # 3. **Logo Upload**:
@@ -94,8 +94,8 @@ export const PROMPT_INSTRUCTIONS = `
               4. If the user selects value "text-color":
                 - EXPLICITLY call the renderColorPicker tool with the following value:
                   - {content}: "Please pick a color for the text on your canopy"
-                - Accept the user answer in format: {name, hex, rgb}
-                - Set the user selected color in BGR (convert from RGB to BGR) to be the text color
+                - Accept the user answer in format: {name, hex}
+                - Set the user selected color in hex format to be the text color
                 - The user answer here will refer to the color of the text on the canopy.
 
             - User can select multiple design changes. The order to process them should be exactly the same as listed above, regardless of the order in which they are selected.
@@ -137,7 +137,7 @@ export const PROMPT_INSTRUCTIONS = `
             - IF the user SELECTS "Table":
               1. IF the user has selected "Table":
                 1.1 Prompt the user to select table color using the "renderColorPicker" tool
-                1.2 Set the user selected color in BGR (convert from RGB to BGR)
+                1.2 Set the user selected color in hex format to be the table color
               2. Table color will be empty if the use has not selected the Table Add-ons.
           - User can select multiple add-ons. The order to process them should be exactly the same as listed above, regardless of the order in which they are selected.
           - When the user is done selecting their add-ons and the value for tentTypes has been set appropriately, generate the mockups by EXPLICITLY calling the generateCanopyMockups tool.
@@ -170,7 +170,7 @@ export const PROMPT_INSTRUCTIONS = `
     - If the user has not provided an input for a question, ask the same question again.
     - If the user input is not relevant or meaningful, ask the user to confirm his input. Once the user confirms the input, proceed to the next question.
       - This rule does not apply to color inputs and option based questions responses.
-    - ACCEPT colors in RGB values.
+    - ACCEPT colors in hex format.
 
   ** Tool Guidelines:**
     - EXPLICITLY CALL the appropriate tool function at EACH step where mentioned..
@@ -185,7 +185,7 @@ export const PROMPT_INSTRUCTIONS = `
       - Question # 4: (If Separate color for each print location Add-on Selected)
     - **generateCanopyMockups tool function**
       - EXPLICITLY CALL the generateCanopyMockups tool function to generate the mockups of the canopy whenever the user confirms the inputs.
-      - WHILE SENDING COLORS TO THE generateCanopyMockups TOOL FUNCTION, ALWAYS SEND THE BGR VALUES OF THE COLORS IN THE FOLLOWING FORMAT: \`[B, G, R]\`
+      - WHILE SENDING COLORS TO THE generateCanopyMockups TOOL FUNCTION, ALWAYS SEND THE HEX VALUES OF THE COLORS
 
   **Editing Guidelines:**
     - At any point user can request for edit. If so update the inputs accordingly and move back to the question where the user requested for edit.

@@ -1,7 +1,7 @@
 import { COLOR_SWATCHES } from '@/app/constants'
 import React, { useState } from 'react'
 import TextInputWithLabel from './ui/text-input-with-label'
-import { getColorName, validateHEX, hexToBGR } from '@/lib/utils'
+import { getColorName, validateHEX } from '@/lib/utils'
 import { Color } from '@/lib/types'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 
@@ -34,10 +34,8 @@ const ColorSwatcher = ({
     }
     if (validateHEX(hex)) {
       setIsValidHex(true)
-      const { r, g, b } = hexToBGR(hex)
       handleColorPick({
         hex,
-        rgb: JSON.stringify([r, g, b]),
         name: getColorName(hex) ?? 'Custom'
       })
     } else {

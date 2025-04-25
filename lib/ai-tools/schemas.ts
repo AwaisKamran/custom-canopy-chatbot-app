@@ -51,7 +51,6 @@ export const ColorLabelPickerSetSchema = z.object({
         label: z.string().describe('The label for the color picker'),
         color: z.object({
           name: z.string().describe('The color name'),
-          rgb: z.string().describe('The color value in rgb'),
           hex: z.string().describe('The color value in hex')
         })
       })
@@ -72,7 +71,6 @@ export const RegionsColorsManagerSchema = z.object({
             label: z.string().describe('The value for the button'),
             color: z.object({
               name: z.string().describe('The name for the button'),
-              rgb: z.string().describe('The color value in rgb'),
               hex: z.string().describe('The color value in hex')
             })
           })

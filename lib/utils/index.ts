@@ -132,21 +132,8 @@ export function getColorName(hexColor: string): string | null {
   return namedColor ? namedColor.name : null
 }
 
-export const hexToBGR = (hex: string): any => {
-  const bigint = parseInt(hex.slice(1), 16)
-  const r = (bigint >> 16) & 255
-  const g = (bigint >> 8) & 255
-  const b = bigint & 255
-
-  return { r, g, b }
-}
-
 export function validateHEX(input: string) {
   return HEX_REGEX.test(input)
-}
-export const convertToBGR = (rgb: string) => {
-  const [r, g, b] = JSON.parse(rgb)
-  return `[${b}, ${g}, ${r}]`
 }
 
 export const isValidJson = (jsonString: string) => {

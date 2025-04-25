@@ -158,7 +158,6 @@ export type EditableOption = {
 }
 
 export type Color = {
-  rgb: string
   hex: string
   name: string
 }
