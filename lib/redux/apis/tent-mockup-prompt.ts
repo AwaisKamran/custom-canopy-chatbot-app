@@ -82,5 +82,5 @@ export const processImage = async (file: File, outputDir: string) => {
     throw new Error(error.detail ?? Error401Response.message)
   }
 
-  return response.json()
+  return await response.json()
 }
